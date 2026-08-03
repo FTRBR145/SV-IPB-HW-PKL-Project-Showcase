@@ -1,27 +1,37 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,300..800;1,300..800&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap');
 
 :root {
+  /* Official sv.ipb.ac.id Primary Color Palette */
+  --sv-official-blue: #3986AC;
+  --sv-official-maroon: #B34E4D;
+  --sv-official-gold: #C09854;
+  --sv-official-green: #458746;
+  --sv-official-orange: #FF6900;
+  --sv-official-sky: #00A0D2;
+  --sv-official-crimson: #DC3232;
+
   --ipb-navy: #003366;
   --ipb-navy-dark: #002244;
-  --ipb-navy-light: #1a4a7b;
-  --sv-magenta: #e30613;
-  --sv-magenta-hover: #c4040f;
+  --ipb-navy-light: #3986AC;
+  --sv-magenta: #B34E4D;
+  --sv-magenta-hover: #9c3f3e;
   --sv-pink: #e91e63;
-  --accent-blue: #2563eb;
-  --accent-blue-light: #eff6ff;
-  --accent-blue-border: #bfdbfe;
+  --accent-blue: #3986AC;
+  --accent-blue-light: #f0f7fa;
+  --accent-blue-border: #b8daf0;
   
   --bg-main: #f8fafc;
   --bg-card: #ffffff;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
+  --text-main: #333333;
+  --text-muted: #666666;
   --border-color: #e2e8f0;
   
-  --font-heading: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: 'Outfit', 'Open Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Open Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   
-  --radius-sm: 8px;
-  --radius-md: 14px;
+  --radius-xs: 2px;
+  --radius-sm: 6px;
+  --radius-md: 12px;
   --radius-lg: 20px;
   --radius-xl: 28px;
 
