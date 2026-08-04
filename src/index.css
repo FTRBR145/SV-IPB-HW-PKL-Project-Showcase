@@ -952,15 +952,14 @@ body {
 }
 
 .footer-logo-img {
-  width: 110px;
+  width: 105px;
   height: auto;
   object-fit: contain;
   flex-shrink: 0;
-  border-radius: var(--radius-sm);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  background: #ffffff;
-  padding: 4px;
+  background: transparent;
+  padding: 0;
+  border: none;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.45));
 }
 
 .footer-brand h3 {
