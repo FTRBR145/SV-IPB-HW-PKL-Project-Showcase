@@ -271,12 +271,12 @@ body {
 /* Hero Section */
 .hero-section {
   position: relative;
-  min-height: 520px;
-  background: linear-gradient(135deg, rgba(0, 34, 68, 0.88) 0%, rgba(0, 51, 102, 0.75) 100%),
-              url('https://images.unsplash.com/photo-1541829070764-84a7d30dd3f3?auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+  min-height: 540px;
+  background: linear-gradient(135deg, rgba(0, 34, 68, 0.88) 0%, rgba(0, 51, 102, 0.78) 100%),
+              url('/sv_ipb_hero.png') center/cover no-repeat;
   display: flex;
   align-items: center;
-  padding: 5rem 0;
+  padding: 5.5rem 0;
   color: #ffffff;
   overflow: hidden;
 }

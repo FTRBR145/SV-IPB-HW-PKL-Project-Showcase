@@ -12,7 +12,7 @@ export default function AboutSection() {
           </div>
           <div className="about-image-wrapper">
             <img 
-              src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1000&q=80" 
+              src="/sv_ipb_hero.png" 
               alt="Gedung Sekolah Vokasi IPB University" 
             />
           </div>
