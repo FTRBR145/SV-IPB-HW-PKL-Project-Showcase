@@ -945,6 +945,24 @@ body {
   margin-bottom: 3rem;
 }
 
+.footer-logo-wrapper {
+  display: flex;
+  gap: 1.25rem;
+  align-items: flex-start;
+}
+
+.footer-logo-img {
+  width: 110px;
+  height: auto;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #ffffff;
+  padding: 4px;
+}
+
 .footer-brand h3 {
   font-family: var(--font-heading);
   color: #ffffff;
@@ -956,7 +974,7 @@ body {
 .footer-brand p {
   font-size: 0.9rem;
   line-height: 1.6;
-  max-width: 340px;
+  max-width: 320px;
 }
 
 .footer-title {

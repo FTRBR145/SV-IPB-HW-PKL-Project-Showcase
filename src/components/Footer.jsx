@@ -6,12 +6,21 @@ export default function Footer() {
     <footer className="footer">
       <div className="container">
         <div className="footer-grid">
-          {/* Brand Info */}
+          {/* Brand Info & Official Shield Logo */}
           <div className="footer-brand">
-            <h3>Sekolah Vokasi IPB</h3>
-            <p>
-              Platform showcase video projek akhir dan karya praktikum semester mahasiswa Sekolah Vokasi IPB University. Menampilkan hasil pembelajaran nyata yang inovatif dan siap kerja.
-            </p>
+            <div className="footer-logo-wrapper">
+              <img 
+                src="/sv_ipb_logo.png" 
+                alt="Logo Resmi IPB University Sekolah Vokasi" 
+                className="footer-logo-img"
+              />
+              <div>
+                <h3>Sekolah Vokasi IPB</h3>
+                <p>
+                  Platform showcase video projek akhir dan karya praktikum semester mahasiswa Sekolah Vokasi IPB University. Menampilkan hasil pembelajaran nyata yang inovatif dan siap kerja.
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Quick Links */}
