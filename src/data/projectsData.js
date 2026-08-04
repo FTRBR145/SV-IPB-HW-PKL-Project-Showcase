@@ -37,7 +37,7 @@ export const initialProjects = [
     semester: 4,
     techStack: ["ESP32", "MQTT", "NodeJS", "Chart.js"],
     thumbnail: "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ",
+    videoUrl: "https://www.youtube.com/embed/aircAruvnKk",
     likes: 198,
     views: 1840,
     supervisor: "Prof. Dr. Ir. Kudang Boro Seminar, M.Sc.",

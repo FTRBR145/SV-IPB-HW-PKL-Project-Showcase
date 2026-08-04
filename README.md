@@ -25,8 +25,7 @@ Platform web **Showcase Video Project Semester dan Projek Akhir Mahasiswa Sekola
   - Bilah pencarian real-time berdasarkan judul, mahasiswa, mata kuliah, atau tech stack.
 - **🎬 Modal Pemutar Video & Detail Projek**:
   - Pemutar video terintegrasi (iframe YouTube / HTML5).
-  - Rincian dosen pembimbing, mata kuliah, deskripsi & tujuan projek, tag teknologi.
-  - Unduh Laporan PDF serta sistem interaktif **Suka & Komentar/Feedback**.
+  - Rincian dosen pembimbing, mata kuliah, deskripsi & tujuan projek, serta tag teknologi.
 - **📤 Modal Unggah Projek Mahasiswa**:
   - Form interaktif bagi mahasiswa untuk menambah karya projek semester secara langsung.
 - **🔐 Portal Login SSO IPB**:

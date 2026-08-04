@@ -1,31 +1,8 @@
-import React, { useState } from 'react';
-import { X, Heart, Eye, User, BookOpen, GraduationCap, Calendar, Send, FileText } from 'lucide-react';
+import React from 'react';
+import { X, User, GraduationCap, Calendar } from 'lucide-react';
 
-export default function ProjectDetailModal({ project, onClose, onAddComment, onToggleLike }) {
-  const [newComment, setNewComment] = useState('');
-  const [commentName, setCommentName] = useState('');
-  const [liked, setLiked] = useState(false);
-
+export default function ProjectDetailModal({ project, onClose }) {
   if (!project) return null;
-
-  const handleLike = () => {
-    setLiked(!liked);
-    onToggleLike(project.id, !liked);
-  };
-
-  const handleSubmitComment = (e) => {
-    e.preventDefault();
-    if (!newComment.trim()) return;
-    onAddComment(project.id, {
-      id: Date.now(),
-      name: commentName.trim() || 'Pengunjung Anonim',
-      role: 'Civitas SV IPB',
-      text: newComment,
-      date: 'Baru saja'
-    });
-    setNewComment('');
-    setCommentName('');
-  };
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -55,29 +32,6 @@ export default function ProjectDetailModal({ project, onClose, onAddComment, onT
               <span>•</span>
               <span><Calendar size={14} /> Tahun {project.year}</span>
             </div>
-          </div>
-
-          {/* Quick Action Stats */}
-          <div style={{ display: 'flex', gap: '1rem', marginBottom: '1.5rem' }}>
-            <button
-              className={`btn ${liked ? 'btn-magenta' : 'btn-secondary'} btn-sm`}
-              onClick={handleLike}
-            >
-              <Heart size={16} fill={liked ? '#ffffff' : 'none'} /> {project.likes + (liked ? 1 : 0)} Suka
-            </button>
-            <span className="btn btn-secondary btn-sm" style={{ cursor: 'default' }}>
-              <Eye size={16} /> {project.views} Dilihat
-            </span>
-            <a
-              href="#download-paper"
-              className="btn btn-secondary btn-sm"
-              onClick={(e) => {
-                e.preventDefault();
-                alert(`Unduh Laporan Ringkas/Laporan Projek: ${project.title}`);
-              }}
-            >
-              <FileText size={16} /> Unduh Laporan PDF
-            </a>
           </div>
 
           {/* Dosen Pembimbing & Mata Kuliah */}
@@ -126,53 +80,6 @@ export default function ProjectDetailModal({ project, onClose, onAddComment, onT
                 </span>
               ))}
             </div>
-          </div>
-
-          {/* Comments Section */}
-          <div className="modal-section-block">
-            <h4>Diskusi & Feedback ({project.comments ? project.comments.length : 0})</h4>
-
-            <div className="comments-list">
-              {project.comments && project.comments.length > 0 ? (
-                project.comments.map((c) => (
-                  <div key={c.id} className="comment-item">
-                    <div className="comment-author">
-                      <div>
-                        <span className="comment-name">{c.name} </span>
-                        <span className="comment-role">{c.role}</span>
-                      </div>
-                      <span className="comment-date">{c.date}</span>
-                    </div>
-                    <p style={{ fontSize: '0.9rem', color: '#334155' }}>{c.text}</p>
-                  </div>
-                ))
-              ) : (
-                <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                  Belum ada komentar. Berikan feedback pertama kamu!
-                </p>
-              )}
-            </div>
-
-            <form onSubmit={handleSubmitComment} style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
-              <input
-                type="text"
-                className="form-control"
-                placeholder="Nama kamu (Opsional)"
-                value={commentName}
-                onChange={(e) => setCommentName(e.target.value)}
-              />
-              <div className="comment-input-box">
-                <input
-                  type="text"
-                  placeholder="Tulis feedback atau pertanyaan projek..."
-                  value={newComment}
-                  onChange={(e) => setNewComment(e.target.value)}
-                />
-                <button type="submit" className="btn btn-primary btn-sm">
-                  <Send size={16} /> Kirim
-                </button>
-              </div>
-            </form>
           </div>
         </div>
       </div>
