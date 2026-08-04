@@ -48,17 +48,27 @@ export default function Footer() {
 
           {/* Contact */}
           <div>
-            <h4 className="footer-title">Kontak SV IPB</h4>
+            <h4 className="footer-title">Alamat & Kontak</h4>
             <ul className="footer-links">
               <li style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
-                <MapPin size={16} style={{ flexShrink: 0, marginTop: '3px' }} />
-                <span>Jl. Kumbang No.14, Cilibende, Kota Bogor, Jawa Barat 16128</span>
+                <MapPin size={16} style={{ flexShrink: 0, marginTop: '3px', color: 'var(--sv-official-sky)' }} />
+                <span>
+                  <strong style={{ color: '#ffffff', display: 'block', fontSize: '0.85rem' }}>KAMPUS BOGOR</strong>
+                  Jl. Kumbang No.14, Kel. Babakan, Kec. Bogor Tengah, Kota Bogor, Jawa Barat 16128
+                </span>
+              </li>
+              <li style={{ display: 'flex', gap: '0.5rem', alignItems: 'flex-start' }}>
+                <MapPin size={16} style={{ flexShrink: 0, marginTop: '3px', color: 'var(--sv-official-sky)' }} />
+                <span>
+                  <strong style={{ color: '#ffffff', display: 'block', fontSize: '0.85rem' }}>KAMPUS SUKABUMI</strong>
+                  Jl. Sarasa No. 45, Babakan, Kec. Cibeureum, Kota Sukabumi, Jawa Barat 43142
+                </span>
+              </li>
+              <li style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', marginTop: '0.25rem' }}>
+                <Phone size={16} style={{ color: 'var(--sv-official-sky)' }} /> <span>(0251) 8348007</span>
               </li>
               <li style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <Phone size={16} /> <span>(0251) 8329101</span>
-              </li>
-              <li style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
-                <Mail size={16} /> <span>sv@apps.ipb.ac.id</span>
+                <Mail size={16} style={{ color: 'var(--sv-official-sky)' }} /> <span>sv@apps.ipb.ac.id</span>
               </li>
             </ul>
           </div>
