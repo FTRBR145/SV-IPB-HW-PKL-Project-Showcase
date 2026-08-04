@@ -8,15 +8,11 @@ export default function Navbar({ onOpenUpload, onOpenLogin, onSelectCourse, onSe
       <div className="container navbar-container">
         {/* Brand Logo */}
         <a href="#" className="navbar-brand">
-          <div className="logo-badge">
-            <div className="ipb-logo-mark">
-              <span>IPB</span>
-            </div>
-            <div className="brand-text">
-              <span className="brand-title">IPB University</span>
-              <span className="brand-subtitle">Sekolah Vokasi</span>
-            </div>
-          </div>
+          <img
+            src="/sv_ipb_navbar_logo.png"
+            alt="IPB University Sekolah Vokasi Logo"
+            className="navbar-logo-img"
+          />
         </a>
 
         {/* Navigation Links */}

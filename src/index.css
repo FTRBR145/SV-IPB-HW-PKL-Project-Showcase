@@ -176,26 +176,16 @@ body {
   border: 2px solid #ffffff;
 }
 
-.brand-text {
-  display: flex;
-  flex-direction: column;
+.navbar-logo-img {
+  height: 52px;
+  width: auto;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.25s ease;
 }
 
-.brand-title {
-  font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 1.25rem;
-  color: var(--ipb-navy);
-  line-height: 1.1;
-  letter-spacing: -0.02em;
-}
-
-.brand-subtitle {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--sv-magenta);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
+.navbar-brand:hover .navbar-logo-img {
+  transform: scale(1.03);
 }
 
 .nav-links {
