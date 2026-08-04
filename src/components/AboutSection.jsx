@@ -6,8 +6,11 @@ export default function AboutSection() {
       <div className="container">
         <div className="about-grid">
           <div className="about-text">
+            <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--ipb-navy)', fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.75rem' }}>
+              Student Project Showcase
+            </h3>
             <p>
-              Ruang bagi mahasiswa untuk memamerkan karya terbaik, membangun koneksi dengan sesama mahasiswa, dan menarik perhatian dosen serta perusahaan teknologi terkemuka. Satu tempat untuk menyimpan, menampilkan, dan mengapresiasi karya video project mahasiswa.
+              Ruang bagi mahasiswa untuk memamerkan karya terbaik, membangun koneksi dengan sesama mahasiswa, dan menarik perhatian dosen serta perusahaan teknologi terkemuka. Satu tempat untuk menyimpan, menampilkan, dan mengapresiasi karya video project mahasiswa Sekolah Vokasi IPB.
             </p>
           </div>
           <div className="about-image-wrapper">

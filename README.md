@@ -1,4 +1,4 @@
-# Sekolah Vokasi IPB - Student Video Project Showcase 🎓📹
+# Student Project Showcase - Sekolah Vokasi IPB 🎓📹
 
 ![Vite](https://img.shields.io/badge/Vite-8.2.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)
 ![React](https://img.shields.io/badge/React-19.0.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)
