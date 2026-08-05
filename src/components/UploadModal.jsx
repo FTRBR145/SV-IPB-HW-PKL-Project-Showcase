@@ -14,7 +14,8 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
     videoUrl: '',
     thumbnail: '',
     techStackStr: 'React, Node.js',
-    description: ''
+    description: '',
+    objectivesStr: ''
   });
 
   const [submitted, setSubmitted] = useState(false);
@@ -35,6 +36,10 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
 
     const selectedProdiObj = SV_PRODIS.find((p) => p.code === formData.prodiCode);
     const techArray = formData.techStackStr.split(',').map((s) => s.trim()).filter(Boolean);
+    const objectivesArray = formData.objectivesStr
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
 
     // Convert YouTube URL to Embed format if needed
     let finalVideoUrl = formData.videoUrl.trim();
@@ -64,7 +69,10 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
       supervisor: formData.supervisor || 'Dosen Pembimbing SV IPB',
       year: '2025/2026',
       description: formData.description || 'Projek video semester hasil pembelajaran karya mahasiswa Sekolah Vokasi IPB.',
-      objectives: ['Implementasi konsep praktikum ke dalam produk riil.', 'Karya unggulan semester mahasiswa SV IPB.'],
+      objectives: objectivesArray.length > 0 ? objectivesArray : [
+        'Implementasi konsep praktikum ke dalam produk riil.',
+        'Karya unggulan semester mahasiswa SV IPB.'
+      ],
       comments: []
     };
 
@@ -243,6 +251,18 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
                     rows="3"
                     placeholder="Jelaskan ringkasan latar belakang, tujuan, dan keunggulan karya..."
                     value={formData.description}
+                    onChange={handleChange}
+                  ></textarea>
+                </div>
+
+                <div className="form-group">
+                  <label>Tujuan & Hasil Utama (1 Poin per baris)</label>
+                  <textarea
+                    name="objectivesStr"
+                    className="form-control"
+                    rows="3"
+                    placeholder="Poin 1: Mengembangkan arsitektur IoT real-time&#10;Poin 2: Integrasi dashboard web monitoring&#10;Poin 3: Otomatisasi notifikasi sensor ke WhatsApp"
+                    value={formData.objectivesStr}
                     onChange={handleChange}
                   ></textarea>
                 </div>
