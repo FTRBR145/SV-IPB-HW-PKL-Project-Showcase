@@ -1,3 +1,19 @@
+export function getYouTubeThumbnail(videoUrl) {
+  if (!videoUrl) return '';
+  let videoId = '';
+  if (videoUrl.includes('youtube.com/embed/')) {
+    videoId = videoUrl.split('youtube.com/embed/')[1]?.split('?')[0];
+  } else if (videoUrl.includes('youtu.be/')) {
+    videoId = videoUrl.split('youtu.be/')[1]?.split('?')[0];
+  } else if (videoUrl.includes('v=')) {
+    videoId = videoUrl.split('v=')[1]?.split('&')[0];
+  }
+  if (videoId) {
+    return `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+  }
+  return '';
+}
+
 export const initialProjects = [
   {
     id: 1,
@@ -9,8 +25,8 @@ export const initialProjects = [
     course: "DATA SCIENCE FOUNDATION",
     semester: 3,
     techStack: ["Python", "D3.js", "TensorFlow", "React"],
-    thumbnail: "https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://www.youtube.com/embed/aircAruvnKk", // Educational demo video
+    thumbnail: "https://img.youtube.com/vi/aircAruvnKk/hqdefault.jpg",
+    videoUrl: "https://www.youtube.com/embed/aircAruvnKk",
     likes: 142,
     views: 1250,
     supervisor: "Dr. Ir. Irfan Syamsuddin, M.T.",
@@ -21,10 +37,7 @@ export const initialProjects = [
       "Menyediakan pustaka D3.js kustom yang ringan untuk kebutuhan edukasi di Sekolah Vokasi IPB.",
       "Integrasi API model backend Python FastAPI dengan frontend React."
     ],
-    comments: [
-      { id: 1, name: "Dr. Irfan Syamsuddin", role: "Dosen Pembimbing", text: "Visualisasi node dan edge sangat jelas dan halus. Sangat berguna untuk bahan ajar praktikum Data Science!", date: "2 hari yang lalu" },
-      { id: 2, name: "Siti Rahmawati (TRPL 59)", role: "Mahasiswa", text: "Keren banget mas David! D3.js nya smooth banget pas animasi forward pass.", date: "1 hari yang lalu" }
-    ]
+    comments: []
   },
   {
     id: 2,
@@ -36,8 +49,8 @@ export const initialProjects = [
     course: "INTERNET OF THINGS & EMBEDDED SYSTEM",
     semester: 4,
     techStack: ["ESP32", "MQTT", "NodeJS", "Chart.js"],
-    thumbnail: "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://www.youtube.com/embed/aircAruvnKk",
+    thumbnail: "https://img.youtube.com/vi/9KxU30uM3qM/hqdefault.jpg",
+    videoUrl: "https://www.youtube.com/embed/9KxU30uM3qM",
     likes: 198,
     views: 1840,
     supervisor: "Prof. Dr. Ir. Kudang Boro Seminar, M.Sc.",
@@ -48,9 +61,7 @@ export const initialProjects = [
       "Dashboard monitoring real-time berbasis web dengan protokol komunikasi MQTT.",
       "Notifikasi otomatis ke WhatsApp petani saat kelembaban tanah kritis."
     ],
-    comments: [
-      { id: 1, name: "Budi Santoso", role: "Mahasiswa TEK", text: "Alatnya sudah diuji coba di lahan SV Sukabumi belum mas?", date: "3 hari yang lalu" }
-    ]
+    comments: []
   },
   {
     id: 3,
@@ -62,8 +73,8 @@ export const initialProjects = [
     course: "PEMROGRAMAN PERANGKAT BERGERAK",
     semester: 5,
     techStack: ["Flutter", "Firebase", "Dart", "REST API"],
-    thumbnail: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://www.youtube.com/embed/aircAruvnKk",
+    thumbnail: "https://img.youtube.com/vi/x0uinJvhNxI/hqdefault.jpg",
+    videoUrl: "https://www.youtube.com/embed/x0uinJvhNxI",
     likes: 215,
     views: 2100,
     supervisor: "Guji Syaikhurrahman, S.Kom., M.T.",
@@ -74,9 +85,7 @@ export const initialProjects = [
       "Integrasi sistem autentikasi single sign-on (SSO) IPB University.",
       "Fitur notifikasi push pengingat jadwal ujian dan responsif UI/UX."
     ],
-    comments: [
-      { id: 1, name: "Guji Syaikhurrahman", role: "Dosen Pembimbing", text: "Desain UI sangat clean dan fitur reservasi lab berjalan tanpa bug. Teruskan ke tahap pengujian pengguna!", date: "4 hari yang lalu" }
-    ]
+    comments: []
   },
   {
     id: 4,
@@ -88,8 +97,8 @@ export const initialProjects = [
     course: "PRODUKSI AUDIO VISUAL & KAMPANYE DIGITAL",
     semester: 2,
     techStack: ["Premiere Pro", "After Effects", "DaVinci Resolve"],
-    thumbnail: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://www.youtube.com/embed/aircAruvnKk",
+    thumbnail: "https://img.youtube.com/vi/L_LUpnjgPso/hqdefault.jpg",
+    videoUrl: "https://www.youtube.com/embed/L_LUpnjgPso",
     likes: 310,
     views: 3450,
     supervisor: "Dr. Reiza Mutia, M.Si.",
@@ -100,9 +109,7 @@ export const initialProjects = [
       "Menggunakan teknik storytelling sinematik dengan color grading profesional.",
       "Dipublikasikan di kanal resmi YouTube & TikTok Sekolah Vokasi IPB."
     ],
-    comments: [
-      { id: 1, name: "Nisa Amalia", role: "Mahasiswa KMN", text: "Cinematography nya juara! Transisi video di menit 1:20 halus banget.", date: "5 hari yang lalu" }
-    ]
+    comments: []
   },
   {
     id: 5,
@@ -114,8 +121,8 @@ export const initialProjects = [
     course: "MANAJEMEN RANTAI PASOK DIGITAL",
     semester: 6,
     techStack: ["Next.js", "TailwindCSS", "PostgreSQL"],
-    thumbnail: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://www.youtube.com/embed/aircAruvnKk",
+    thumbnail: "https://img.youtube.com/vi/q1N8YfA9b0A/hqdefault.jpg",
+    videoUrl: "https://www.youtube.com/embed/q1N8YfA9b0A",
     likes: 164,
     views: 1420,
     supervisor: "Dr. Ir. Arief Daryanto, Dip.Ag.Econ., M.Ec.",
@@ -126,9 +133,7 @@ export const initialProjects = [
       "Integrasi QR Code pada setiap kemasan produk sayuran hidroponik SV IPB.",
       "Dashboard analitik penjualan dan estimasi waktu kadaluarsa produk."
     ],
-    comments: [
-      { id: 1, name: "Dr. Arief Daryanto", role: "Dosen Pembimbing", text: "Solusi inovatif untuk menghubungkan Teaching Farm SV IPB dengan pasar swalayan.", date: "1 minggu yang lalu" }
-    ]
+    comments: []
   },
   {
     id: 6,
@@ -140,8 +145,8 @@ export const initialProjects = [
     course: "PENGEMBANGAN GIM & REALITAS VIRTUAL",
     semester: 1,
     techStack: ["Unity 3D", "C#", "Blender", "Spatial Audio"],
-    thumbnail: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&q=80",
-    videoUrl: "https://www.youtube.com/embed/aircAruvnKk",
+    thumbnail: "https://img.youtube.com/vi/j48LtUkZRjU/hqdefault.jpg",
+    videoUrl: "https://www.youtube.com/embed/j48LtUkZRjU",
     likes: 275,
     views: 2900,
     supervisor: "Asep Rahmat, S.Kom., M.T.",
@@ -152,9 +157,7 @@ export const initialProjects = [
       "Kuis interaktif sains keanekaragaman hayati untuk siswa SMA/K binaan SV IPB.",
       "Dukungan kontroler PC dan Mobile Android."
     ],
-    comments: [
-      { id: 1, name: "Rian Hidayat", role: "Mahasiswa TRPL", text: "Grafik 3D-nya rapi banget bang Kevin! Rusa Kampus IPB-nya mirip banget asli.", date: "3 hari yang lalu" }
-    ]
+    comments: []
   }
 ];
 

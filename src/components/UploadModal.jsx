@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Upload, CheckCircle2 } from 'lucide-react';
-import { SV_PRODIS, SV_COURSES } from '../data/projectsData';
+import { SV_PRODIS, SV_COURSES, getYouTubeThumbnail } from '../data/projectsData';
 
 export default function UploadModal({ isOpen, onClose, onAddProject }) {
   const [formData, setFormData] = useState({
@@ -57,7 +57,7 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
       course: formData.course,
       semester: parseInt(formData.semester),
       techStack: techArray.length > 0 ? techArray : ['Web', 'Vokasi IPB'],
-      thumbnail: formData.thumbnail || 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80',
+      thumbnail: formData.thumbnail || getYouTubeThumbnail(finalVideoUrl) || 'https://img.youtube.com/vi/aircAruvnKk/hqdefault.jpg',
       videoUrl: finalVideoUrl,
       likes: 1,
       views: 12,

@@ -1,11 +1,14 @@
 import React from 'react';
 import { Play } from 'lucide-react';
+import { getYouTubeThumbnail } from '../data/projectsData';
 
 export default function ProjectCard({ project, onClickDetail }) {
+  const displayThumbnail = getYouTubeThumbnail(project.videoUrl) || project.thumbnail;
+
   return (
     <div className="project-card">
       <div className="card-thumbnail-wrapper" onClick={() => onClickDetail(project)}>
-        <img src={project.thumbnail} alt={project.title} />
+        <img src={displayThumbnail} alt={project.title} />
         <span className="semester-badge">Semester {project.semester}</span>
         <div className="play-overlay">
           <div className="play-btn-circle">
