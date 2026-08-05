@@ -7,10 +7,10 @@ export default function AboutSection() {
         <div className="about-grid">
           <div className="about-text">
             <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--ipb-navy)', fontSize: '1.75rem', fontWeight: 800, marginBottom: '0.75rem' }}>
-              Student Project Showcase
+              TRPL Student Project Showcase
             </h3>
             <p>
-              Ruang bagi mahasiswa untuk memamerkan karya terbaik, membangun koneksi dengan sesama mahasiswa, dan menarik perhatian dosen serta perusahaan teknologi terkemuka. Satu tempat untuk menyimpan, menampilkan, dan mengapresiasi karya video project mahasiswa Sekolah Vokasi IPB.
+              Ruang digital bagi mahasiswa Teknologi Rekayasa Perangkat Lunak (TRPL) Sekolah Vokasi IPB University untuk memamerkan produk software, aplikasi web/mobile, sistem AI, dan gim terbaik. Tempat mengeksplorasi karya praktikum dan projek akhir mahasiswa TRPL secara interaktif.
             </p>
           </div>
           <div className="about-image-wrapper">

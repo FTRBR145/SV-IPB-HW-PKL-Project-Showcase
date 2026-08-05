@@ -5,26 +5,26 @@ export default function HeroSection({ onOpenUpload }) {
   const slides = [
     {
       id: 1,
-      tag: "SEKOLAH VOKASI IPB UNIVERSITY",
-      title: "Student Project",
+      tag: "TEKNOLOGI REKAYASA PERANGKAT LUNAK (TRPL)",
+      title: "TRPL Student Project",
       highlight: "Showcase",
-      subtitle: "Jelajahi berbagai project mahasiswa dari setiap semester dan mata kuliah dalam satu platform yang dirancang untuk menampilkan hasil pembelajaran secara nyata. Temukan ide, inovasi, dan karya terbaik bukti kreativitas mahasiswa Sekolah Vokasi IPB.",
+      subtitle: "Platform showcase video projek akhir dan praktikum koding mahasiswa Teknologi Rekayasa Perangkat Lunak (TRPL) Sekolah Vokasi IPB University. Menampilkan inovasi aplikasi web, mobile, sistem terdistribusi, AI, dan gim.",
       image: "/sv_ipb_hero.png"
     },
     {
       id: 2,
-      tag: "TEKNOLOGI & INOVASI VOKASI",
-      title: "Karya Inovatif",
+      tag: "REKAYASA SOFTWARE & INOVASI SISTEM",
+      title: "Karya Inovatif TRPL",
       highlight: "Siap Kerja",
-      subtitle: "Platform komprehensif memamerkan karya aplikasi software, gim 3D, sistem IoT pertanian cerdas, dan analisis data hasil praktikum mahasiswa Sekolah Vokasi IPB.",
+      subtitle: "Memamerkan karya perangkat lunak berstandar industri mulai dari arsitektur cloud, sistem informasi enterprise, aplikasi mobile Flutter, hingga model Machine Learning karya mahasiswa TRPL SV IPB.",
       image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1920&q=80"
     },
     {
       id: 3,
-      tag: "MULTIMEDIA & MEDIA DIGITAL",
+      tag: "PORTFOLIO DIGITIAL MAHASISWA TRPL",
       title: "Showcase Video",
-      highlight: "Interaktif",
-      subtitle: "Apresiasi produksi audio visual sinematik, kampanye media digital, dan projek akhir mahasiswa dari berbagai program studi Sekolah Vokasi IPB.",
+      highlight: "Projek Akhir",
+      subtitle: "Dokumentasi dan video demo produk perangkat lunak hasil tugas akhir serta praktikum mahasiswa Program Studi Teknologi Rekayasa Perangkat Lunak SV IPB.",
       image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1920&q=80"
     }
   ];

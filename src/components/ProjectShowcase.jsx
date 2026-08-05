@@ -21,8 +21,8 @@ export default function ProjectShowcase({
         {/* Header Title */}
         <div className="showcase-header">
           <div className="section-title-group">
-            <h2>Project Terbaru</h2>
-            <p>Lihat apa yang dikerjakan mahasiswa saat ini.</p>
+            <h2>Project TRPL Terbaru</h2>
+            <p>Karya rekayasa perangkat lunak praktikum & projek akhir mahasiswa TRPL SV IPB.</p>
           </div>
           <a href="#projects" className="btn btn-secondary btn-sm" style={{ gap: '0.4rem' }}>
             View All Submissions <ArrowRight size={14} />

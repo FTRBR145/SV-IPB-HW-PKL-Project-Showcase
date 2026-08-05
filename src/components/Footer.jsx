@@ -15,9 +15,9 @@ export default function Footer() {
                 className="footer-logo-img"
               />
               <div>
-                <h3>Sekolah Vokasi IPB</h3>
+                <h3>TRPL Sekolah Vokasi IPB</h3>
                 <p>
-                  Platform showcase video projek akhir dan karya praktikum semester mahasiswa Sekolah Vokasi IPB University. Menampilkan hasil pembelajaran nyata yang inovatif dan siap kerja.
+                  Platform showcase video projek akhir dan karya praktikum semester mahasiswa Teknologi Rekayasa Perangkat Lunak (TRPL) Sekolah Vokasi IPB University.
                 </p>
               </div>
             </div>
@@ -30,19 +30,19 @@ export default function Footer() {
               <li><a href="#home">Home</a></li>
               <li><a href="#about">Tentang Showcase</a></li>
               <li><a href="#projects">Project Terbaru</a></li>
-              <li><a href="#projects">Top Rated Videos</a></li>
+              <li><a href="#projects">Kategori TRPL</a></li>
             </ul>
           </div>
 
-          {/* Program Studi */}
+          {/* Fokus Keahlian TRPL */}
           <div>
-            <h4 className="footer-title">Program Studi</h4>
+            <h4 className="footer-title">Fokus Keahlian TRPL</h4>
             <ul className="footer-links">
-              <li><a href="#projects">Teknologi Rekayasa Perangkat Lunak</a></li>
-              <li><a href="#projects">Komunikasi Digital & Media</a></li>
-              <li><a href="#projects">Manajemen Informatika</a></li>
-              <li><a href="#projects">Teknik Komputer</a></li>
-              <li><a href="#projects">Manajemen Agribisnis</a></li>
+              <li><a href="#projects">Rekayasa Perangkat Lunak (RPL)</a></li>
+              <li><a href="#projects">Mobile & Web Application Dev</a></li>
+              <li><a href="#projects">Data Science & Machine Learning</a></li>
+              <li><a href="#projects">UI/UX & Frontend Engineering</a></li>
+              <li><a href="#projects">Pengembangan Gim & VR 3D</a></li>
             </ul>
           </div>
 
