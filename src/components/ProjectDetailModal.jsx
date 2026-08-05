@@ -49,25 +49,12 @@ export default function ProjectDetailModal({ project, onClose }) {
             </div>
           </div>
 
-          {/* Deskripsi & Tujuan */}
+          {/* Deskripsi Projek */}
           <div className="modal-section-block">
             <h4>Deskripsi Projek</h4>
-            <p style={{ color: '#334155', lineHeight: 1.7, marginBottom: '1rem' }}>
+            <p style={{ color: '#334155', lineHeight: 1.7 }}>
               {project.description}
             </p>
-
-            {project.objectives && project.objectives.length > 0 && (
-              <>
-                <h5 style={{ fontWeight: 700, fontSize: '0.95rem', color: 'var(--ipb-navy)', marginBottom: '0.5rem' }}>
-                  Tujuan & Hasil Utama:
-                </h5>
-                <ul style={{ paddingLeft: '1.25rem', color: '#475569', fontSize: '0.9rem' }}>
-                  {project.objectives.map((obj, idx) => (
-                    <li key={idx} style={{ marginBottom: '0.25rem' }}>{obj}</li>
-                  ))}
-                </ul>
-              </>
-            )}
           </div>
 
           {/* Tech Stack Tags */}

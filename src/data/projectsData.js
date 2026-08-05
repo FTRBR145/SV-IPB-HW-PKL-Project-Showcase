@@ -32,11 +32,6 @@ export const initialProjects = [
     supervisor: "Dr. Ir. Irfan Syamsuddin, M.T.",
     year: "2025/2026",
     description: "Sistem visualisasi grafik neural network interaktif yang dirancang untuk membantu mahasiswa Sekolah Vokasi IPB memahami alur propagasi data dan bobot model machine learning secara visual dan intuitif.",
-    objectives: [
-      "Mengvisualisasikan arsitektur Deep Neural Network secara real-time.",
-      "Menyediakan pustaka D3.js kustom yang ringan untuk kebutuhan edukasi di Sekolah Vokasi IPB.",
-      "Integrasi API model backend Python FastAPI dengan frontend React."
-    ],
     comments: []
   },
   {
@@ -56,11 +51,6 @@ export const initialProjects = [
     supervisor: "Prof. Dr. Ir. Kudang Boro Seminar, M.Sc.",
     year: "2025/2026",
     description: "Projek IoT untuk memantau kelembaban tanah, suhu lingkungan, dan intensitas cahaya secara otomatis pada green house Kebun Percobaan SV IPB Sukabumi menggunakan transmisi sensor ESP32.",
-    objectives: [
-      "Otomatisasi penyiraman tanaman berdasarkan ambang batas sensor kelembaban.",
-      "Dashboard monitoring real-time berbasis web dengan protokol komunikasi MQTT.",
-      "Notifikasi otomatis ke WhatsApp petani saat kelembaban tanah kritis."
-    ],
     comments: []
   },
   {
@@ -80,11 +70,6 @@ export const initialProjects = [
     supervisor: "Guji Syaikhurrahman, S.Kom., M.T.",
     year: "2025/2026",
     description: "Aplikasi mobile lintas platform untuk integrasi jadwal kuliah, reservasi laboratorium komputer SV IPB Cilibende, dan peminjaman peralatan audio visual secara digital.",
-    objectives: [
-      "Mengurangi antrean peminjaman lab secara manual.",
-      "Integrasi sistem autentikasi single sign-on (SSO) IPB University.",
-      "Fitur notifikasi push pengingat jadwal ujian dan responsif UI/UX."
-    ],
     comments: []
   },
   {
@@ -104,11 +89,6 @@ export const initialProjects = [
     supervisor: "Dr. Reiza Mutia, M.Si.",
     year: "2025/2026",
     description: "Video kampanye kreatif cinematic berdurasi 3 menit yang mengedukasi civitas akademika SV IPB tentang pemilahan sampah organik dan anorganik di lingkungan kampus Baranangsiang.",
-    objectives: [
-      "Meningkatkan kesadaran pengelolaan sampah lingkungan kampus.",
-      "Menggunakan teknik storytelling sinematik dengan color grading profesional.",
-      "Dipublikasikan di kanal resmi YouTube & TikTok Sekolah Vokasi IPB."
-    ],
     comments: []
   },
   {
@@ -128,11 +108,6 @@ export const initialProjects = [
     supervisor: "Dr. Ir. Arief Daryanto, Dip.Ag.Econ., M.Ec.",
     year: "2025/2026",
     description: "Platform digital lacak balak (traceability) hasil panen Teaching Farm Sekolah Vokasi IPB menuju mitra industri retail dari kebun hingga konsumen akhir.",
-    objectives: [
-      "Transparansi data rantai pasok produk pertanian segar.",
-      "Integrasi QR Code pada setiap kemasan produk sayuran hidroponik SV IPB.",
-      "Dashboard analitik penjualan dan estimasi waktu kadaluarsa produk."
-    ],
     comments: []
   },
   {
@@ -152,11 +127,6 @@ export const initialProjects = [
     supervisor: "Asep Rahmat, S.Kom., M.T.",
     year: "2025/2026",
     description: "Game edukasi interaktif 3D petualangan menjelajahi Kampus IPB Dramaga dan SV IPB Cilibende untuk mengenali keanekaragaman hayati dan flora fauna unik IPB.",
-    objectives: [
-      "Simulasi lingkungan 3D Kampus IPB berbasis modeling low-poly.",
-      "Kuis interaktif sains keanekaragaman hayati untuk siswa SMA/K binaan SV IPB.",
-      "Dukungan kontroler PC dan Mobile Android."
-    ],
     comments: []
   }
 ];
