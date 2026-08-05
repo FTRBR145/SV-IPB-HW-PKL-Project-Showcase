@@ -18,7 +18,7 @@ Platform web **Showcase Video Project Semester dan Projek Akhir Mahasiswa Sekola
   - Headline utama **"Preview Project Video Semester"** sesuai rancangan mockup rujukan.
   - Latar belakang foto visual Kampus Sekolah Vokasi IPB.
 - **📊 Stats Counter Bar**:
-  - Indikator pencapaian platform (250+ Projects, 450+ Students, 85+ Tutors, 32+ Industry).
+  - Indikator pencapaian platform (250+ Projects, 450+ Students, 85+ Tutors).
 - **🔍 Filter Semester & Program Studi Interaktif**:
   - Filter tab cepat **Semester 1 hingga Semester 8**.
   - Filter Program Studi (TRPL, KMN, INF, TEK, MAB, dll.).
