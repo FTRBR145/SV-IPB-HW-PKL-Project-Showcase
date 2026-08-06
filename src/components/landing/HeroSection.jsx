@@ -1,25 +1,31 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowRight, Upload, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Upload, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function HeroSection({ onOpenUpload }) {
   const slides = [
     {
-      badge: "TEKNOLOGI REKAYASA KOMPUTER (TRK)",
-      title: "TRK Student Project Showcase",
-      subtitle: "Platform showcase video projek akhir & praktikum sistem tertanam, jaringan, dan IoT mahasiswa Teknologi Rekayasa Komputer Sekolah Vokasi IPB.",
-      bgImage: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80"
+      id: 1,
+      tag: "TEKNOLOGI REKAYASA KOMPUTER (TRK)",
+      title: "TRK Student Project",
+      highlight: "Showcase",
+      subtitle: "Platform showcase video projek akhir dan praktikum sistem tertanam mahasiswa Teknologi Rekayasa Komputer (TRK) Sekolah Vokasi IPB University. Menampilkan inovasi IoT, mikrokontroler, jaringan komputer, dan cloud.",
+      image: "/sv_ipb_hero.png"
     },
     {
-      badge: "INTERNET OF THINGS & EMBEDDED SYSTEM",
-      title: "Inovasi Perangkat Cerdas TRK",
-      subtitle: "Eksplorasi hasil rancang bangun mikrokontroler, otomasi industri, dan sensor telemetri karya inovatif mahasiswa prodi TRK SV IPB.",
-      bgImage: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=1920&q=80"
+      id: 2,
+      tag: "INTERNET OF THINGS & EMBEDDED SYSTEM",
+      title: "Karya Inovatif TRK",
+      highlight: "Siap Kerja",
+      subtitle: "Memamerkan karya sistem hardware & software berstandar industri mulai dari transmisi sensor ESP32, arsitektur jaringan MikroTik, sistem kontrol Arduino, hingga cloud monitoring telemetri.",
+      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1920&q=80"
     },
     {
-      badge: "JARINGAN & CLOUD COMPUTING",
-      title: "Arsitektur Siber Terintegrasi",
-      subtitle: "Dokumentasi simulasi jaringan server, keamanan siber, dan infrastruktur cloud computing berstandar industri Sekolah Vokasi IPB.",
-      bgImage: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1920&q=80"
+      id: 3,
+      tag: "PORTFOLIO DIGITAL MAHASISWA TRK",
+      title: "Showcase Video",
+      highlight: "Projek Akhir",
+      subtitle: "Dokumentasi dan video demo produk sistem perangkat keras dan jaringan komputer hasil tugas akhir serta praktikum mahasiswa Program Studi Teknologi Rekayasa Komputer SV IPB.",
+      image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1920&q=80"
     }
   ];
 
@@ -28,7 +34,7 @@ export default function HeroSection({ onOpenUpload }) {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }, 6000);
+    }, 5000);
     return () => clearInterval(timer);
   }, [slides.length]);
 
@@ -41,66 +47,64 @@ export default function HeroSection({ onOpenUpload }) {
   };
 
   return (
-    <section className="hero-section">
-      {/* Dynamic Slide Background */}
-      {slides.map((slide, idx) => (
+    <section id="home" className="hero-section">
+      {/* Background Slides */}
+      {slides.map((slide, index) => (
         <div
-          key={idx}
-          className={`hero-slide-bg ${idx === currentSlide ? 'active' : ''}`}
-          style={{ backgroundImage: `url(${slide.bgImage})` }}
+          key={slide.id}
+          className={`hero-slide-bg ${index === currentSlide ? 'active' : ''}`}
+          style={{ backgroundImage: `linear-gradient(135deg, rgba(0, 34, 68, 0.88) 0%, rgba(0, 51, 102, 0.78) 100%), url('${slide.image}')` }}
         />
       ))}
 
-      {/* Hero Overlay Gradient */}
-      <div className="hero-overlay" />
+      <div className="hero-overlay-graphic"></div>
 
-      {/* Hero Main Content */}
-      <div className="container hero-container">
+      <div className="container">
         <div className="hero-content">
-          <div className="hero-badge animate-fade-in">
-            <span className="badge-dot"></span>
-            {slides[currentSlide].badge}
-          </div>
+          <span className="hero-tag-badge animate-slide-down">
+            {slides[currentSlide].tag}
+          </span>
 
-          <h1 className="hero-title animate-slide-up">
-            {slides[currentSlide].title}
+          <h1 className="hero-title animate-fade-in">
+            {slides[currentSlide].title} <br />
+            <span className="blue-highlight">{slides[currentSlide].highlight}</span>
           </h1>
-
-          <p className="hero-subtitle animate-slide-up-delay">
+          
+          <p className="hero-subtitle animate-fade-in">
             {slides[currentSlide].subtitle}
           </p>
 
-          <div className="hero-actions animate-fade-in-delay">
-            <a href="#projects" className="btn btn-primary btn-lg">
+          <div className="hero-buttons animate-slide-up">
+            <a href="#projects" className="btn btn-primary">
               Lihat Semua Project <ArrowRight size={18} />
             </a>
-            <button className="btn btn-outline-hero btn-lg" onClick={onOpenUpload}>
+            <button className="btn btn-secondary" onClick={onOpenUpload}>
               Upload Project <Upload size={18} />
             </button>
           </div>
         </div>
+      </div>
 
-        {/* Slideshow Navigation Controls */}
-        <div className="hero-slider-controls">
-          <button className="slider-arrow-btn" onClick={handlePrev} aria-label="Slide Sebelumnya">
-            <ChevronLeft size={20} />
-          </button>
+      {/* Slideshow Controls */}
+      <div className="hero-slideshow-controls">
+        <button className="hero-nav-arrow" onClick={handlePrev} aria-label="Slide Sebelumnya">
+          <ChevronLeft size={22} />
+        </button>
 
-          <div className="slider-dots">
-            {slides.map((_, idx) => (
-              <button
-                key={idx}
-                className={`slider-dot ${idx === currentSlide ? 'active' : ''}`}
-                onClick={() => setCurrentSlide(idx)}
-                aria-label={`Slide ${idx + 1}`}
-              />
-            ))}
-          </div>
-
-          <button className="slider-arrow-btn" onClick={handleNext} aria-label="Slide Selanjutnya">
-            <ChevronRight size={20} />
-          </button>
+        <div className="hero-slide-dots">
+          {slides.map((_, idx) => (
+            <button
+              key={idx}
+              className={`slide-dot ${idx === currentSlide ? 'active' : ''}`}
+              onClick={() => setCurrentSlide(idx)}
+              aria-label={`Slide ${idx + 1}`}
+            />
+          ))}
         </div>
+
+        <button className="hero-nav-arrow" onClick={handleNext} aria-label="Slide Selanjutnya">
+          <ChevronRight size={22} />
+        </button>
       </div>
     </section>
   );
