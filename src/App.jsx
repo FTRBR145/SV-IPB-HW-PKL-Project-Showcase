@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import HeroSection from './components/HeroSection';
 import AboutSection from './components/AboutSection';
 import StatsBar from './components/StatsBar';
+import MataKuliahSection from './components/MataKuliahSection';
 import ProjectShowcase from './components/ProjectShowcase';
 import ProjectDetailModal from './components/ProjectDetailModal';
 import UploadModal from './components/UploadModal';
@@ -56,35 +57,6 @@ export default function App() {
     setProjects((prev) => [newProject, ...prev]);
   };
 
-  const handleAddComment = (projectId, commentObj) => {
-    setProjects((prev) =>
-      prev.map((p) => {
-        if (p.id === projectId) {
-          const updatedComments = p.comments ? [...p.comments, commentObj] : [commentObj];
-          return { ...p, comments: updatedComments };
-        }
-        return p;
-      })
-    );
-    if (activeProjectDetail && activeProjectDetail.id === projectId) {
-      setActiveProjectDetail((prev) => ({
-        ...prev,
-        comments: prev.comments ? [...prev.comments, commentObj] : [commentObj]
-      }));
-    }
-  };
-
-  const handleToggleLike = (projectId, isLiked) => {
-    setProjects((prev) =>
-      prev.map((p) => {
-        if (p.id === projectId) {
-          return { ...p, likes: p.likes + (isLiked ? 1 : -1) };
-        }
-        return p;
-      })
-    );
-  };
-
   return (
     <div className="app">
       {/* Navbar */}
@@ -101,8 +73,11 @@ export default function App() {
       {/* About Section */}
       <AboutSection />
 
-      {/* Stats Bar */}
+      {/* Prestasi Stats Bar (Matches Design Screenshot) */}
       <StatsBar />
+
+      {/* Mata Kuliah Carousel Section */}
+      <MataKuliahSection onSelectCourse={(course) => setSelectedCourse(course)} />
 
       {/* Project Showcase Section */}
       <ProjectShowcase
