@@ -5,26 +5,26 @@ export default function HeroSection({ onOpenUpload }) {
   const slides = [
     {
       id: 1,
-      tag: "TEKNOLOGI REKAYASA PERANGKAT LUNAK (TRPL)",
-      title: "TRPL Student Project",
+      tag: "TEKNOLOGI REKAYASA KOMPUTER (TRK)",
+      title: "TRK Student Project",
       highlight: "Showcase",
-      subtitle: "Platform showcase video projek akhir dan praktikum koding mahasiswa Teknologi Rekayasa Perangkat Lunak (TRPL) Sekolah Vokasi IPB University. Menampilkan inovasi aplikasi web, mobile, sistem terdistribusi, AI, dan gim.",
+      subtitle: "Platform showcase video projek akhir dan praktikum sistem tertanam mahasiswa Teknologi Rekayasa Komputer (TRK) Sekolah Vokasi IPB University. Menampilkan inovasi IoT, mikrokontroler, jaringan komputer, dan cloud.",
       image: "/sv_ipb_hero.png"
     },
     {
       id: 2,
-      tag: "REKAYASA SOFTWARE & INOVASI SISTEM",
-      title: "Karya Inovatif TRPL",
+      tag: "INTERNET OF THINGS & EMBEDDED SYSTEM",
+      title: "Karya Inovatif TRK",
       highlight: "Siap Kerja",
-      subtitle: "Memamerkan karya perangkat lunak berstandar industri mulai dari arsitektur cloud, sistem informasi enterprise, aplikasi mobile Flutter, hingga model Machine Learning karya mahasiswa TRPL SV IPB.",
+      subtitle: "Memamerkan karya sistem hardware & software berstandar industri mulai dari transmisi sensor ESP32, arsitektur jaringan MikroTik, sistem kontrol Arduino, hingga cloud monitoring telemetri.",
       image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1920&q=80"
     },
     {
       id: 3,
-      tag: "PORTFOLIO DIGITIAL MAHASISWA TRPL",
+      tag: "PORTFOLIO DIGITAL MAHASISWA TRK",
       title: "Showcase Video",
       highlight: "Projek Akhir",
-      subtitle: "Dokumentasi dan video demo produk perangkat lunak hasil tugas akhir serta praktikum mahasiswa Program Studi Teknologi Rekayasa Perangkat Lunak SV IPB.",
+      subtitle: "Dokumentasi dan video demo produk sistem perangkat keras dan jaringan komputer hasil tugas akhir serta praktikum mahasiswa Program Studi Teknologi Rekayasa Komputer SV IPB.",
       image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1920&q=80"
     }
   ];

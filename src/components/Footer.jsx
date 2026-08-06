@@ -15,9 +15,9 @@ export default function Footer() {
                 className="footer-logo-img"
               />
               <div>
-                <h3>TRPL Sekolah Vokasi IPB</h3>
+                <h3>TRK Sekolah Vokasi IPB</h3>
                 <p>
-                  Platform showcase video projek akhir dan karya praktikum semester mahasiswa Teknologi Rekayasa Perangkat Lunak (TRPL) Sekolah Vokasi IPB University.
+                  Platform showcase video projek akhir dan karya praktikum semester mahasiswa Teknik Komputer / Teknologi Rekayasa Komputer (TRK) Sekolah Vokasi IPB University.
                 </p>
               </div>
             </div>
@@ -30,19 +30,19 @@ export default function Footer() {
               <li><a href="#home">Home</a></li>
               <li><a href="#about">Tentang Showcase</a></li>
               <li><a href="#projects">Project Terbaru</a></li>
-              <li><a href="#projects">Kategori TRPL</a></li>
+              <li><a href="#projects">Kategori TRK</a></li>
             </ul>
           </div>
 
-          {/* Fokus Keahlian TRPL */}
+          {/* Fokus Keahlian TRK */}
           <div>
-            <h4 className="footer-title">Fokus Keahlian TRPL</h4>
+            <h4 className="footer-title">Fokus Keahlian TRK</h4>
             <ul className="footer-links">
-              <li><a href="#projects">Rekayasa Perangkat Lunak (RPL)</a></li>
-              <li><a href="#projects">Mobile & Web Application Dev</a></li>
-              <li><a href="#projects">Data Science & Machine Learning</a></li>
-              <li><a href="#projects">UI/UX & Frontend Engineering</a></li>
-              <li><a href="#projects">Pengembangan Gim & VR 3D</a></li>
+              <li><a href="#projects">Internet of Things & Sensor ESP32</a></li>
+              <li><a href="#projects">Mikrokontroler & Sistem Kontrol</a></li>
+              <li><a href="#projects">Jaringan Komputer & Keamanan Siber</a></li>
+              <li><a href="#projects">Embedded System & Robotika</a></li>
+              <li><a href="#projects">Cloud Computing & Server Monitoring</a></li>
             </ul>
           </div>
 

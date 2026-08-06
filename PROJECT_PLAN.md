@@ -5,8 +5,8 @@
 
 ### 📋 Informasi Umum Proyek
 
-* **Nama / Judul Proyek**: SV IPB Project Showcase (TRPL Student Project Showcase)
-* **Program Studi**: Teknologi Rekayasa Perangkat Lunak (TRPL)
+* **Nama / Judul Proyek**: SV IPB Project Showcase (TRK Student Project Showcase)
+* **Program Studi**: Teknik Komputer / Teknologi Rekayasa Komputer (TRK)
 * **Instansi**: Sekolah Vokasi IPB University
 * **Tim Penyusun / Anggota**:
   1. **Fatir Syaiful Bahri**
@@ -19,7 +19,7 @@
 
 Karya dan proyek akhir mahasiswa Sekolah Vokasi IPB memiliki nilai edukasi dan potensi besar untuk dijadikan portofolio profesional. Saat ini, kebutuhan akan sebuah wadah digital yang terpusat untuk memamerkan video hasil karya tersebut sangat krusial. Tanpa adanya platform yang terintegrasi, karya-karya mahasiswa sulit diakses secara luas oleh publik, adik tingkat sebagai referensi pembelajaran, maupun oleh mitra industri yang mencari talenta potensial.
 
-Sebagai solusi, proyek ini berfokus pada pengembangan **"SV IPB Project Showcase"** (TRPL Student Project Showcase), sebuah platform website berbasis katalog yang dirancang khusus untuk menyimpan, menampilkan, dan mengapresiasi video proyek mahasiswa. Website ini memungkinkan pengunjung untuk mengeksplorasi karya berdasarkan program studi, semester, atau mata kuliah, sekaligus menyediakan sistem bagi mahasiswa dan admin untuk mengelola pengajuan video proyek secara terstruktur.
+Sebagai solusi, proyek ini berfokus pada pengembangan **"SV IPB Project Showcase"** (TRK Student Project Showcase), sebuah platform website berbasis katalog yang dirancang khusus untuk menyimpan, menampilkan, dan mengapresiasi video proyek mahasiswa. Website ini memungkinkan pengunjung untuk mengeksplorasi karya berdasarkan program studi, semester, atau mata kuliah, sekaligus menyediakan sistem bagi mahasiswa dan admin untuk mengelola pengajuan video proyek secara terstruktur.
 
 ---
 
