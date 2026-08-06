@@ -28,6 +28,8 @@
 | **FR-06** | **Auto-Generate Thumbnail** | Sistem secara otomatis meng-ekstraksi ID video YouTube dan menampilkan thumbnail kualitas tinggi (*HQ Thumbnail*) dari YouTube CDN. | Sistem |
 | **FR-07** | **Autentikasi Admin / Dosen** | Sistem menyediakan fitur Login Modal yang aman bagi Admin/Dosen Pembimbing prodi TRK. | Admin / Dosen |
 | **FR-08** | **Dashboard Moderasi Projek** | Admin/Dosen dapat meninjau (*review*), menyetujui (*approve*), menolak (*reject*), mengedit, atau menghapus data pengajuan projek. | Admin / Dosen |
+| **FR-09** | **Viewer Perancangan 3D CAD** | Sistem menyediakan tab interaktif *3D CAD Model Viewer* (Sketchfab/WebGL/Canvas 3D) untuk menampilkan desain perancangan casing/enclosure 3D buatan mahasiswa TRK. | Publik / Mahasiswa |
+| **FR-10** | **Galeri Alat & Rincian Hardware** | Sistem dapat menampilkan galeri foto alat fisik, skematik sirkuit/PCB, dan rincian spesifikasi komponen hardware & sensor yang digunakan. | Publik / Mahasiswa |
 
 ---
 
