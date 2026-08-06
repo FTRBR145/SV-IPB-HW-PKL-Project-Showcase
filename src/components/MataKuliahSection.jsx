@@ -1,10 +1,10 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function MataKuliahSection({ onSelectCourse }) {
   const scrollRef = useRef(null);
 
-  const courses = [
+  const baseCourses = [
     {
       name: "Hardware",
       courseFullName: "INTERNET OF THINGS & EMBEDDED SYSTEM",
@@ -37,12 +37,39 @@ export default function MataKuliahSection({ onSelectCourse }) {
     }
   ];
 
+  // Tripled course array for endless smooth scrolling loop
+  const courses = [...baseCourses, ...baseCourses, ...baseCourses];
+
   const handleScroll = (direction) => {
     if (scrollRef.current) {
-      const scrollAmount = direction === 'left' ? -320 : 320;
-      scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+      const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
+      const scrollAmount = 300;
+
+      if (direction === 'right') {
+        if (scrollLeft + clientWidth >= scrollWidth - 25) {
+          // Loop back to start smoothly
+          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+        } else {
+          scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+        }
+      } else {
+        if (scrollLeft <= 25) {
+          // Loop to end smoothly
+          scrollRef.current.scrollTo({ left: scrollWidth - clientWidth, behavior: 'smooth' });
+        } else {
+          scrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+        }
+      }
     }
   };
+
+  // Auto-scroll loop interval
+  useEffect(() => {
+    const autoLoop = setInterval(() => {
+      handleScroll('right');
+    }, 4500);
+    return () => clearInterval(autoLoop);
+  }, []);
 
   return (
     <section className="matakuliah-section">
