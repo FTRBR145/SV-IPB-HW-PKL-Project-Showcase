@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { X, Upload, CheckCircle2 } from 'lucide-react';
-import { SV_PRODIS, SV_COURSES, getYouTubeThumbnail } from '../data/projectsData';
+import { SV_PRODIS, SV_COURSES, getYouTubeThumbnail } from '../../data/projectsData';
 
 export default function UploadModal({ isOpen, onClose, onAddProject }) {
   const [formData, setFormData] = useState({
