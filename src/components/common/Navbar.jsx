@@ -27,14 +27,14 @@ export default function Navbar({ onOpenUpload, onOpenLogin, onSelectCourse, onSe
             
             {/* Mata Kuliah Dropdown */}
             <li className="nav-dropdown">
-              <span className="nav-link">
+              <a href="#matakuliah" className="nav-link">
                 Mata Kuliah <ChevronDown size={14} />
-              </span>
+              </a>
               <div className="dropdown-menu">
                 {SV_COURSES.map((course, idx) => (
                   <a
                     key={idx}
-                    href="#projects"
+                    href="#matakuliah"
                     className="dropdown-item"
                     onClick={() => onSelectCourse(course === "Semua Mata Kuliah" ? "" : course)}
                   >
@@ -66,9 +66,9 @@ export default function Navbar({ onOpenUpload, onOpenLogin, onSelectCourse, onSe
 
             {/* Project Dropdown */}
             <li className="nav-dropdown">
-              <span className="nav-link">
+              <a href="#projects" className="nav-link">
                 Project <ChevronDown size={14} />
-              </span>
+              </a>
               <div className="dropdown-menu">
                 <a href="#projects" className="dropdown-item">Project Terbaru</a>
                 <a href="#projects" className="dropdown-item">Top Rated Video</a>

@@ -72,7 +72,7 @@ export default function MataKuliahSection({ onSelectCourse }) {
   }, []);
 
   return (
-    <section className="matakuliah-section">
+    <section id="matakuliah" className="matakuliah-section">
       <div className="container">
         <h2 className="matakuliah-title">Mata Kuliah</h2>
 
