@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, CheckCircle2, Box, Cpu, Image } from 'lucide-react';
+import { X, Upload, CheckCircle2 } from 'lucide-react';
 import { SV_PRODIS, SV_COURSES, getYouTubeThumbnail } from '../data/projectsData';
 
 export default function UploadModal({ isOpen, onClose, onAddProject }) {
@@ -12,9 +12,6 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
     course: SV_COURSES[1] || 'INTERNET OF THINGS & EMBEDDED SYSTEM',
     supervisor: '',
     videoUrl: '',
-    model3dUrl: '',
-    hardwareComponentsStr: 'ESP32 Microcontroller, Sensor DHT11, Relay Module 5V',
-    galleryImagesStr: '',
     thumbnail: '',
     techStackStr: 'C++, ESP32, MQTT, Node.js',
     description: ''
@@ -38,8 +35,6 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
 
     const selectedProdiObj = SV_PRODIS.find((p) => p.code === formData.prodiCode);
     const techArray = formData.techStackStr.split(',').map((s) => s.trim()).filter(Boolean);
-    const hardwareArray = formData.hardwareComponentsStr.split(',').map((s) => s.trim()).filter(Boolean);
-    const galleryArray = formData.galleryImagesStr.split(',').map((s) => s.trim()).filter(Boolean);
 
     // Convert YouTube URL to Embed format if needed
     let finalVideoUrl = formData.videoUrl.trim();
@@ -62,9 +57,6 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
       course: formData.course,
       semester: parseInt(formData.semester),
       techStack: techArray.length > 0 ? techArray : ['TRK', 'Embedded System'],
-      hardwareComponents: hardwareArray.length > 0 ? hardwareArray : ['Mikrokontroler TRK'],
-      model3dUrl: formData.model3dUrl.trim(),
-      galleryImages: galleryArray,
       thumbnail: formData.thumbnail || getYouTubeThumbnail(finalVideoUrl) || 'https://img.youtube.com/vi/9KxU30uM3qM/hqdefault.jpg',
       videoUrl: finalVideoUrl,
       likes: 1,
@@ -86,7 +78,7 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '720px' }}>
+      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px' }}>
         <button className="modal-close-btn" onClick={onClose}>
           <X size={20} />
         </button>
@@ -99,23 +91,23 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
                 Projek TRK Berhasil Diunggah!
               </h3>
               <p style={{ color: 'var(--text-muted)' }}>
-                Karya alat/sistem semester kamu sudah masuk ke showcase TRK Sekolah Vokasi IPB.
+                Karya video semester kamu sudah masuk ke showcase TRK Sekolah Vokasi IPB.
               </p>
             </div>
           ) : (
             <>
               <div style={{ marginBottom: '1.5rem' }}>
                 <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.6rem', color: 'var(--ipb-navy)' }}>
-                  Upload Projek Mata Kuliah TRK
+                  Upload Video Project Semester TRK
                 </h2>
                 <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                  Isi formulir untuk mendokumentasikan video, perancangan 3D CAD, dan alat hardware mahasiswa TRK.
+                  Isi formulir untuk menambahkan karya video projek mahasiswa TRK SV IPB.
                 </p>
               </div>
 
               <form onSubmit={handleSubmit}>
                 <div className="form-group">
-                  <label>Judul Project Video & Alat *</label>
+                  <label>Judul Project Video *</label>
                   <input
                     type="text"
                     name="title"
@@ -219,7 +211,7 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
                 </div>
 
                 <div className="form-group">
-                  <label>URL Video YouTube Demo Alat (Embed atau Link)</label>
+                  <label>URL Video YouTube (Embed atau Share Link)</label>
                   <input
                     type="url"
                     name="videoUrl"
@@ -231,49 +223,7 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
                 </div>
 
                 <div className="form-group">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Box size={16} color="var(--accent-blue)" /> Link Embed Model 3D CAD / Sketchfab (Opsional)
-                  </label>
-                  <input
-                    type="text"
-                    name="model3dUrl"
-                    className="form-control"
-                    placeholder="https://sketchfab.com/models/.../embed"
-                    value={formData.model3dUrl}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Cpu size={16} color="var(--accent-blue)" /> Komponen Hardware & Sensor (pisahkan koma)
-                  </label>
-                  <input
-                    type="text"
-                    name="hardwareComponentsStr"
-                    className="form-control"
-                    placeholder="ESP32 Board, Sensor DHT11, Relay 5V, OLED Display"
-                    value={formData.hardwareComponentsStr}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                    <Image size={16} color="var(--accent-blue)" /> URL Foto Alat & Skematik Hardware (pisahkan koma)
-                  </label>
-                  <input
-                    type="text"
-                    name="galleryImagesStr"
-                    className="form-control"
-                    placeholder="https://.../foto_alat1.jpg, https://.../skematik.png"
-                    value={formData.galleryImagesStr}
-                    onChange={handleChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Teknologi / Protocol / Software Stack (pisahkan koma)</label>
+                  <label>Teknologi / Stack (pisahkan koma)</label>
                   <input
                     type="text"
                     name="techStackStr"
@@ -285,12 +235,12 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
                 </div>
 
                 <div className="form-group">
-                  <label>Deskripsi Sistem & Alat</label>
+                  <label>Deskripsi Project</label>
                   <textarea
                     name="description"
                     className="form-control"
                     rows="3"
-                    placeholder="Jelaskan ringkasan alat, latar belakang, cara kerja sensor/hardware, dan hasil..."
+                    placeholder="Jelaskan ringkasan latar belakang, tujuan, dan keunggulan karya..."
                     value={formData.description}
                     onChange={handleChange}
                   ></textarea>
