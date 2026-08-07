@@ -19,7 +19,7 @@ import LoginModal from '../components/modals/LoginModal';
 // Initial Data
 import { initialProjects } from '../data/projectsData';
 
-export default function LandingPage() {
+export default function LandingPage({ onNavigateToAdmin }) {
   const [projects, setProjects] = useState(initialProjects);
   const [selectedSemester, setSelectedSemester] = useState('ALL');
   const [selectedProdi, setSelectedProdi] = useState('ALL');
@@ -64,12 +64,19 @@ export default function LandingPage() {
     setProjects((prev) => [newProject, ...prev]);
   };
 
+  const handleLoginSuccess = (userRole) => {
+    if (userRole === 'admin' && onNavigateToAdmin) {
+      onNavigateToAdmin();
+    }
+  };
+
   return (
     <div className="landing-page">
       {/* Top Navbar */}
       <Navbar
         onOpenUpload={() => setIsUploadOpen(true)}
         onOpenLogin={() => setIsLoginOpen(true)}
+        onOpenAdminDashboard={onNavigateToAdmin}
         onSelectCourse={(course) => setSelectedCourse(course)}
         onSelectSemester={(sem) => setSelectedSemester(sem)}
       />
@@ -118,6 +125,7 @@ export default function LandingPage() {
       <LoginModal
         isOpen={isLoginOpen}
         onClose={() => setIsLoginOpen(false)}
+        onLoginSuccess={handleLoginSuccess}
       />
     </div>
   );

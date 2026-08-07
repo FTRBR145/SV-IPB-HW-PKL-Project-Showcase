@@ -1,8 +1,8 @@
 import React from 'react';
-import { ChevronDown, LogIn, Upload } from 'lucide-react';
+import { ChevronDown, LogIn, Upload, Shield } from 'lucide-react';
 import { SV_COURSES } from '../../data/projectsData';
 
-export default function Navbar({ onOpenUpload, onOpenLogin, onSelectCourse, onSelectSemester }) {
+export default function Navbar({ onOpenUpload, onOpenLogin, onOpenAdminDashboard, onSelectCourse, onSelectSemester }) {
   return (
     <header className="navbar">
       <div className="container navbar-container">
@@ -80,6 +80,11 @@ export default function Navbar({ onOpenUpload, onOpenLogin, onSelectCourse, onSe
 
         {/* Action Buttons */}
         <div className="nav-actions">
+          {onOpenAdminDashboard && (
+            <button className="btn btn-secondary btn-sm" onClick={onOpenAdminDashboard} title="Masuk Ke Dashboard Moderasi Admin">
+              <Shield size={16} /> Admin Dashboard
+            </button>
+          )}
           <button className="btn btn-secondary btn-sm" onClick={onOpenLogin}>
             <LogIn size={16} /> Login
           </button>
