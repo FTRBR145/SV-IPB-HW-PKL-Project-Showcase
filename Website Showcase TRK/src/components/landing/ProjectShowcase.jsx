@@ -1,14 +1,11 @@
 import React from 'react';
 import { Search, ArrowRight } from 'lucide-react';
 import ProjectCard from '../projects/ProjectCard';
-import { SV_PRODIS } from '../../data/projectsData';
 
 export default function ProjectShowcase({
   projects,
   selectedSemester,
   onSelectSemester,
-  selectedProdi,
-  onSelectProdi,
   searchQuery,
   onSearchChange,
   onClickDetail
@@ -29,7 +26,7 @@ export default function ProjectShowcase({
           </a>
         </div>
 
-        {/* Controls: Semester Tabs, Search & Prodi filter */}
+        {/* Controls: Semester Tabs & Search */}
         <div className="controls-bar">
           <div className="semester-tabs">
             {semesters.map((sem) => (
@@ -53,18 +50,6 @@ export default function ProjectShowcase({
                 onChange={(e) => onSearchChange(e.target.value)}
               />
             </div>
-
-            <select
-              className="prodi-select"
-              value={selectedProdi}
-              onChange={(e) => onSelectProdi(e.target.value)}
-            >
-              {SV_PRODIS.map((p) => (
-                <option key={p.code} value={p.code}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
 

@@ -139,8 +139,3 @@ export const SV_COURSES = [
   "SISTEM TERTANAM (EMBEDDED SYSTEM)",
   "PROYEK SISTEM IOT (INTERNET OF THINGS)"
 ];
-
-export const SV_PRODIS = [
-  { code: "ALL", name: "Teknik Komputer / Teknologi Rekayasa Komputer (TRK)" },
-  { code: "TRK", name: "Teknologi Rekayasa Komputer (TRK)" }
-];

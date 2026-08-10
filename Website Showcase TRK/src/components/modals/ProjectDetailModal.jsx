@@ -28,7 +28,7 @@ export default function ProjectDetailModal({ project, onClose }) {
             <div className="modal-meta-row">
               <span><User size={14} /> {project.student} ({project.nim})</span>
               <span>•</span>
-              <span><GraduationCap size={14} /> {project.prodi}</span>
+              <span><GraduationCap size={14} /> Semester {project.semester}</span>
               <span>•</span>
               <span><Calendar size={14} /> Tahun {project.year}</span>
             </div>

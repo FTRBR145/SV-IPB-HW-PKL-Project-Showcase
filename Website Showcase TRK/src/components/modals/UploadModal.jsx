@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
 import { X, Upload, CheckCircle2 } from 'lucide-react';
-import { SV_PRODIS, SV_COURSES, getYouTubeThumbnail } from '../../data/projectsData';
+import { SV_COURSES, getYouTubeThumbnail } from '../../data/projectsData';
 
 export default function UploadModal({ isOpen, onClose, onAddProject }) {
   const [formData, setFormData] = useState({
     title: '',
     student: '',
     nim: '',
-    prodiCode: 'TRK',
     semester: 3,
-    course: SV_COURSES[1] || 'INTERNET OF THINGS & EMBEDDED SYSTEM',
+    course: SV_COURSES[1] || 'RANGKAIAN LOGIKA DAN TEKNIK DIGITAL',
     supervisor: '',
     videoUrl: '',
     thumbnail: '',
@@ -33,7 +32,6 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
       return;
     }
 
-    const selectedProdiObj = SV_PRODIS.find((p) => p.code === formData.prodiCode);
     const techArray = formData.techStackStr.split(',').map((s) => s.trim()).filter(Boolean);
 
     // Convert YouTube URL to Embed format if needed
@@ -52,8 +50,6 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
       title: formData.title,
       student: formData.student,
       nim: formData.nim,
-      prodi: selectedProdiObj ? selectedProdiObj.name : 'Teknik Komputer / TRK',
-      prodiCode: formData.prodiCode,
       course: formData.course,
       semester: parseInt(formData.semester),
       techStack: techArray.length > 0 ? techArray : ['TRK', 'Embedded System'],
@@ -147,22 +143,6 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
                 </div>
 
                 <div className="form-row">
-                  <div className="form-group">
-                    <label>Program Studi (Prodi)</label>
-                    <select
-                      name="prodiCode"
-                      className="form-control"
-                      value={formData.prodiCode}
-                      onChange={handleChange}
-                    >
-                      {SV_PRODIS.filter((p) => p.code !== 'ALL').map((p) => (
-                        <option key={p.code} value={p.code}>
-                          {p.name} ({p.code})
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
                   <div className="form-group">
                     <label>Semester</label>
                     <select
