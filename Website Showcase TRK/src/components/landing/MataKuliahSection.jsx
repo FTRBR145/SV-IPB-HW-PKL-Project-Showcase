@@ -8,27 +8,27 @@ export default function MataKuliahSection({ onSelectCourse }) {
     {
       name: "Rangkaian Logika & Teknik Digital",
       courseFullName: "RANGKAIAN LOGIKA DAN TEKNIK DIGITAL",
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80"
+      image: "/trk_photos/DSC09040.JPG"
     },
     {
       name: "Teknologi Bengkel Elektromekanik",
       courseFullName: "TEKNOLOGI BENGKEL ELEKTROMEKANIK",
-      image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80"
+      image: "/trk_photos/DSC09042.JPG"
     },
     {
       name: "Aplikasi Mobile",
       courseFullName: "APLIKASI MOBILE",
-      image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80"
+      image: "/trk_photos/DSC09048.JPG"
     },
     {
       name: "Sistem Tertanam",
       courseFullName: "SISTEM TERTANAM (EMBEDDED SYSTEM)",
-      image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80"
+      image: "/trk_photos/DSC09038.JPG"
     },
     {
       name: "Proyek Sistem IoT",
       courseFullName: "PROYEK SISTEM IOT (INTERNET OF THINGS)",
-      image: "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=800&q=80"
+      image: "/trk_photos/DSC09044.JPG"
     }
   ];
 

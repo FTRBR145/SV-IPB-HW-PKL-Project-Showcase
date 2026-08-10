@@ -15,8 +15,8 @@ export default function AboutSection() {
           </div>
           <div className="about-image-wrapper">
             <img 
-              src="/sv_ipb_hero.png" 
-              alt="Gedung Sekolah Vokasi IPB University" 
+              src="/trk_photos/DSC09046.JPG" 
+              alt="Mahasiswa TRK Sekolah Vokasi IPB University" 
             />
           </div>
         </div>

@@ -9,7 +9,7 @@ export default function HeroSection({ onOpenUpload }) {
       title: "TRK Student Project",
       highlight: "Showcase",
       subtitle: "Platform showcase video projek akhir dan praktikum sistem tertanam mahasiswa Teknologi Rekayasa Komputer (TRK) Sekolah Vokasi IPB University. Menampilkan inovasi IoT, mikrokontroler, jaringan komputer, dan cloud.",
-      image: "/sv_ipb_hero.png"
+      image: "/trk_photos/DSC09044.JPG"
     },
     {
       id: 2,
@@ -17,7 +17,7 @@ export default function HeroSection({ onOpenUpload }) {
       title: "Karya Inovatif TRK",
       highlight: "Siap Kerja",
       subtitle: "Memamerkan karya sistem hardware & software berstandar industri mulai dari transmisi sensor ESP32, arsitektur jaringan MikroTik, sistem kontrol Arduino, hingga cloud monitoring telemetri.",
-      image: "https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=1920&q=80"
+      image: "/trk_photos/DSC09040.JPG"
     },
     {
       id: 3,
@@ -25,7 +25,7 @@ export default function HeroSection({ onOpenUpload }) {
       title: "Showcase Video",
       highlight: "Projek Akhir",
       subtitle: "Dokumentasi dan video demo produk sistem perangkat keras dan jaringan komputer hasil tugas akhir serta praktikum mahasiswa Program Studi Teknologi Rekayasa Komputer SV IPB.",
-      image: "https://images.unsplash.com/photo-1574717024653-61fd2cf4d44d?auto=format&fit=crop&w=1920&q=80"
+      image: "/trk_photos/DSC09997.JPG"
     }
   ];
 
