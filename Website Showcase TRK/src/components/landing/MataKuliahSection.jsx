@@ -7,36 +7,26 @@ export default function MataKuliahSection({ onSelectCourse }) {
   const baseCourses = [
     {
       name: "Rangkaian Logika & Teknik Digital",
-      code: "TEK1107",
-      semester: "Semester 2",
       courseFullName: "RANGKAIAN LOGIKA DAN TEKNIK DIGITAL",
       image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80"
     },
     {
       name: "Teknologi Bengkel Elektromekanik",
-      code: "TEK1207",
-      semester: "Semester 4",
       courseFullName: "TEKNOLOGI BENGKEL ELEKTROMEKANIK",
       image: "https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80"
     },
     {
       name: "Aplikasi Mobile",
-      code: "TEK1210",
-      semester: "Semester 4",
       courseFullName: "APLIKASI MOBILE",
       image: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80"
     },
     {
       name: "Sistem Tertanam",
-      code: "TEK1301",
-      semester: "Semester 5",
       courseFullName: "SISTEM TERTANAM (EMBEDDED SYSTEM)",
       image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80"
     },
     {
       name: "Proyek Sistem IoT",
-      code: "TEK1313",
-      semester: "Semester 5",
       courseFullName: "PROYEK SISTEM IOT (INTERNET OF THINGS)",
       image: "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=800&q=80"
     }
@@ -105,7 +95,6 @@ export default function MataKuliahSection({ onSelectCourse }) {
                   <img src={c.image} alt={c.name} />
                 </div>
                 <div className="matakuliah-label-bar">
-                  <span style={{ fontSize: '0.75rem', opacity: 0.75, display: 'block', marginBottom: '0.15rem' }}>{c.code} · {c.semester}</span>
                   <span>{c.name}</span>
                 </div>
               </div>
