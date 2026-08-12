@@ -2,83 +2,72 @@ import React, { useState, useEffect } from 'react';
 import { Upload, ArrowRight, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function HeroSection({ onOpenUpload }) {
-  const slides = [
-    {
-      id: 1,
-      tag: "TEKNOLOGI REKAYASA KOMPUTER (TRK)",
-      title: "TRK Student Project",
-      highlight: "Showcase",
-      subtitle: "Platform showcase video projek akhir dan praktikum sistem tertanam mahasiswa Teknologi Rekayasa Komputer (TRK) Sekolah Vokasi IPB University. Menampilkan inovasi IoT, mikrokontroler, jaringan komputer, dan cloud.",
-      image: "/trk_photos/DSC09044.JPG"
-    },
-    {
-      id: 2,
-      tag: "INTERNET OF THINGS & EMBEDDED SYSTEM",
-      title: "Karya Inovatif TRK",
-      highlight: "Siap Kerja",
-      subtitle: "Memamerkan karya sistem hardware & software berstandar industri mulai dari transmisi sensor ESP32, arsitektur jaringan MikroTik, sistem kontrol Arduino, hingga cloud monitoring telemetri.",
-      image: "/trk_photos/DSC09040.JPG"
-    },
-    {
-      id: 3,
-      tag: "PORTFOLIO DIGITAL MAHASISWA TRK",
-      title: "Showcase Video",
-      highlight: "Projek Akhir",
-      subtitle: "Dokumentasi dan video demo produk sistem perangkat keras dan jaringan komputer hasil tugas akhir serta praktikum mahasiswa Program Studi Teknologi Rekayasa Komputer SV IPB.",
-      image: "/trk_photos/DSC09997.JPG"
-    }
+  const images = [
+    "/trk_photos/DSC09044.JPG",
+    "/trk_photos/DSC09040.JPG",
+    "/trk_photos/DSC09997.JPG",
+    "/trk_photos/DSC09046.JPG",
+    "/sv_ipb_hero.png"
   ];
 
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
+      setCurrentSlide((prev) => (prev + 1) % images.length);
     }, 5000);
     return () => clearInterval(timer);
-  }, [slides.length]);
+  }, [images.length]);
 
   const handlePrev = () => {
-    setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    setCurrentSlide((prev) => (prev - 1 + images.length) % images.length);
   };
 
   const handleNext = () => {
-    setCurrentSlide((prev) => (prev + 1) % slides.length);
+    setCurrentSlide((prev) => (prev + 1) % images.length);
   };
 
   return (
     <section id="home" className="hero-section">
-      {/* Background Slides */}
-      {slides.map((slide, index) => (
-        <div
-          key={slide.id}
-          className={`hero-slide-bg ${index === currentSlide ? 'active' : ''}`}
-          style={{ backgroundImage: `linear-gradient(135deg, rgba(0, 34, 68, 0.88) 0%, rgba(0, 51, 102, 0.78) 100%), url('${slide.image}')` }}
-        />
-      ))}
+      {/* Background Track - Only Background Photos Slide */}
+      <div
+        className="hero-bg-slider-track"
+        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+      >
+        {images.map((imgUrl, idx) => (
+          <div
+            key={idx}
+            className="hero-bg-slide-item"
+            style={{
+              backgroundImage: `linear-gradient(135deg, rgba(15, 23, 42, 0.78) 0%, rgba(30, 41, 59, 0.65) 100%), url('${imgUrl}')`
+            }}
+          />
+        ))}
+      </div>
 
       <div className="hero-overlay-graphic"></div>
 
-      <div className="container">
+      {/* Fixed/Static Hero Text Content */}
+      <div className="container hero-static-container">
         <div className="hero-content">
-          <span className="hero-tag-badge animate-slide-down">
-            {slides[currentSlide].tag}
+          <span className="hero-tag-badge">
+            TEKNOLOGI REKAYASA KOMPUTER (TRK)
           </span>
 
-          <h1 className="hero-title animate-fade-in">
-            {slides[currentSlide].title} <br />
-            <span className="blue-highlight">{slides[currentSlide].highlight}</span>
+          <h1 className="hero-title">
+            TRK Student Project <br />
+            <span className="blue-highlight">Showcase</span>
           </h1>
           
-          <p className="hero-subtitle animate-fade-in">
-            {slides[currentSlide].subtitle}
+          <p className="hero-subtitle">
+            Platform showcase video projek akhir dan praktikum sistem tertanam mahasiswa Teknologi Rekayasa Komputer (TRK) Sekolah Vokasi IPB University. Menampilkan inovasi IoT, mikrokontroler, jaringan komputer, dan cloud.
           </p>
 
-          <div className="hero-buttons animate-slide-up">
-            <a href="#projects" className="btn btn-primary">
+          <div className="hero-buttons">
+            <a href="#projects" className="btn btn-hero-primary">
               Lihat Semua Project <ArrowRight size={18} />
             </a>
-            <button className="btn btn-secondary" onClick={onOpenUpload}>
+            <button className="btn btn-hero-secondary" onClick={onOpenUpload}>
               Upload Project <Upload size={18} />
             </button>
           </div>
@@ -92,7 +81,7 @@ export default function HeroSection({ onOpenUpload }) {
         </button>
 
         <div className="hero-slide-dots">
-          {slides.map((_, idx) => (
+          {images.map((_, idx) => (
             <button
               key={idx}
               className={`slide-dot ${idx === currentSlide ? 'active' : ''}`}
