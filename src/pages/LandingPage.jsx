@@ -22,7 +22,6 @@ import { initialProjects } from '../data/projectsData';
 export default function LandingPage({ onNavigateToAdmin }) {
   const [projects, setProjects] = useState(initialProjects);
   const [selectedSemester, setSelectedSemester] = useState('ALL');
-  const [selectedProdi, setSelectedProdi] = useState('ALL');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -35,10 +34,6 @@ export default function LandingPage({ onNavigateToAdmin }) {
   const filteredProjects = projects.filter((p) => {
     // Semester filter
     if (selectedSemester !== 'ALL' && p.semester !== selectedSemester) {
-      return false;
-    }
-    // Prodi filter
-    if (selectedProdi !== 'ALL' && p.prodiCode !== selectedProdi) {
       return false;
     }
     // Course filter
@@ -98,8 +93,6 @@ export default function LandingPage({ onNavigateToAdmin }) {
         projects={filteredProjects}
         selectedSemester={selectedSemester}
         onSelectSemester={setSelectedSemester}
-        selectedProdi={selectedProdi}
-        onSelectProdi={setSelectedProdi}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
         onClickDetail={(proj) => setActiveProjectDetail(proj)}

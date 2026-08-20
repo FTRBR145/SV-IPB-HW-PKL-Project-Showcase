@@ -6,34 +6,29 @@ export default function MataKuliahSection({ onSelectCourse }) {
 
   const baseCourses = [
     {
-      name: "Hardware",
-      courseFullName: "INTERNET OF THINGS & EMBEDDED SYSTEM",
-      image: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=80"
+      name: "Rangkaian Logika & Teknik Digital",
+      courseFullName: "RANGKAIAN LOGIKA DAN TEKNIK DIGITAL",
+      image: "/trk_photos/DSC09040.JPG"
     },
     {
-      name: "Internet of Things",
-      courseFullName: "INTERNET OF THINGS & EMBEDDED SYSTEM",
-      image: "https://images.unsplash.com/photo-1586771107445-d3ca888129ff?auto=format&fit=crop&w=800&q=80"
+      name: "Teknologi Bengkel Elektromekanik",
+      courseFullName: "TEKNOLOGI BENGKEL ELEKTROMEKANIK",
+      image: "/trk_photos/DSC09042.JPG"
     },
     {
-      name: "Mikrokontroler",
-      courseFullName: "SISTEM KONTROL & MIKROKONTROLER",
-      image: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=800&q=80"
+      name: "Aplikasi Mobile",
+      courseFullName: "APLIKASI MOBILE",
+      image: "/trk_photos/DSC09048.JPG"
     },
     {
-      name: "Jaringan Komputer",
-      courseFullName: "JARINGAN KOMPUTER & KEAMANAN SIBER",
-      image: "https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80"
+      name: "Sistem Tertanam",
+      courseFullName: "SISTEM TERTANAM (EMBEDDED SYSTEM)",
+      image: "/trk_photos/DSC09038.JPG"
     },
     {
-      name: "Perangkat Terhubung",
-      courseFullName: "PEMROGRAMAN PERANGKAT TERHUBUNG",
-      image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?auto=format&fit=crop&w=800&q=80"
-    },
-    {
-      name: "Cloud Computing",
-      courseFullName: "APLIKASI WEB & CLOUD COMPUTING",
-      image: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=800&q=80"
+      name: "Proyek Sistem IoT",
+      courseFullName: "PROYEK SISTEM IOT (INTERNET OF THINGS)",
+      image: "/trk_photos/DSC09044.JPG"
     }
   ];
 
@@ -47,14 +42,12 @@ export default function MataKuliahSection({ onSelectCourse }) {
 
       if (direction === 'right') {
         if (scrollLeft + clientWidth >= scrollWidth - 25) {
-          // Loop back to start smoothly
           scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
         } else {
           scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
         }
       } else {
         if (scrollLeft <= 25) {
-          // Loop to end smoothly
           scrollRef.current.scrollTo({ left: scrollWidth - clientWidth, behavior: 'smooth' });
         } else {
           scrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
@@ -63,7 +56,6 @@ export default function MataKuliahSection({ onSelectCourse }) {
     }
   };
 
-  // Auto-scroll loop interval
   useEffect(() => {
     const autoLoop = setInterval(() => {
       handleScroll('right');
@@ -72,34 +64,45 @@ export default function MataKuliahSection({ onSelectCourse }) {
   }, []);
 
   return (
-    <section id="matakuliah" className="matakuliah-section">
-      <div className="container">
-        <h2 className="matakuliah-title">Mata Kuliah</h2>
+    <section id="matakuliah" className="py-12 bg-gray-50 border-b border-gray-200">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-gray-800 text-center mb-8">
+          Mata Kuliah Unggulan TRK
+        </h2>
 
-        <div className="matakuliah-slider-wrapper">
+        <div className="relative group/slider">
           <button
-            className="slider-nav-btn nav-left"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 sm:-translate-x-5 z-20 w-10 h-10 rounded-full bg-white/90 shadow-lg border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-800 hover:text-white transition-all transform hover:scale-110 active:scale-95"
             onClick={() => handleScroll('left')}
             aria-label="Scroll Kiri"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={20} />
           </button>
 
-          <div className="matakuliah-scroll-container" ref={scrollRef}>
+          <div 
+            className="flex gap-4 overflow-x-auto scrollbar-none py-2 scroll-smooth"
+            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            ref={scrollRef}
+          >
             {courses.map((c, idx) => (
               <div
                 key={idx}
-                className="matakuliah-card"
+                className="flex-shrink-0 w-64 sm:w-72 bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-200 cursor-pointer transform hover:-translate-y-1 transition-all duration-300 group"
                 onClick={() => {
                   if (onSelectCourse) onSelectCourse(c.courseFullName);
                   const el = document.getElementById('projects');
                   if (el) el.scrollIntoView({ behavior: 'smooth' });
                 }}
               >
-                <div className="matakuliah-img-wrapper">
-                  <img src={c.image} alt={c.name} />
+                <div className="relative h-44 overflow-hidden">
+                  <img 
+                    src={c.image} 
+                    alt={c.name} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950/70 via-transparent to-transparent" />
                 </div>
-                <div className="matakuliah-label-bar">
+                <div className="p-4 bg-gray-800 text-white font-semibold text-sm text-center line-clamp-2">
                   <span>{c.name}</span>
                 </div>
               </div>
@@ -107,11 +110,11 @@ export default function MataKuliahSection({ onSelectCourse }) {
           </div>
 
           <button
-            className="slider-nav-btn nav-right"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 sm:translate-x-5 z-20 w-10 h-10 rounded-full bg-white/90 shadow-lg border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-800 hover:text-white transition-all transform hover:scale-110 active:scale-95"
             onClick={() => handleScroll('right')}
             aria-label="Scroll Kanan"
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={20} />
           </button>
         </div>
       </div>

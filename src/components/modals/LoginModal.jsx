@@ -24,20 +24,28 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '440px' }}>
-        <button className="modal-close-btn" onClick={onClose}>
-          <X size={20} />
+    <div className="fixed inset-0 z-50 bg-gray-950/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6" onClick={onClose}>
+      <div 
+        className="relative bg-white rounded-2xl shadow-2xl max-w-sm sm:max-w-md w-full max-h-[85vh] flex flex-col overflow-hidden border border-gray-100 transform transition-all"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          className="absolute top-3.5 right-3.5 p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors z-10"
+          onClick={onClose}
+        >
+          <X size={16} />
         </button>
 
-        <div className="modal-body" style={{ padding: '2rem 1.75rem' }}>
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1">
           {isLoggedIn ? (
-            <div style={{ textAlign: 'center', padding: '1.5rem 0' }}>
-              <ShieldCheck size={54} color="var(--accent-blue)" style={{ margin: '0 auto 1rem' }} />
-              <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--ipb-navy)', fontSize: '1.4rem', marginBottom: '0.5rem' }}>
+            <div className="text-center py-6">
+              <div className="w-14 h-14 rounded-full bg-sky-50 text-sky-600 flex items-center justify-center mx-auto mb-3">
+                <ShieldCheck size={32} />
+              </div>
+              <h3 className="font-heading text-lg font-bold text-gray-800 mb-1.5">
                 Login Berhasil!
               </h3>
-              <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+              <p className="text-gray-500 text-xs">
                 {role === 'admin'
                   ? 'Pengalihan otomatis ke Dashboard Admin TRK SV IPB...'
                   : 'Selamat datang kembali, Mahasiswa TRK SV IPB!'}
@@ -46,76 +54,54 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
           ) : (
             <>
               {/* Header Title */}
-              <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
-                <div style={{ width: '48px', height: '48px', background: '#eff6ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 0.75rem', color: 'var(--accent-blue)' }}>
-                  <Lock size={24} />
+              <div className="text-center mb-5 pr-4">
+                <div className="w-11 h-11 bg-sky-50 text-sky-600 rounded-full flex items-center justify-center mx-auto mb-2.5">
+                  <Lock size={20} />
                 </div>
-                <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.4rem', color: 'var(--ipb-navy)' }}>
+                <h2 className="font-heading text-lg font-extrabold text-gray-800">
                   Autentikasi Pengguna TRK
                 </h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
+                <p className="text-gray-500 text-xs mt-0.5">
                   Pilih peran kamu untuk masuk ke platform SV IPB Showcase.
                 </p>
               </div>
 
               {/* Dual Role Selector Tabs */}
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.5rem', background: '#f1f5f9', padding: '0.35rem', borderRadius: '10px', marginBottom: '1.5rem' }}>
+              <div className="grid grid-cols-2 gap-1 bg-gray-100 p-1 rounded-xl mb-5">
                 <button
                   type="button"
                   onClick={() => setRole('student')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.4rem',
-                    padding: '0.6rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    background: role === 'student' ? '#ffffff' : 'transparent',
-                    color: role === 'student' ? 'var(--ipb-navy)' : '#64748b',
-                    boxShadow: role === 'student' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
-                    transition: 'all 0.2s ease'
-                  }}
+                  className={`flex items-center justify-center gap-1.5 py-2 rounded-lg font-bold text-xs transition-all ${
+                    role === 'student'
+                      ? 'bg-white text-gray-800 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
                 >
-                  <GraduationCap size={16} /> Mahasiswa
+                  <GraduationCap size={15} /> Mahasiswa
                 </button>
 
                 <button
                   type="button"
                   onClick={() => setRole('admin')}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '0.4rem',
-                    padding: '0.6rem',
-                    borderRadius: '8px',
-                    border: 'none',
-                    fontWeight: 700,
-                    fontSize: '0.85rem',
-                    cursor: 'pointer',
-                    background: role === 'admin' ? '#ffffff' : 'transparent',
-                    color: role === 'admin' ? 'var(--ipb-navy)' : '#64748b',
-                    boxShadow: role === 'admin' ? '0 2px 6px rgba(0,0,0,0.06)' : 'none',
-                    transition: 'all 0.2s ease'
-                  }}
+                  className={`flex items-center justify-center gap-1.5 py-2 rounded-lg font-bold text-xs transition-all ${
+                    role === 'admin'
+                      ? 'bg-white text-gray-800 shadow-sm'
+                      : 'text-gray-500 hover:text-gray-700'
+                  }`}
                 >
-                  <User size={16} /> Dosen / Admin
+                  <User size={15} /> Dosen / Admin
                 </button>
               </div>
 
               {/* Login Form */}
-              <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label>
+              <form onSubmit={handleSubmit} className="space-y-3.5">
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">
                     {role === 'student' ? 'NIM / Email Mahasiswa IPB' : 'NIP / Email Dosen / Admin TRK'}
                   </label>
                   <input
                     type="text"
-                    className="form-control"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
                     placeholder={role === 'student' ? 'J0304211088 / mhs@apps.ipb.ac.id' : 'admin.trk@apps.ipb.ac.id'}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
@@ -123,11 +109,11 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Password Akun IPB</label>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">Password Akun IPB</label>
                   <input
                     type="password"
-                    className="form-control"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
                     placeholder="••••••••"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -135,7 +121,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
                   />
                 </div>
 
-                <button type="submit" className="btn btn-primary w-full" style={{ marginTop: '1.25rem', padding: '0.75rem' }}>
+                <button type="submit" className="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs shadow-md transition-all pt-2.5 mt-2">
                   {role === 'admin' ? 'Masuk ke Dashboard Admin' : 'Masuk Portal Mahasiswa'}
                 </button>
               </form>

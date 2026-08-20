@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { X, Upload, CheckCircle2 } from 'lucide-react';
-import { SV_PRODIS, SV_COURSES, getYouTubeThumbnail } from '../../data/projectsData';
+import { SV_COURSES, getYouTubeThumbnail } from '../../data/projectsData';
 
 export default function UploadModal({ isOpen, onClose, onAddProject }) {
+  const todayStr = new Date().toISOString().split('T')[0];
   const [formData, setFormData] = useState({
     title: '',
     student: '',
     nim: '',
-    prodiCode: 'TRK',
     semester: 3,
-    course: SV_COURSES[1] || 'INTERNET OF THINGS & EMBEDDED SYSTEM',
+    course: SV_COURSES[1] || 'RANGKAIAN LOGIKA DAN TEKNIK DIGITAL',
+    date: todayStr,
+    year: '2025/2026',
     supervisor: '',
     videoUrl: '',
     thumbnail: '',
@@ -26,6 +28,19 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  const formatIndoDate = (dateStr) => {
+    if (!dateStr) return '19 Agustus 2026';
+    try {
+      const [y, m, d] = dateStr.split('-');
+      if (!y || !m || !d) return dateStr;
+      const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+      const monthName = months[parseInt(m, 10) - 1] || m;
+      return `${parseInt(d, 10)} ${monthName} ${y}`;
+    } catch (e) {
+      return dateStr;
+    }
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!formData.title || !formData.student || !formData.nim) {
@@ -33,10 +48,8 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
       return;
     }
 
-    const selectedProdiObj = SV_PRODIS.find((p) => p.code === formData.prodiCode);
     const techArray = formData.techStackStr.split(',').map((s) => s.trim()).filter(Boolean);
 
-    // Convert YouTube URL to Embed format if needed
     let finalVideoUrl = formData.videoUrl.trim();
     if (finalVideoUrl.includes('watch?v=')) {
       finalVideoUrl = finalVideoUrl.replace('watch?v=', 'embed/');
@@ -47,13 +60,13 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
       finalVideoUrl = 'https://www.youtube.com/embed/9KxU30uM3qM';
     }
 
+    const formattedDate = formatIndoDate(formData.date);
+
     const newProject = {
       id: Date.now(),
       title: formData.title,
       student: formData.student,
       nim: formData.nim,
-      prodi: selectedProdiObj ? selectedProdiObj.name : 'Teknik Komputer / TRK',
-      prodiCode: formData.prodiCode,
       course: formData.course,
       semester: parseInt(formData.semester),
       techStack: techArray.length > 0 ? techArray : ['TRK', 'Embedded System'],
@@ -62,7 +75,8 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
       likes: 1,
       views: 12,
       supervisor: formData.supervisor || 'Dosen Pembimbing TRK SV IPB',
-      year: '2025/2026',
+      year: formData.year || '2025/2026',
+      date: formattedDate,
       description: formData.description || 'Projek alat/sistem hasil praktikum mahasiswa Teknik Komputer (TRK) Sekolah Vokasi IPB.',
       comments: []
     };
@@ -77,41 +91,47 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
   };
 
   return (
-    <div className="modal-backdrop" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()} style={{ maxWidth: '680px' }}>
-        <button className="modal-close-btn" onClick={onClose}>
-          <X size={20} />
+    <div className="fixed inset-0 z-50 bg-gray-950/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6" onClick={onClose}>
+      <div 
+        className="relative bg-white rounded-2xl shadow-2xl max-w-xl w-full max-h-[85vh] flex flex-col overflow-hidden border border-gray-100 transform transition-all"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button 
+          className="absolute top-3.5 right-3.5 p-1.5 rounded-full text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors z-10"
+          onClick={onClose}
+        >
+          <X size={16} />
         </button>
 
-        <div className="modal-body">
+        <div className="p-5 sm:p-6 overflow-y-auto flex-1">
           {submitted ? (
-            <div style={{ textAlign: 'center', padding: '3rem 1rem' }}>
-              <CheckCircle2 size={64} color="var(--accent-blue)" style={{ margin: '0 auto 1rem' }} />
-              <h3 style={{ fontFamily: 'var(--font-heading)', color: 'var(--ipb-navy)', fontSize: '1.5rem', marginBottom: '0.5rem' }}>
+            <div className="text-center py-8">
+              <CheckCircle2 size={52} className="text-sky-500 mx-auto mb-3" />
+              <h3 className="font-heading text-xl font-bold text-gray-800 mb-1.5">
                 Projek TRK Berhasil Diunggah!
               </h3>
-              <p style={{ color: 'var(--text-muted)' }}>
+              <p className="text-gray-500 text-xs">
                 Karya video semester kamu sudah masuk ke showcase TRK Sekolah Vokasi IPB.
               </p>
             </div>
           ) : (
             <>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <h2 style={{ fontFamily: 'var(--font-heading)', fontSize: '1.6rem', color: 'var(--ipb-navy)' }}>
+              <div className="mb-4 pr-6">
+                <h2 className="font-heading text-lg sm:text-xl font-extrabold text-gray-800">
                   Upload Video Project Semester TRK
                 </h2>
-                <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
+                <p className="text-gray-500 text-xs mt-0.5">
                   Isi formulir untuk menambahkan karya video projek mahasiswa TRK SV IPB.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                  <label>Judul Project Video *</label>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">Judul Project Video *</label>
                   <input
                     type="text"
                     name="title"
-                    className="form-control"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
                     placeholder="Contoh: Sistem Monitoring Kebun Cerdas IoT ESP32"
                     value={formData.title}
                     onChange={handleChange}
@@ -119,25 +139,25 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
                   />
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Nama Mahasiswa *</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">Nama Mahasiswa *</label>
                     <input
                       type="text"
                       name="student"
-                      className="form-control"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
                       placeholder="Contoh: Ahmad Rizky"
                       value={formData.student}
                       onChange={handleChange}
                       required
                     />
                   </div>
-                  <div className="form-group">
-                    <label>NIM Mahasiswa *</label>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">NIM Mahasiswa *</label>
                     <input
                       type="text"
                       name="nim"
-                      className="form-control"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
                       placeholder="Contoh: J0304211088"
                       value={formData.nim}
                       onChange={handleChange}
@@ -146,28 +166,37 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
                   </div>
                 </div>
 
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Program Studi (Prodi)</label>
-                    <select
-                      name="prodiCode"
-                      className="form-control"
-                      value={formData.prodiCode}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">Tanggal Pelaksanaan / Upload *</label>
+                    <input
+                      type="date"
+                      name="date"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
+                      value={formData.date}
                       onChange={handleChange}
-                    >
-                      {SV_PRODIS.filter((p) => p.code !== 'ALL').map((p) => (
-                        <option key={p.code} value={p.code}>
-                          {p.name} ({p.code})
-                        </option>
-                      ))}
-                    </select>
+                      required
+                    />
                   </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">Tahun Ajaran / Angkatan</label>
+                    <input
+                      type="text"
+                      name="year"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
+                      placeholder="Contoh: 2025/2026"
+                      value={formData.year}
+                      onChange={handleChange}
+                    />
+                  </div>
+                </div>
 
-                  <div className="form-group">
-                    <label>Semester</label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">Semester</label>
                     <select
                       name="semester"
-                      className="form-control"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
                       value={formData.semester}
                       onChange={handleChange}
                     >
@@ -178,31 +207,12 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
                       ))}
                     </select>
                   </div>
-                </div>
-
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>Mata Kuliah TRK</label>
-                    <select
-                      name="course"
-                      className="form-control"
-                      value={formData.course}
-                      onChange={handleChange}
-                    >
-                      {SV_COURSES.filter((c) => c !== 'Semua Mata Kuliah').map((c, i) => (
-                        <option key={i} value={c}>
-                          {c}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div className="form-group">
-                    <label>Dosen Pembimbing</label>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-gray-700 mb-1">Dosen Pembimbing</label>
                     <input
                       type="text"
                       name="supervisor"
-                      className="form-control"
+                      className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
                       placeholder="Nama Dosen beserta Gelar"
                       value={formData.supervisor}
                       onChange={handleChange}
@@ -210,48 +220,64 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
                   </div>
                 </div>
 
-                <div className="form-group">
-                  <label>URL Video YouTube (Embed atau Share Link)</label>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">Mata Kuliah TRK</label>
+                  <select
+                    name="course"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
+                    value={formData.course}
+                    onChange={handleChange}
+                  >
+                    {SV_COURSES.filter((c) => c !== 'Semua Mata Kuliah').map((c, i) => (
+                      <option key={i} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">URL Video YouTube</label>
                   <input
                     type="url"
                     name="videoUrl"
-                    className="form-control"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
                     placeholder="https://www.youtube.com/watch?v=..."
                     value={formData.videoUrl}
                     onChange={handleChange}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Teknologi / Stack (pisahkan koma)</label>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">Teknologi / Stack (pisahkan koma)</label>
                   <input
                     type="text"
                     name="techStackStr"
-                    className="form-control"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
                     placeholder="C++, ESP32, MQTT, Node.js"
                     value={formData.techStackStr}
                     onChange={handleChange}
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Deskripsi Project</label>
+                <div>
+                  <label className="block text-[11px] font-semibold text-gray-700 mb-1">Deskripsi Project</label>
                   <textarea
                     name="description"
-                    className="form-control"
-                    rows="3"
+                    rows="2.5"
+                    className="w-full px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 text-xs text-gray-800 placeholder-gray-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/20 transition-all"
                     placeholder="Jelaskan ringkasan latar belakang, tujuan, dan keunggulan karya..."
                     value={formData.description}
                     onChange={handleChange}
                   ></textarea>
                 </div>
 
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '0.75rem', marginTop: '1.5rem' }}>
-                  <button type="button" className="btn btn-secondary" onClick={onClose}>
+                <div className="flex justify-end gap-2.5 pt-3">
+                  <button type="button" className="px-4 py-2 rounded-xl border border-gray-200 text-gray-700 font-semibold text-xs hover:bg-gray-100 transition-colors" onClick={onClose}>
                     Batal
                   </button>
-                  <button type="submit" className="btn btn-primary">
-                    <Upload size={18} /> Unggah Sekarang
+                  <button type="submit" className="flex items-center gap-1.5 px-5 py-2 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-bold text-xs shadow-md transition-all">
+                    <Upload size={15} /> Unggah Sekarang
                   </button>
                 </div>
               </form>

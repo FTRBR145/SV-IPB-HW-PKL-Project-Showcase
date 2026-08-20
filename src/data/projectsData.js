@@ -22,7 +22,7 @@ export const initialProjects = [
     nim: "J0304211088",
     prodi: "Teknik Komputer / Teknologi Rekayasa Komputer",
     prodiCode: "TRK",
-    course: "INTERNET OF THINGS & EMBEDDED SYSTEM",
+    course: "PROYEK SISTEM IOT (INTERNET OF THINGS)",
     semester: 4,
     techStack: ["ESP32", "MQTT", "NodeJS", "Chart.js"],
     thumbnail: "https://img.youtube.com/vi/9KxU30uM3qM/hqdefault.jpg",
@@ -31,6 +31,7 @@ export const initialProjects = [
     views: 1840,
     supervisor: "Prof. Dr. Ir. Kudang Boro Seminar, M.Sc.",
     year: "2025/2026",
+    date: "18 Agustus 2026",
     description: "Projek IoT & embedded system karya mahasiswa TRK Sekolah Vokasi IPB untuk memantau kelembaban tanah, suhu lingkungan, dan intensitas cahaya secara otomatis pada green house Kebun Percobaan SV IPB Sukabumi menggunakan transmisi sensor ESP32.",
     comments: []
   },
@@ -41,7 +42,7 @@ export const initialProjects = [
     nim: "J0304211029",
     prodi: "Teknik Komputer / Teknologi Rekayasa Komputer",
     prodiCode: "TRK",
-    course: "SISTEM KONTROL & MIKROKONTROLER",
+    course: "SISTEM TERTANAM (EMBEDDED SYSTEM)",
     semester: 3,
     techStack: ["Arduino", "RFID RC522", "Raspberry Pi", "Python"],
     thumbnail: "https://img.youtube.com/vi/aircAruvnKk/hqdefault.jpg",
@@ -50,6 +51,7 @@ export const initialProjects = [
     views: 1250,
     supervisor: "Dr. Ir. Irfan Syamsuddin, M.T.",
     year: "2025/2026",
+    date: "14 Agustus 2026",
     description: "Sistem pengontrol pintu laboratorium berbasis mikrokontroler Arduino dan pemindai RFID untuk mengamankan akses masuk laboratorium komputer SV IPB Cilibende.",
     comments: []
   },
@@ -60,7 +62,7 @@ export const initialProjects = [
     nim: "J0304211015",
     prodi: "Teknik Komputer / Teknologi Rekayasa Komputer",
     prodiCode: "TRK",
-    course: "PEMROGRAMAN PERANGKAT TERHUBUNG",
+    course: "APLIKASI MOBILE",
     semester: 5,
     techStack: ["Flutter", "Firebase", "ESP8266", "REST API"],
     thumbnail: "https://img.youtube.com/vi/x0uinJvhNxI/hqdefault.jpg",
@@ -69,6 +71,7 @@ export const initialProjects = [
     views: 2100,
     supervisor: "Guji Syaikhurrahman, S.Kom., M.T.",
     year: "2025/2026",
+    date: "10 Agustus 2026",
     description: "Aplikasi mobile kontrol sakelar listrik pintar dan monitoring daya arus listrik secara real-time berbasis Flutter dan protokol Firebase buatan mahasiswa TRK SV IPB.",
     comments: []
   },
@@ -79,7 +82,7 @@ export const initialProjects = [
     nim: "J0304211042",
     prodi: "Teknik Komputer / Teknologi Rekayasa Komputer",
     prodiCode: "TRK",
-    course: "JARINGAN KOMPUTER & KEAMANAN SIBER",
+    course: "TEKNOLOGI BENGKEL ELEKTROMEKANIK",
     semester: 2,
     techStack: ["Cisco Packet Tracer", "MikroTik", "Linux Server", "Wireshark"],
     thumbnail: "https://img.youtube.com/vi/L_LUpnjgPso/hqdefault.jpg",
@@ -88,6 +91,7 @@ export const initialProjects = [
     views: 3450,
     supervisor: "Dr. Reiza Mutia, M.Si.",
     year: "2025/2026",
+    date: "05 Agustus 2026",
     description: "Perancangan topologi jaringan komputer terdistribusi dan simulasi konfigurasi firewall keamanan siber pada gedung kuliah Sekolah Vokasi IPB.",
     comments: []
   },
@@ -98,7 +102,7 @@ export const initialProjects = [
     nim: "J0304211077",
     prodi: "Teknik Komputer / Teknologi Rekayasa Komputer",
     prodiCode: "TRK",
-    course: "APLIKASI WEB & CLOUD COMPUTING",
+    course: "RANGKAIAN LOGIKA DAN TEKNIK DIGITAL",
     semester: 6,
     techStack: ["Docker", "Kubernetes", "Grafana", "Node.js"],
     thumbnail: "https://img.youtube.com/vi/q1N8YfA9b0A/hqdefault.jpg",
@@ -107,6 +111,7 @@ export const initialProjects = [
     views: 1420,
     supervisor: "Dr. Ir. Arief Daryanto, Dip.Ag.Econ., M.Ec.",
     year: "2025/2026",
+    date: "28 Juli 2026",
     description: "Platform dashboard visualisasi telemetri server cloud berbasis container Docker dan Prometheus untuk memantau performa jaringan kampus TRK SV IPB.",
     comments: []
   },
@@ -117,7 +122,7 @@ export const initialProjects = [
     nim: "J0304211102",
     prodi: "Teknik Komputer / Teknologi Rekayasa Komputer",
     prodiCode: "TRK",
-    course: "SISTEM KONTROL & MIKROKONTROLER",
+    course: "SISTEM TERTANAM (EMBEDDED SYSTEM)",
     semester: 1,
     techStack: ["ROS (Robot OS)", "C++", "Ultrasonic Sensor", "LIDAR"],
     thumbnail: "https://img.youtube.com/vi/j48LtUkZRjU/hqdefault.jpg",
@@ -126,6 +131,7 @@ export const initialProjects = [
     views: 2900,
     supervisor: "Asep Rahmat, S.Kom., M.T.",
     year: "2025/2026",
+    date: "20 Juli 2026",
     description: "Projek prototype robotika berkaki/berroda otomatis karya praktikum mahasiswa TRK SV IPB yang dilengkapi sensor pemindai jarak LIDAR untuk menghindari halangan secara otonom.",
     comments: []
   }
@@ -133,15 +139,9 @@ export const initialProjects = [
 
 export const SV_COURSES = [
   "Semua Mata Kuliah",
-  "INTERNET OF THINGS & EMBEDDED SYSTEM",
-  "SISTEM KONTROL & MIKROKONTROLER",
-  "JARINGAN KOMPUTER & KEAMANAN SIBER",
-  "PEMROGRAMAN PERANGKAT TERHUBUNG",
-  "SISTEM OPERASI & ARSITEKTUR KOMPUTER",
-  "APLIKASI WEB & CLOUD COMPUTING"
-];
-
-export const SV_PRODIS = [
-  { code: "ALL", name: "Teknik Komputer / Teknologi Rekayasa Komputer (TRK)" },
-  { code: "TRK", name: "Teknologi Rekayasa Komputer (TRK)" }
+  "RANGKAIAN LOGIKA DAN TEKNIK DIGITAL",
+  "TEKNOLOGI BENGKEL ELEKTROMEKANIK",
+  "APLIKASI MOBILE",
+  "SISTEM TERTANAM (EMBEDDED SYSTEM)",
+  "PROYEK SISTEM IOT (INTERNET OF THINGS)"
 ];
