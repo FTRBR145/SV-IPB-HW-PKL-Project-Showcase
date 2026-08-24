@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  /* 1. Warna Utama & Identitas (Neutral Gray Theme) */
+  --ipb-navy-dark: #1f2937;
+  --ipb-navy: #374151;
+  --ipb-navy-light: #4b5563;
+  --accent-blue: #4b5563;
+  --dark-slate-canvas: #111827;
+
+  /* 2. Aksen & Highlight */
+  --accent-sky: #0284c7;
+  --accent-cyan: #38bdf8;
+  --accent-ocean: #0284c7;
+  --accent-vibrant: #2563eb;
+
+  /* 3. Palet Resmi Sekolah Vokasi IPB */
+  --sv-official-blue: #3986AC;
+  --sv-official-sky: #00A0D2;
+  --sv-official-maroon: #B34E4D;
+  --sv-official-crimson: #DC3232;
+  --sv-official-gold: #C09854;
+  --sv-official-orange: #FF6900;
+  --sv-official-green: #458746;
+
+  /* 4. Warna Status (Dashboard & Modals) */
+  --status-success: #10b981;
+  --status-pending: #f59e0b;
+  --status-danger: #ef4444;
+
+  /* 5. Warna Netral & Background (True Gray) */
+  --bg-main: #f9fafb;
+  --bg-card: #ffffff;
+  --text-main: #1f2937;
+  --text-muted: #6b7280;
+  --border-color: #e5e7eb;
+
+  /* 6. Tipografi */
+  --font-heading: 'Outfit', 'Open Sans', sans-serif;
+  --font-body: 'Open Sans', 'Inter', sans-serif;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--bg-main);
+  color: var(--text-main);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+}
+
+.scrollbar-none::-webkit-scrollbar {
+  display: none;
+}
+.scrollbar-none {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
