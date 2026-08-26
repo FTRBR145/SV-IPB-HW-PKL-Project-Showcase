@@ -1,6 +1,5 @@
 import {
   Activity,
-  BarChart3,
   BookOpen,
   Cpu,
   FileText,
@@ -20,7 +19,6 @@ export const ADMIN_MENU = [
   { icon: BookOpen, label: 'Mata Kuliah', id: 'courses' },
   { icon: Tag, label: 'Kategori', id: 'categories' },
   { icon: Cpu, label: 'Tech Stack', id: 'techstack' },
-  { icon: BarChart3, label: 'Analitik', id: 'analytics' },
   { icon: FileText, label: 'Laporan', id: 'reports' },
   { icon: Settings, label: 'Pengaturan', id: 'settings' },
   { icon: Activity, label: 'Log Aktivitas', id: 'logs' }

@@ -13,7 +13,6 @@ import {
 } from '../components/admin/ManagementPanels';
 import {
   ActivityLogsPanel,
-  AnalyticsPanel,
   ReportsPanel,
   SettingsPanel
 } from '../components/admin/InsightsPanels';
@@ -31,7 +30,6 @@ const menuDescriptions = {
   courses: ['Manajemen Mata Kuliah', 'Tambah dan kelola daftar mata kuliah TRK.'],
   categories: ['Manajemen Kategori', 'Kelola kategori yang digunakan untuk mengelompokkan projek.'],
   techstack: ['Tech Stack', 'Pantau teknologi yang paling sering digunakan mahasiswa.'],
-  analytics: ['Analitik Showcase', 'Analisis performa, interaksi, dan distribusi projek.'],
   reports: ['Laporan', 'Unduh data atau cetak ringkasan operasional showcase.'],
   settings: ['Pengaturan Sistem', 'Atur kebijakan upload, moderasi, dan informasi platform.'],
   logs: ['Log Aktivitas', 'Tinjau jejak perubahan yang dilakukan pada dashboard.']
@@ -168,8 +166,6 @@ export default function AdminDashboard() {
         );
       case 'techstack':
         return <TechStackPanel projects={projects} onFilterProjects={(tech) => { setProjectSearch(tech); selectMenu('projects'); }} />;
-      case 'analytics':
-        return <AnalyticsPanel projects={projects} />;
       case 'reports':
         return (
           <ReportsPanel

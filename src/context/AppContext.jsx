@@ -14,7 +14,6 @@ const STORAGE_KEYS = {
   PROJECTS: 'trk_showcase_projects',
   USER: 'trk_showcase_user',
   SUBMISSIONS: 'trk_showcase_submissions',
-  LIKES: 'trk_showcase_likes',
   COURSES: 'trk_showcase_courses',
   CATEGORIES: 'trk_showcase_categories',
   MODERATORS: 'trk_showcase_moderators',
@@ -51,9 +50,6 @@ export function AppProvider({ children }) {
     const saved = readStoredValue(STORAGE_KEYS.SUBMISSIONS, INITIAL_SUBMISSIONS);
     return Array.isArray(saved) ? saved : INITIAL_SUBMISSIONS;
   });
-  const [likedProjectIds, setLikedProjectIds] = useState(() =>
-    readStoredValue(STORAGE_KEYS.LIKES, [])
-  );
   const [courses, setCourses] = useState(() => readStoredValue(STORAGE_KEYS.COURSES, DEFAULT_COURSES));
   const [categories, setCategories] = useState(() =>
     readStoredValue(STORAGE_KEYS.CATEGORIES, DEFAULT_CATEGORIES)
@@ -73,7 +69,6 @@ export function AppProvider({ children }) {
 
   useEffect(() => localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects)), [projects]);
   useEffect(() => localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(submissions)), [submissions]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.LIKES, JSON.stringify(likedProjectIds)), [likedProjectIds]);
   useEffect(() => localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(courses)), [courses]);
   useEffect(() => localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories)), [categories]);
   useEffect(() => localStorage.setItem(STORAGE_KEYS.MODERATORS, JSON.stringify(moderators)), [moderators]);
@@ -153,8 +148,6 @@ export function AppProvider({ children }) {
       nim: authorNim,
       prodi: 'Teknik Komputer / Teknologi Rekayasa Komputer',
       prodiCode: 'TRK',
-      likes: Number(projectData.likes) || 0,
-      views: Number(projectData.views) || 1,
       date: projectData.date || 'Hari ini',
       year: projectData.year || adminSettings.academicYear,
       comments: projectData.comments || []
@@ -180,22 +173,9 @@ export function AppProvider({ children }) {
     const target = projects.find((project) => project.id === projectId);
     if (!target) return false;
     setProjects((previous) => previous.filter((project) => project.id !== projectId));
-    setLikedProjectIds((previous) => previous.filter((id) => id !== projectId));
     recordActivity(`Projek “${target.title}” dihapus.`, 'danger');
     showToast('Projek berhasil dihapus.', 'info');
     return true;
-  };
-
-  const toggleLike = (projectId) => {
-    const isLiked = likedProjectIds.includes(projectId);
-    setLikedProjectIds((previous) =>
-      isLiked ? previous.filter((id) => id !== projectId) : [...previous, projectId]
-    );
-    setProjects((previous) => previous.map((project) => {
-      if (project.id !== projectId) return project;
-      return { ...project, likes: Math.max(0, (project.likes || 0) + (isLiked ? -1 : 1)) };
-    }));
-    if (!isLiked) showToast('Menyukai projek ini!');
   };
 
   const approveSubmission = (submissionId) => {
@@ -215,8 +195,6 @@ export function AppProvider({ children }) {
       techStack: target.techStack || ['ESP32', 'Sensor', 'IoT'],
       videoUrl: target.videoUrl || 'https://www.youtube.com/embed/9KxU30uM3qM',
       thumbnail: target.thumbnail,
-      likes: 0,
-      views: 1,
       supervisor: target.supervisor || 'Dosen Pembimbing TRK',
       year: target.year || adminSettings.academicYear,
       date: target.date || 'Hari ini',
@@ -378,7 +356,6 @@ export function AppProvider({ children }) {
     setModerators(DEFAULT_MODERATORS);
     setAdminSettings(DEFAULT_ADMIN_SETTINGS);
     setActivityLogs(INITIAL_ACTIVITY_LOGS);
-    setLikedProjectIds([]);
     showToast('Seluruh data demo berhasil direset.', 'info');
   };
 
@@ -390,7 +367,6 @@ export function AppProvider({ children }) {
       setCurrentUser,
       isLoggedIn: Boolean(currentUser),
       submissions,
-      likedProjectIds,
       courses,
       categories,
       moderators,
@@ -406,7 +382,6 @@ export function AppProvider({ children }) {
       addProject,
       updateProject,
       deleteProject,
-      toggleLike,
       approveSubmission,
       rejectSubmission,
       restoreSubmission,

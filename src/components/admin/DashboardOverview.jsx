@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   CheckCircle,
   FolderKanban,
   GraduationCap,
   RotateCcw,
-  Search,
   ShieldCheck,
-  XCircle
+  XCircle,
+  Calendar,
+  Layers
 } from 'lucide-react';
+import DataTable from '../common/DataTable';
 
 function DonutChart({ approved, pending, rejected }) {
   const total = approved + pending + rejected || 1;
@@ -48,9 +50,9 @@ function DonutChart({ approved, pending, rejected }) {
 }
 
 const statusStyles = {
-  pending: 'bg-amber-100 text-amber-800',
-  approved: 'bg-emerald-100 text-emerald-800',
-  rejected: 'bg-rose-100 text-rose-800'
+  pending: 'bg-amber-100 text-amber-800 border-amber-200',
+  approved: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  rejected: 'bg-rose-100 text-rose-800 border-rose-200'
 };
 
 const statusLabels = {
@@ -68,7 +70,7 @@ export default function DashboardOverview({
   onRestore
 }) {
   const [statusFilter, setStatusFilter] = useState('all');
-  const [searchQuery, setSearchQuery] = useState('');
+
   const pendingCount = submissions.filter((item) => item.status === 'pending').length;
   const approvedCount = submissions.filter((item) => item.status === 'approved').length;
   const rejectedCount = submissions.filter((item) => item.status === 'rejected').length;
@@ -83,13 +85,11 @@ export default function DashboardOverview({
     .slice(0, 5);
   const maxCourseCount = Math.max(...courseChartData.map((item) => item.count), 1);
 
-  const filteredSubmissions = submissions.filter((submission) => {
-    if (statusFilter !== 'all' && submission.status !== statusFilter) return false;
-    const query = searchQuery.trim().toLowerCase();
-    if (!query) return true;
-    return [submission.student, submission.nim, submission.title, submission.course]
-      .some((value) => value?.toLowerCase().includes(query));
-  });
+  // Filter submissions by status tab
+  const statusFilteredData = useMemo(() => {
+    if (statusFilter === 'all') return submissions;
+    return submissions.filter((s) => s.status === statusFilter);
+  }, [submissions, statusFilter]);
 
   const stats = [
     { label: 'Total Projek Aktif', value: projects.length, hint: 'Tampil di showcase', icon: FolderKanban, color: 'sky' },
@@ -105,11 +105,111 @@ export default function DashboardOverview({
     indigo: 'bg-indigo-50 text-indigo-600'
   };
 
+  // DataTable Column Definitions for Submissions
+  const columns = [
+    {
+      key: 'student',
+      label: 'Mahasiswa',
+      sortable: true,
+      render: (row) => (
+        <div>
+          <strong className="block text-slate-900 font-bold">{row.student}</strong>
+          <span className="text-[10px] text-slate-400 font-mono">NIM. {row.nim}</span>
+        </div>
+      )
+    },
+    {
+      key: 'title',
+      label: 'Judul Projek',
+      sortable: true,
+      render: (row) => (
+        <div className="max-w-xs">
+          <strong className="block truncate text-slate-800 font-semibold">{row.title}</strong>
+          <span className="block truncate text-[10px] text-slate-400">{row.desc}</span>
+        </div>
+      )
+    },
+    {
+      key: 'course',
+      label: 'Mata Kuliah',
+      sortable: true,
+      render: (row) => (
+        <span className="text-slate-600 font-medium max-w-[200px] truncate block">
+          {row.course}
+        </span>
+      )
+    },
+    {
+      key: 'date',
+      label: 'Tanggal',
+      sortable: true,
+      render: (row) => (
+        <span className="text-[11px] text-slate-500 font-mono">
+          {row.date || '2026'}
+        </span>
+      )
+    },
+    {
+      key: 'status',
+      label: 'Status',
+      sortable: true,
+      render: (row) => (
+        <span
+          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+            statusStyles[row.status] || 'bg-slate-100 text-slate-700'
+          }`}
+        >
+          {statusLabels[row.status] || row.status}
+        </span>
+      )
+    },
+    {
+      key: 'actions',
+      label: 'Aksi Moderasi',
+      sortable: false,
+      searchable: false,
+      headerClassName: 'text-center',
+      className: 'text-center',
+      render: (row) => (
+        <div className="flex items-center justify-center gap-1.5">
+          {row.status === 'pending' ? (
+            <>
+              <button
+                onClick={() => onApprove(row.id)}
+                className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors shadow-2xs"
+                title="Setujui dan Terbitkan"
+              >
+                <CheckCircle size={15} />
+              </button>
+              <button
+                onClick={() => onReject(row.id)}
+                className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors shadow-2xs"
+                title="Tolak Pengajuan"
+              >
+                <XCircle size={15} />
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => onRestore(row.id)}
+              className="p-1.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors shadow-2xs flex items-center gap-1 text-[11px] font-bold"
+              title="Kembalikan ke antrean pending"
+            >
+              <RotateCcw size={13} />
+              <span>Pulihkan</span>
+            </button>
+          )}
+        </div>
+      )
+    }
+  ];
+
   return (
     <div className="space-y-6">
+      {/* 4 Top KPI Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {stats.map(({ label, value, hint, icon: Icon, color }) => (
-          <div key={label} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+          <div key={label} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
             <div>
               <span className="text-[11px] font-bold text-slate-500 uppercase block mb-1">{label}</span>
               <strong className="text-3xl font-black text-slate-900">{value}</strong>
@@ -122,11 +222,12 @@ export default function DashboardOverview({
         ))}
       </div>
 
+      {/* Donut & Bar Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading font-bold text-sm text-slate-900">Rasio Status Moderasi</h2>
-            <span className="text-[10px] text-slate-400">Real-time</span>
+            <span className="text-[10px] text-slate-400 font-mono">Real-time</span>
           </div>
           <div className="flex justify-center py-2">
             <DonutChart approved={approvedCount} pending={pendingCount} rejected={rejectedCount} />
@@ -146,10 +247,10 @@ export default function DashboardOverview({
           </div>
         </div>
 
-        <div className="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm">
+        <div className="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-heading font-bold text-sm text-slate-900">Distribusi Mata Kuliah</h2>
-            <span className="text-[10px] text-slate-400">{projects.length} projek</span>
+            <span className="text-[10px] text-slate-400">{projects.length} projek terdaftar</span>
           </div>
           <div className="space-y-4">
             {courseChartData.map((course) => (
@@ -170,96 +271,54 @@ export default function DashboardOverview({
         </div>
       </div>
 
-      <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-        <div className="p-5 border-b border-slate-100 space-y-4">
+      {/* =================================================================== */}
+      {/* DATATABLE: ANTREAN DAN HISTORI MODERASI */}
+      {/* =================================================================== */}
+      <section className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100">
           <div>
-            <h2 className="font-heading font-bold text-sm text-slate-900">Antrean dan Histori Moderasi</h2>
-            <p className="text-xs text-slate-500 mt-1">Setujui, tolak, atau kembalikan pengajuan ke antrean.</p>
+            <h2 className="font-heading font-bold text-base text-slate-900">
+              Antrean dan Histori Moderasi
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Gunakan DataTables untuk menyortir, mencari, dan memfilter pengajuan projek mahasiswa.
+            </p>
           </div>
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
-            <div className="relative max-w-sm w-full">
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                value={searchQuery}
-                onChange={(event) => setSearchQuery(event.target.value)}
-                placeholder="Cari mahasiswa, NIM, atau projek..."
-                className="w-full pl-9 pr-3 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-              />
-            </div>
-            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto">
-              {[
-                ['all', 'Semua', submissions.length],
-                ['pending', 'Pending', pendingCount],
-                ['approved', 'Disetujui', approvedCount],
-                ['rejected', 'Ditolak', rejectedCount]
-              ].map(([value, label, count]) => (
-                <button
-                  key={value}
-                  onClick={() => setStatusFilter(value)}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap ${
-                    statusFilter === value ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600'
-                  }`}
-                >
-                  {label} ({count})
-                </button>
-              ))}
-            </div>
+
+          {/* Status Filter Tabs */}
+          <div className="flex gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto self-start sm:self-auto select-none">
+            {[
+              ['all', 'Semua', submissions.length],
+              ['pending', 'Pending', pendingCount],
+              ['approved', 'Disetujui', approvedCount],
+              ['rejected', 'Ditolak', rejectedCount]
+            ].map(([value, label, count]) => (
+              <button
+                key={value}
+                onClick={() => setStatusFilter(value)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+                  statusFilter === value ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                {label} ({count})
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs">
-            <thead className="bg-slate-50 text-slate-500 uppercase text-[10px] font-bold">
-              <tr>
-                <th className="p-3.5">Mahasiswa</th>
-                <th className="p-3.5">Projek</th>
-                <th className="p-3.5">Mata Kuliah</th>
-                <th className="p-3.5">Status</th>
-                <th className="p-3.5 text-center">Aksi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {filteredSubmissions.length === 0 ? (
-                <tr><td colSpan={5} className="p-10 text-center text-slate-400">Tidak ada pengajuan yang cocok.</td></tr>
-              ) : filteredSubmissions.map((submission) => (
-                <tr key={submission.id} className="hover:bg-slate-50">
-                  <td className="p-3.5">
-                    <strong className="block text-slate-900">{submission.student}</strong>
-                    <span className="text-[10px] text-slate-400 font-mono">{submission.nim}</span>
-                  </td>
-                  <td className="p-3.5 max-w-xs">
-                    <strong className="block truncate text-slate-800">{submission.title}</strong>
-                    <span className="block truncate text-[10px] text-slate-400">{submission.desc}</span>
-                  </td>
-                  <td className="p-3.5 text-slate-600 max-w-[220px] truncate">{submission.course}</td>
-                  <td className="p-3.5">
-                    <span className={`px-2 py-1 rounded-full text-[10px] font-bold ${statusStyles[submission.status]}`}>
-                      {statusLabels[submission.status]}
-                    </span>
-                  </td>
-                  <td className="p-3.5">
-                    <div className="flex justify-center gap-1.5">
-                      {submission.status === 'pending' ? (
-                        <>
-                          <button onClick={() => onApprove(submission.id)} className="p-2 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100" title="Setujui">
-                            <CheckCircle size={16} />
-                          </button>
-                          <button onClick={() => onReject(submission.id)} className="p-2 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100" title="Tolak">
-                            <XCircle size={16} />
-                          </button>
-                        </>
-                      ) : (
-                        <button onClick={() => onRestore(submission.id)} className="p-2 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100" title="Kembalikan ke antrean">
-                          <RotateCcw size={16} />
-                        </button>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* Integrated DataTable */}
+        <DataTable
+          data={statusFilteredData}
+          columns={columns}
+          searchPlaceholder="Cari pengajuan, nama mahasiswa, NIM, atau projek..."
+          defaultPageSize={10}
+          pageSizeOptions={[5, 10, 25, 50, 100]}
+          defaultSortKey="date"
+          defaultSortDirection="desc"
+          showExportCsv={true}
+          exportFileName={`histori-moderasi-${statusFilter}.csv`}
+          emptyMessage="Tidak ada pengajuan yang cocok dengan filter saat ini."
+        />
       </section>
     </div>
   );
