@@ -1,15 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
-  Home,
   CheckCircle2,
-  FolderGit2,
-  Cpu,
-  Smartphone,
-  Wifi,
-  Wrench,
-  Binary,
   GraduationCap,
-  ShieldCheck,
   Sparkles,
   Plus,
   Search,
@@ -19,30 +12,56 @@ import {
 } from 'lucide-react';
 import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
-import { initialProjects, getYouTubeThumbnail } from '../data/projectsData';
+import { getYouTubeThumbnail } from '../data/projectsData';
 import ProjectDetailModal from '../components/modals/ProjectDetailModal';
-import UploadModal from '../components/modals/UploadModal';
+import StudentSidebar from '../components/student/StudentSidebar';
+import useApp from '../hooks/useApp';
 
-export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLanding }) {
-  const [projects, setProjects] = useState(initialProjects);
-  const [activeTab, setActiveTab] = useState('home'); // 'home' | 'my-projects'
-  const [selectedCategory, setSelectedCategory] = useState('Semua');
+export default function StudentHome() {
+  const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { projects, currentUser, isLoggedIn, logout } = useApp();
+
+  const studentUser = currentUser;
+
+  const [activeTab, setActiveTab] = useState(() =>
+    searchParams.get('tab') === 'my-projects' ? 'my-projects' : 'home'
+  );
+  const [selectedCategory, setSelectedCategory] = useState(() =>
+    searchParams.get('course') || (searchParams.get('tab') === 'my-projects' ? 'Projek Saya' : 'Semua')
+  );
   const [selectedSemester, setSelectedSemester] = useState('ALL'); // 'ALL' | 1 | 2 | 3 | 4 | 5 | 6
   const [isSemesterExpanded, setIsSemesterExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(true);
   const [activeDetailProject, setActiveDetailProject] = useState(null);
-  const [isUploadOpen, setIsUploadOpen] = useState(false);
 
-  // Current Logged-in Student Mock Profile
-  const currentUser = {
-    name: 'Nabila Putri Utami',
-    nim: 'J0304211015',
-    role: 'Mahasiswa TRK SV IPB',
-    semester: 5,
-    angkatan: '58 (2021)',
-    myProjectCount: 2
+  // Deep-link project modal opening via ?project=:id
+  useEffect(() => {
+    const targetId = searchParams.get('project');
+    if (targetId) {
+      const found = projects.find((p) => String(p.id) === String(targetId));
+      if (found) {
+        setActiveDetailProject(found);
+      }
+    }
+  }, [searchParams, projects]);
+
+  const handleCloseDetail = () => {
+    setActiveDetailProject(null);
+    if (searchParams.get('project')) {
+      searchParams.delete('project');
+      setSearchParams(searchParams, { replace: true });
+    }
   };
+
+  const handleOpenDetail = (proj) => {
+    setActiveDetailProject(proj);
+    setSearchParams({ project: proj.id });
+  };
+
+  const myProjects = projects.filter(
+    (p) => p.nim === studentUser.nim || p.student?.toLowerCase().includes(studentUser.name.toLowerCase())
+  );
 
   const semesterOptions = [1, 2, 3, 4, 5, 6];
 
@@ -50,7 +69,7 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
   const filteredProjects = projects.filter((proj) => {
     // Tab filter
     if (activeTab === 'my-projects') {
-      if (proj.nim !== currentUser.nim && proj.student !== currentUser.name) {
+      if (proj.nim !== studentUser.nim && !proj.student?.toLowerCase().includes(studentUser.name.toLowerCase())) {
         return false;
       }
     }
@@ -64,7 +83,9 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
 
     // Category Chip filter
     if (selectedCategory === 'Projek Saya') {
-      if (proj.nim !== currentUser.nim && proj.student !== currentUser.name) return false;
+      if (proj.nim !== studentUser.nim && !proj.student?.toLowerCase().includes(studentUser.name.toLowerCase())) {
+        return false;
+      }
     } else if (selectedCategory !== 'Semua') {
       if (selectedCategory === proj.course) {
         // exact course match from sidebar
@@ -91,20 +112,6 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
     return true;
   });
 
-  const handleAddProject = (newProj) => {
-    const enriched = {
-      ...newProj,
-      student: currentUser.name,
-      nim: currentUser.nim,
-      prodi: 'Teknologi Rekayasa Komputer',
-      prodiCode: 'TRK',
-      views: 12,
-      likes: 1,
-      date: 'Baru saja'
-    };
-    setProjects([enriched, ...projects]);
-  };
-
   const handleSemesterSelect = (sem) => {
     setSelectedSemester(sem);
   };
@@ -116,166 +123,44 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
       {/* ========================================================================= */}
       <Navbar
         currentPage="student"
-        currentUser={currentUser}
-        isLoggedIn={true}
+        currentUser={studentUser}
+        isLoggedIn={isLoggedIn}
         searchQuery={searchQuery}
         onSearchChange={setSearchQuery}
-        onOpenUpload={() => setIsUploadOpen(true)}
-        onLogout={onLogout}
-        onNavigateToAdmin={onNavigateToAdmin}
-        onBackToLanding={onBackToLanding}
+        onOpenUpload={() => navigate('/student/upload')}
+        onLogout={() => {
+          logout();
+          navigate('/');
+        }}
+        onNavigateToAdmin={() => navigate('/admin')}
+        onBackToLanding={() => navigate('/')}
       />
 
       {/* ========================================================================= */}
       {/* 2. BODY: SIDEBAR + FEED GRID */}
       {/* ========================================================================= */}
       <div className="flex-1 flex overflow-hidden">
-        {/* DESKTOP SIDEBAR */}
-        <aside
-          className={`hidden md:flex flex-col border-r border-slate-200 bg-white flex-shrink-0 transition-all duration-200 overflow-y-auto select-none ${
-            isSidebarExpanded ? 'w-60 p-3' : 'w-20 py-3 px-1.5 items-center'
-          }`}
-        >
-          {/* Main Nav Section */}
-          <div className="space-y-1 w-full pb-3 border-b border-slate-100">
-            <button
-              onClick={() => {
-                setActiveTab('home');
-                setSelectedCategory('Semua');
-                setSelectedSemester('ALL');
-              }}
-              className={`w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
-                activeTab === 'home' && selectedCategory === 'Semua' && selectedSemester === 'ALL'
-                  ? 'bg-slate-100 text-slate-900 font-extrabold'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              } ${!isSidebarExpanded && 'flex-col gap-1 px-1 text-[10px] justify-center'}`}
-            >
-              <Home size={isSidebarExpanded ? 17 : 20} className={activeTab === 'home' && selectedCategory === 'Semua' && selectedSemester === 'ALL' ? 'text-sky-600' : ''} />
-              <span>Beranda</span>
-            </button>
-
-            <button
-              onClick={() => {
-                setActiveTab('my-projects');
-                setSelectedCategory('Projek Saya');
-              }}
-              className={`w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-colors ${
-                activeTab === 'my-projects'
-                  ? 'bg-slate-100 text-slate-900 font-extrabold'
-                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-              } ${!isSidebarExpanded && 'flex-col gap-1 px-1 text-[10px] justify-center'}`}
-            >
-              <FolderGit2 size={isSidebarExpanded ? 17 : 20} className={activeTab === 'my-projects' ? 'text-sky-600' : ''} />
-              <span>Projek Saya</span>
-              {isSidebarExpanded && (
-                <span className="ml-auto bg-sky-100 text-sky-700 text-[10px] px-2 py-0.5 rounded-full font-bold">
-                  {currentUser.myProjectCount}
-                </span>
-              )}
-            </button>
-          </div>
-
-          {/* Section: 5 Mata Kuliah TRK SV IPB (Only expanded) */}
-          {isSidebarExpanded && (
-            <>
-              <div className="py-3 border-b border-slate-100 space-y-1">
-                <span className="px-3 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">
-                  Mata Kuliah TRK
-                </span>
-                <button
-                  onClick={() => {
-                    setActiveTab('home');
-                    setSelectedCategory('SISTEM TERTANAM (EMBEDDED SYSTEM)');
-                  }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-left truncate transition-colors ${
-                    selectedCategory === 'SISTEM TERTANAM (EMBEDDED SYSTEM)'
-                      ? 'bg-sky-50 text-sky-700 font-bold'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <Cpu size={15} className="text-sky-500 flex-shrink-0" />
-                  <span className="truncate">Sistem Tertanam</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab('home');
-                    setSelectedCategory('APLIKASI MOBILE');
-                  }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-left truncate transition-colors ${
-                    selectedCategory === 'APLIKASI MOBILE'
-                      ? 'bg-emerald-50 text-emerald-700 font-bold'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <Smartphone size={15} className="text-emerald-500 flex-shrink-0" />
-                  <span className="truncate">Aplikasi Mobile</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab('home');
-                    setSelectedCategory('PROYEK SISTEM IOT (INTERNET OF THINGS)');
-                  }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-left truncate transition-colors ${
-                    selectedCategory === 'PROYEK SISTEM IOT (INTERNET OF THINGS)'
-                      ? 'bg-indigo-50 text-indigo-700 font-bold'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <Wifi size={15} className="text-indigo-500 flex-shrink-0" />
-                  <span className="truncate">Sistem IoT</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab('home');
-                    setSelectedCategory('TEKNOLOGI BENGKEL ELEKTROMEKANIK');
-                  }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-left truncate transition-colors ${
-                    selectedCategory === 'TEKNOLOGI BENGKEL ELEKTROMEKANIK'
-                      ? 'bg-amber-50 text-amber-700 font-bold'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <Wrench size={15} className="text-amber-500 flex-shrink-0" />
-                  <span className="truncate">Bengkel Elektromekanik</span>
-                </button>
-                <button
-                  onClick={() => {
-                    setActiveTab('home');
-                    setSelectedCategory('RANGKAIAN LOGIKA DAN TEKNIK DIGITAL');
-                  }}
-                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-left truncate transition-colors ${
-                    selectedCategory === 'RANGKAIAN LOGIKA DAN TEKNIK DIGITAL'
-                      ? 'bg-rose-50 text-rose-700 font-bold'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <Binary size={15} className="text-rose-500 flex-shrink-0" />
-                  <span className="truncate">Rangkaian Logika Digital</span>
-                </button>
-              </div>
-
-              {/* Section: Quick Dosen/Admin Link & Info */}
-              <div className="pt-3 space-y-1">
-                <button
-                  onClick={onNavigateToAdmin}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100/70 hover:bg-slate-200 transition-colors"
-                >
-                  <ShieldCheck size={16} className="text-slate-800" />
-                  <span>Panel Admin / Dosen</span>
-                </button>
-                <div className="p-3 bg-sky-50/60 rounded-xl border border-sky-100 mt-3">
-                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-sky-900 mb-1">
-                    <GraduationCap size={14} className="text-sky-600" />
-                    <span>TRK SV IPB 2026</span>
-                  </div>
-                  <p className="text-[10px] text-sky-700/90 leading-tight">
-                    Showcase Tugas Akhir & Praktikum Mahasiswa SV IPB University.
-                  </p>
-                </div>
-              </div>
-            </>
-          )}
-        </aside>
+        <StudentSidebar
+          activeItem={activeTab === 'my-projects' ? 'my-projects' : 'home'}
+          selectedCategory={selectedCategory}
+          projectCount={myProjects.length}
+          onSelectHome={() => {
+            setActiveTab('home');
+            setSelectedCategory('Semua');
+            setSelectedSemester('ALL');
+          }}
+          onNavigateUpload={() => navigate('/student/upload')}
+          onSelectMyProjects={() => {
+            setActiveTab('my-projects');
+            setSelectedCategory('Projek Saya');
+          }}
+          onSelectCourse={(course) => {
+            setActiveTab('home');
+            setSelectedCategory(course);
+          }}
+          onNavigateAdmin={() => navigate('/admin')}
+          showAdmin={currentUser.role === 'admin'}
+        />
 
         {/* MAIN FEED CONTENT */}
         <main className="flex-1 overflow-y-auto bg-slate-50 flex flex-col">
@@ -311,10 +196,10 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
-              Projek Saya
+              Projek Saya ({myProjects.length})
             </button>
 
-            {/* 3. EXPANDABLE "SEMESTER" BUTTON — OPENS TO THE RIGHT */}
+            {/* 3. EXPANDABLE "SEMESTER" BUTTON */}
             <div className="flex-shrink-0 flex items-center gap-1.5 bg-slate-100/90 p-0.5 rounded-xl border border-slate-200/80 transition-all">
               <button
                 onClick={() => setIsSemesterExpanded(!isSemesterExpanded)}
@@ -335,7 +220,7 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
                 />
               </button>
 
-              {/* Expanded Semester Options Sliding to the Right */}
+              {/* Expanded Semester Options */}
               {isSemesterExpanded && (
                 <div className="flex items-center gap-1 pl-1 pr-1 animate-in fade-in slide-in-from-left-2 duration-200">
                   <button
@@ -386,7 +271,7 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
                       <span>Beranda Mahasiswa Terautentikasi</span>
                     </div>
                     <h1 className="font-heading text-xl sm:text-2xl font-black tracking-tight text-white">
-                      Hai, {currentUser.name}! 👋
+                      Hai, {studentUser.name}! 👋
                     </h1>
                     <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
                       Jelajahi karya inovatif rekan mahasiswa TRK SV IPB atau unggah dokumentasi projek tugas akhir dan praktikum terbarumu.
@@ -395,7 +280,7 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
 
                   <div className="flex flex-wrap items-center gap-3">
                     <button
-                      onClick={() => setIsUploadOpen(true)}
+                      onClick={() => navigate('/student/upload')}
                       className="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2"
                     >
                       <Plus size={16} />
@@ -408,7 +293,7 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
                       }}
                       className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-sm border border-white/15 transition-all"
                     >
-                      Kelola Projek Saya ({currentUser.myProjectCount})
+                      Kelola Projek Saya ({myProjects.length})
                     </button>
                   </div>
                 </div>
@@ -438,7 +323,7 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
 
               {activeTab === 'my-projects' && (
                 <button
-                  onClick={() => setIsUploadOpen(true)}
+                  onClick={() => navigate('/student/upload')}
                   className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5"
                 >
                   <Plus size={14} /> Tambah Baru
@@ -473,13 +358,15 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-7">
                 {filteredProjects.map((project) => {
-                  const isOwner = project.nim === currentUser.nim || project.student === currentUser.name;
+                  const isOwner =
+                    project.nim === studentUser.nim ||
+                    project.student?.toLowerCase().includes(studentUser.name.toLowerCase());
                   const thumb = project.thumbnail || getYouTubeThumbnail(project.videoUrl);
 
                   return (
                     <div
                       key={project.id}
-                      onClick={() => setActiveDetailProject(project)}
+                      onClick={() => handleOpenDetail(project)}
                       className="group flex flex-col cursor-pointer transition-all"
                     >
                       {/* 1. Thumbnail Container (16:9 Aspect) */}
@@ -505,7 +392,7 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
                         )}
                       </div>
 
-                      {/* 2. Metadata Section (Title + Student Name + Course + Date) */}
+                      {/* 2. Metadata Section */}
                       <div className="flex justify-between items-start gap-2 mt-3">
                         <div className="flex-1 min-w-0">
                           <h3 className="font-heading font-bold text-sm text-slate-900 leading-snug line-clamp-2 group-hover:text-sky-600 transition-colors mb-1.5">
@@ -533,9 +420,10 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
-                            setActiveDetailProject(project);
+                            handleOpenDetail(project);
                           }}
                           className="text-slate-400 hover:text-slate-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
+                          aria-label="Lihat Detail"
                         >
                           <MoreVertical size={16} />
                         </button>
@@ -560,15 +448,9 @@ export default function StudentHome({ onLogout, onNavigateToAdmin, onBackToLandi
       {activeDetailProject && (
         <ProjectDetailModal
           project={activeDetailProject}
-          onClose={() => setActiveDetailProject(null)}
+          onClose={handleCloseDetail}
         />
       )}
-
-      <UploadModal
-        isOpen={isUploadOpen}
-        onClose={() => setIsUploadOpen(false)}
-        onAddProject={handleAddProject}
-      />
     </div>
   );
 }

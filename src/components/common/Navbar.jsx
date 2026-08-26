@@ -9,11 +9,9 @@ import {
   Search,
   LogOut,
   User,
-  Plus,
   PlaySquare,
-  Flame,
-  FolderGit2,
-  Bookmark
+  Home,
+  LayoutDashboard
 } from 'lucide-react';
 import { SV_COURSES } from '../../data/projectsData';
 
@@ -29,8 +27,7 @@ export default function Navbar({
   onNavigateToAdmin,
   onNavigateToStudent,
   onBackToLanding,
-  onSelectCourse,
-  onSelectSemester
+  onSelectCourse
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
@@ -57,15 +54,20 @@ export default function Navbar({
             alt="IPB University Sekolah Vokasi Logo"
             className="h-11 sm:h-14 max-w-[210px] sm:max-w-[270px] object-contain transition-transform group-hover:scale-105"
           />
-          {currentPage === 'student' && (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-sky-100 text-sky-700 text-[10px] font-bold tracking-wider font-mono uppercase">
+          {(currentPage === 'student' || currentPage === 'student-upload') && (
+            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-sky-100 text-sky-700 text-[10px] font-bold tracking-wider font-mono uppercase">
               Portal Mahasiswa
+            </span>
+          )}
+          {currentPage === 'admin' && (
+            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-slate-900 text-white text-[10px] font-bold tracking-wider font-mono uppercase shadow-xs">
+              Panel Admin
             </span>
           )}
         </div>
 
         {/* =================================================================== */}
-        {/* CENTER SEARCH BAR (WHEN ON STUDENT PORTAL) OR STANDARD NAVIGATION */}
+        {/* CENTER SEARCH BAR / NAVIGATION LINKS */}
         {/* =================================================================== */}
         {currentPage === 'student' ? (
           <div className="flex-1 max-w-xl hidden md:flex items-center justify-center px-4">
@@ -91,6 +93,29 @@ export default function Navbar({
               )}
             </div>
           </div>
+        ) : currentPage === 'student-upload' ? (
+          <div className="hidden md:block flex-1" />
+        ) : currentPage === 'admin' ? (
+          <nav className="hidden lg:flex items-center gap-2 font-medium text-xs text-slate-700">
+            <button
+              onClick={onBackToLanding}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors font-semibold"
+            >
+              <Home size={14} />
+              <span>Landing Publik</span>
+            </button>
+            <button
+              onClick={onNavigateToStudent}
+              className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors font-semibold"
+            >
+              <PlaySquare size={14} className="text-sky-600" />
+              <span>Beranda Mahasiswa</span>
+            </button>
+            <span className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 text-slate-900 font-bold border border-slate-200">
+              <LayoutDashboard size={14} className="text-slate-800" />
+              <span>Dashboard Admin</span>
+            </span>
+          </nav>
         ) : (
           <nav className="hidden lg:flex items-center gap-6 font-medium text-sm text-slate-700">
             <a
@@ -125,8 +150,7 @@ export default function Navbar({
                     href="#matakuliah"
                     className="block px-4 py-2.5 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors"
                     onClick={() => {
-                      onSelectCourse &&
-                        onSelectCourse(course === 'Semua Mata Kuliah' ? '' : course);
+                      onSelectCourse?.(course === 'Semua Mata Kuliah' ? '' : course);
                     }}
                   >
                     {course}
@@ -138,21 +162,23 @@ export default function Navbar({
         )}
 
         {/* =================================================================== */}
-        {/* RIGHT ACTION BUTTONS & USER AVATAR */}
+        {/* RIGHT ACTION BUTTONS & USER PROFILE */}
         {/* =================================================================== */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
           {/* Upload Button */}
-          <button
-            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-sm hover:bg-slate-800 hover:shadow transition-all transform hover:-translate-y-0.5 active:translate-y-0"
-            onClick={onOpenUpload}
-          >
-            <Upload size={14} className="text-sky-400" />
-            <span className="hidden sm:inline">Upload Projek</span>
-            <span className="sm:hidden">Upload</span>
-          </button>
+          {onOpenUpload && (
+            <button
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-sm hover:bg-slate-800 hover:shadow transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              onClick={onOpenUpload}
+            >
+              <Upload size={14} className="text-sky-400" />
+              <span className="hidden sm:inline">Upload Projek</span>
+              <span className="sm:hidden">Upload</span>
+            </button>
+          )}
 
-          {/* Student Portal Shortcut (When on Landing) */}
-          {currentPage === 'landing' && onNavigateToStudent && (
+          {/* Student Portal Shortcut (When on Landing or Admin) */}
+          {(currentPage === 'landing' || currentPage === 'admin') && onNavigateToStudent && (
             <button
               className="hidden md:flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-sky-50 text-sky-700 hover:bg-sky-100 text-xs font-bold transition-all border border-sky-200/70 shadow-sm"
               onClick={onNavigateToStudent}
@@ -163,8 +189,8 @@ export default function Navbar({
             </button>
           )}
 
-          {/* Landing Page Shortcut (When on Student Home) */}
-          {currentPage === 'student' && onBackToLanding && (
+          {/* Landing Page Shortcut (When on Student Home or Admin) */}
+          {(currentPage === 'student' || currentPage === 'student-upload' || currentPage === 'admin') && onBackToLanding && (
             <button
               className="hidden lg:flex items-center gap-1.5 px-3 py-2 rounded-xl text-slate-600 hover:text-slate-900 text-xs font-semibold hover:bg-slate-100 transition-colors"
               onClick={onBackToLanding}
@@ -173,8 +199,10 @@ export default function Navbar({
             </button>
           )}
 
-          {/* Admin Dashboard Shortcut */}
-          {onNavigateToAdmin && (
+          {/* Admin Dashboard Shortcut (When on Landing or Student) */}
+          {currentPage !== 'admin' &&
+            onNavigateToAdmin &&
+            (!isLoggedIn || currentUser?.role === 'admin') && (
             <button
               className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-100 hover:text-slate-900 transition-all shadow-sm"
               onClick={onNavigateToAdmin}
@@ -207,12 +235,12 @@ export default function Navbar({
                       {currentUser.name}
                     </p>
                     <p className="text-[11px] text-slate-400 font-mono">
-                      {currentUser.nim}
+                      {currentUser.nim || currentUser.email}
                     </p>
                   </div>
                   <button
                     onClick={() => {
-                      onNavigateToStudent && onNavigateToStudent();
+                      onNavigateToStudent?.();
                       closeMobileMenu();
                     }}
                     className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2"
@@ -220,20 +248,22 @@ export default function Navbar({
                     <PlaySquare size={14} className="text-sky-600" />
                     <span>Beranda Mahasiswa</span>
                   </button>
-                  <button
-                    onClick={() => {
-                      onNavigateToAdmin && onNavigateToAdmin();
-                      closeMobileMenu();
-                    }}
-                    className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2"
-                  >
-                    <Shield size={14} className="text-slate-700" />
-                    <span>Panel Admin Dosen</span>
-                  </button>
+                  {currentUser.role === 'admin' && (
+                    <button
+                      onClick={() => {
+                        onNavigateToAdmin?.();
+                        closeMobileMenu();
+                      }}
+                      className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                    >
+                      <Shield size={14} className="text-slate-700" />
+                      <span>Panel Admin Dosen</span>
+                    </button>
+                  )}
                   <div className="border-t border-slate-100 my-1"></div>
                   <button
                     onClick={() => {
-                      onLogout && onLogout();
+                      onLogout?.();
                       closeMobileMenu();
                     }}
                     className="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-semibold"
@@ -258,97 +288,100 @@ export default function Navbar({
           <button
             className="lg:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors"
             onClick={toggleMobileMenu}
-            aria-label="Toggle Navigation Menu"
+            aria-label="Toggle Menu"
           >
-            {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
       {/* =================================================================== */}
-      {/* MOBILE COLLAPSIBLE DRAWER */}
+      {/* MOBILE EXPANDED MENU */}
       {/* =================================================================== */}
       {mobileMenuOpen && (
-        <div className="lg:hidden bg-white border-b border-slate-200 px-4 py-5 space-y-4 shadow-xl">
+        <div className="lg:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-3 animate-in slide-in-from-top-2 duration-200 shadow-xl">
+          {/* Mobile Search (Student View) */}
           {currentPage === 'student' && (
             <div className="relative w-full">
               <input
                 type="text"
-                placeholder="Cari projek TRK, sensor, dosen..."
+                placeholder="Telusuri projek TRK..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-                className="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white"
+                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none text-slate-800"
               />
-              <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <Search
+                size={14}
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+              />
             </div>
           )}
 
-          <div className="space-y-1">
-            <a
-              href="#home"
-              onClick={closeMobileMenu}
-              className="block py-2 px-3 rounded-xl text-sm font-semibold text-slate-800 hover:bg-slate-50"
+          {/* Links */}
+          <div className="space-y-1 pt-1">
+            <button
+              onClick={() => {
+                onBackToLanding?.();
+                closeMobileMenu();
+              }}
+              className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2"
             >
-              Home
-            </a>
-            <a
-              href="#about"
-              onClick={closeMobileMenu}
-              className="block py-2 px-3 rounded-xl text-sm font-semibold text-slate-800 hover:bg-slate-50"
+              <Home size={15} />
+              <span>Landing Utama</span>
+            </button>
+            <button
+              onClick={() => {
+                onNavigateToStudent?.();
+                closeMobileMenu();
+              }}
+              className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-sky-700 bg-sky-50 flex items-center gap-2"
             >
-              Tentang
-            </a>
-            <a
-              href="#matakuliah"
-              onClick={closeMobileMenu}
-              className="block py-2 px-3 rounded-xl text-sm font-semibold text-slate-800 hover:bg-slate-50"
-            >
-              Mata Kuliah TRK
-            </a>
+              <PlaySquare size={15} />
+              <span>Portal Beranda Mahasiswa</span>
+            </button>
+            {(!isLoggedIn || currentUser?.role === 'admin') && (
+              <button
+                onClick={() => {
+                  onNavigateToAdmin?.();
+                  closeMobileMenu();
+                }}
+                className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2"
+              >
+                <Shield size={15} />
+                <span>Panel Admin / Dosen</span>
+              </button>
+            )}
           </div>
 
-          <div className="pt-3 border-t border-slate-100 space-y-2">
-            {onNavigateToStudent && (
-              <button
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-sky-50 text-sky-700 text-xs font-bold hover:bg-sky-100"
-                onClick={() => {
-                  onNavigateToStudent();
-                  closeMobileMenu();
-                }}
-              >
-                <PlaySquare size={15} /> Beranda Mahasiswa
-              </button>
-            )}
-            {onNavigateToAdmin && (
-              <button
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
-                onClick={() => {
-                  onNavigateToAdmin();
-                  closeMobileMenu();
-                }}
-              >
-                <Shield size={15} /> Admin Dashboard
-              </button>
-            )}
-            {isLoggedIn ? (
-              <button
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl bg-rose-50 text-rose-600 text-xs font-bold hover:bg-rose-100"
-                onClick={() => {
-                  onLogout && onLogout();
-                  closeMobileMenu();
-                }}
-              >
-                <LogOut size={15} /> Keluar Akun
-              </button>
+          {/* Mobile User / Auth */}
+          <div className="pt-2 border-t border-slate-100">
+            {isLoggedIn && currentUser ? (
+              <div className="space-y-2">
+                <div className="px-3 py-1">
+                  <p className="text-xs font-bold text-slate-900">{currentUser.name}</p>
+                  <p className="text-[10px] text-slate-500">{currentUser.nim || currentUser.email}</p>
+                </div>
+                <button
+                  onClick={() => {
+                    onLogout?.();
+                    closeMobileMenu();
+                  }}
+                  className="w-full py-2 px-3 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5"
+                >
+                  <LogOut size={14} />
+                  <span>Keluar Akun</span>
+                </button>
+              </div>
             ) : (
               <button
-                className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold hover:bg-slate-50"
                 onClick={() => {
-                  onOpenLogin();
+                  onOpenLogin?.();
                   closeMobileMenu();
                 }}
+                className="w-full py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5"
               >
-                <LogIn size={15} /> Login
+                <LogIn size={14} />
+                <span>Masuk / Login Akun</span>
               </button>
             )}
           </div>

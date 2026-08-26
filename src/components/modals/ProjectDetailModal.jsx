@@ -6,16 +6,16 @@ export default function ProjectDetailModal({ project, onClose }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5"
+      className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="relative bg-white rounded-2xl shadow-2xl w-full max-w-5xl overflow-hidden border border-slate-100"
+        className="relative bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden border border-slate-100 transform transition-all animate-in zoom-in-95 duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Close Button */}
         <button
-          className="absolute top-3 right-3 z-30 p-1.5 rounded-full bg-black/50 text-white hover:bg-black/80 transition-colors shadow-lg backdrop-blur-sm"
+          className="absolute top-3.5 right-3.5 z-30 p-2 rounded-full bg-black/60 text-white hover:bg-black/85 transition-colors shadow-lg backdrop-blur-sm"
           onClick={onClose}
           aria-label="Tutup Modal"
         >
@@ -24,14 +24,13 @@ export default function ProjectDetailModal({ project, onClose }) {
 
         {/* Layout: side-by-side on lg, stacked on mobile */}
         <div className="flex flex-col lg:flex-row relative">
-
           {/* Left: Video — drives the modal height via aspect-video */}
-          <div className="lg:w-3/5 flex-shrink-0">
+          <div className="lg:w-3/5 flex-shrink-0 bg-black">
             <div className="relative w-full aspect-video">
               <iframe
                 src={project.videoUrl}
                 title={project.title}
-                className="absolute inset-0 w-full h-full border-none lg:rounded-l-2xl"
+                className="absolute inset-0 w-full h-full border-none lg:rounded-l-3xl"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                 allowFullScreen
               ></iframe>
@@ -41,10 +40,9 @@ export default function ProjectDetailModal({ project, onClose }) {
           {/* Right: Info Panel — absolute on desktop to match video height exactly, scrolls internally */}
           <div className="lg:w-2/5 lg:absolute lg:top-0 lg:bottom-0 lg:right-0 overflow-y-auto">
             <div className="p-5 sm:p-6 space-y-4">
-
               {/* Title & Metadata */}
               <div>
-                <h2 className="font-heading text-lg font-extrabold text-slate-800 mb-1.5 leading-snug pr-6">
+                <h2 className="font-heading text-lg font-extrabold text-slate-800 mb-1.5 leading-snug pr-8">
                   {project.title}
                 </h2>
                 <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 font-medium">
@@ -66,7 +64,7 @@ export default function ProjectDetailModal({ project, onClose }) {
               </div>
 
               {/* Mata Kuliah & Dosen */}
-              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200/80 space-y-3">
+              <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-2.5">
                 <div>
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
                     MATA KULIAH TRK
@@ -77,7 +75,7 @@ export default function ProjectDetailModal({ project, onClose }) {
                   <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
                     DOSEN PEMBIMBING
                   </span>
-                  <p className="font-bold text-xs text-slate-800">{project.supervisor}</p>
+                  <p className="font-bold text-xs text-slate-800">{project.supervisor || 'Dosen Pembimbing TRK SV IPB'}</p>
                 </div>
               </div>
 
@@ -99,7 +97,7 @@ export default function ProjectDetailModal({ project, onClose }) {
                     {project.techStack.map((tech, idx) => (
                       <span
                         key={idx}
-                        className="bg-sky-50 text-sky-700 text-[11px] font-semibold px-2.5 py-0.5 rounded-md border border-sky-100"
+                        className="bg-sky-50 text-sky-700 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-sky-100"
                       >
                         {tech}
                       </span>
@@ -107,7 +105,6 @@ export default function ProjectDetailModal({ project, onClose }) {
                   </div>
                 </div>
               )}
-
             </div>
           </div>
         </div>
