@@ -1,21 +1,20 @@
 import React from 'react';
 import { X, User, GraduationCap, Calendar } from 'lucide-react';
+import ModalShell from '../common/ModalShell';
 
 export default function ProjectDetailModal({ project, onClose }) {
   if (!project) return null;
 
   return (
-    <div
-      className="fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-5 animate-in fade-in duration-200"
-      onClick={onClose}
+    <ModalShell
+      onClose={onClose}
+      ariaLabel={`Detail projek ${project.title}`}
+      panelClassName="max-w-5xl max-h-[92vh] overflow-y-auto rounded-3xl lg:overflow-hidden"
     >
-      <div
-        className="relative bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden border border-slate-100 transform transition-all animate-in zoom-in-95 duration-200"
-        onClick={(e) => e.stopPropagation()}
-      >
         {/* Close Button */}
         <button
-          className="absolute top-3.5 right-3.5 z-30 p-2 rounded-full bg-black/60 text-white hover:bg-black/85 transition-colors shadow-lg backdrop-blur-sm"
+          type="button"
+          className="absolute right-3 top-3 z-30 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950/85 text-white shadow-lg transition-colors hover:bg-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
           onClick={onClose}
           aria-label="Tutup Modal"
         >
@@ -66,13 +65,13 @@ export default function ProjectDetailModal({ project, onClose }) {
               {/* Mata Kuliah & Dosen */}
               <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-2.5">
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                  <span className="mb-0.5 block text-xs font-bold uppercase tracking-wider text-slate-600">
                     MATA KULIAH TRK
                   </span>
                   <p className="font-bold text-xs text-slate-800">{project.course}</p>
                 </div>
                 <div>
-                  <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block mb-0.5">
+                  <span className="mb-0.5 block text-xs font-bold uppercase tracking-wider text-slate-600">
                     DOSEN PEMBIMBING
                   </span>
                   <p className="font-bold text-xs text-slate-800">{project.supervisor || 'Dosen Pembimbing TRK SV IPB'}</p>
@@ -97,7 +96,7 @@ export default function ProjectDetailModal({ project, onClose }) {
                     {project.techStack.map((tech, idx) => (
                       <span
                         key={idx}
-                        className="bg-sky-50 text-sky-700 text-[11px] font-semibold px-2.5 py-1 rounded-lg border border-sky-100"
+                        className="rounded-lg border border-sky-100 bg-sky-50 px-2.5 py-1 text-xs font-semibold text-sky-800"
                       >
                         {tech}
                       </span>
@@ -108,7 +107,6 @@ export default function ProjectDetailModal({ project, onClose }) {
             </div>
           </div>
         </div>
-      </div>
-    </div>
+    </ModalShell>
   );
 }

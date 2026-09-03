@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Save, X } from 'lucide-react';
 import useApp from '../../hooks/useApp';
+import ModalShell from '../common/ModalShell';
 
 const fieldClass = 'w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500';
 
@@ -16,26 +17,33 @@ export default function EditProjectModal({ project, onClose }) {
     techStackStr: project.techStack?.join(', ') || '',
     description: project.description || ''
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const updateField = (event) => {
     const { name, value } = event.target;
     setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
-    updateProject(project.id, {
-      ...formData,
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    setFormError('');
+    const { techStackStr, ...projectUpdates } = formData;
+    const updated = await updateProject(project.id, {
+      ...projectUpdates,
       semester: Number.parseInt(formData.semester, 10),
-      techStack: formData.techStackStr.split(',').map((item) => item.trim()).filter(Boolean)
+      techStack: techStackStr.split(',').map((item) => item.trim()).filter(Boolean)
     });
-    onClose();
+    setIsSubmitting(false);
+    if (updated) onClose();
+    else setFormError('Perubahan belum tersimpan. Periksa data lalu coba kembali.');
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
-      <div className="bg-white rounded-3xl shadow-2xl border border-slate-100 max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 relative" onClick={(event) => event.stopPropagation()}>
-        <button onClick={onClose} className="absolute top-4 right-4 p-2 rounded-full text-slate-400 hover:bg-slate-100" aria-label="Tutup"><X size={17} /></button>
+    <ModalShell onClose={onClose} ariaLabel={`Edit projek ${project.title}`} panelClassName="max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl p-6 sm:p-8">
+        <button type="button" onClick={onClose} className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-xl text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600" aria-label="Tutup"><X size={17} /></button>
         <div className="mb-6 pr-8"><h2 className="font-heading text-xl font-extrabold text-slate-900">Edit Projek</h2><p className="text-xs text-slate-500 mt-1">Perbarui informasi projek yang sudah dipublikasikan.</p></div>
         <form onSubmit={submit} className="space-y-4">
           <label className="block text-xs font-bold text-slate-700">Judul projek<input name="title" value={formData.title} onChange={updateField} className={`${fieldClass} mt-1.5`} required /></label>
@@ -50,9 +58,9 @@ export default function EditProjectModal({ project, onClose }) {
           <label className="block text-xs font-bold text-slate-700">URL video<input type="url" name="videoUrl" value={formData.videoUrl} onChange={updateField} className={`${fieldClass} mt-1.5`} /></label>
           <label className="block text-xs font-bold text-slate-700">Tech stack<input name="techStackStr" value={formData.techStackStr} onChange={updateField} className={`${fieldClass} mt-1.5`} placeholder="Pisahkan dengan koma" /></label>
           <label className="block text-xs font-bold text-slate-700">Deskripsi<textarea name="description" rows="4" value={formData.description} onChange={updateField} className={`${fieldClass} mt-1.5 resize-none`} /></label>
-          <div className="flex justify-end gap-3 pt-2"><button type="button" onClick={onClose} className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-700">Batal</button><button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold"><Save size={16} /> Simpan Perubahan</button></div>
+          {formError && <p className="rounded-xl bg-rose-50 px-3 py-2.5 text-sm font-semibold text-rose-800" role="alert">{formError}</p>}
+          <div className="flex justify-end gap-3 pt-2"><button type="button" onClick={onClose} disabled={isSubmitting} className="min-h-11 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-bold text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 disabled:opacity-50">Batal</button><button disabled={isSubmitting} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-bold text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 disabled:cursor-wait disabled:opacity-60"><Save size={16} /> {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}</button></div>
         </form>
-      </div>
-    </div>
+    </ModalShell>
   );
 }

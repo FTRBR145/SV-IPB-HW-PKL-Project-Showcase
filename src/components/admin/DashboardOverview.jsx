@@ -5,16 +5,14 @@ import {
   GraduationCap,
   RotateCcw,
   ShieldCheck,
-  XCircle,
-  Calendar,
-  Layers
+  XCircle
 } from 'lucide-react';
 import DataTable from '../common/DataTable';
 
 function DonutChart({ approved, pending, rejected }) {
   const total = approved + pending + rejected || 1;
   const values = [approved, pending, rejected];
-  const colors = ['#3b82f6', '#f59e0b', '#ef4444'];
+  const colors = ['#059669', '#d97706', '#e11d48'];
   const radius = 70;
   const circumference = 2 * Math.PI * radius;
   let accumulated = 0;
@@ -43,7 +41,7 @@ function DonutChart({ approved, pending, rejected }) {
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
         <strong className="text-xl font-extrabold text-slate-800">{Math.round((approved / total) * 100)}%</strong>
-        <span className="text-[10px] text-slate-500 font-medium">Disetujui</span>
+          <span className="text-xs font-medium text-slate-600">Disetujui</span>
       </div>
     </div>
   );
@@ -70,6 +68,20 @@ export default function DashboardOverview({
   onRestore
 }) {
   const [statusFilter, setStatusFilter] = useState('all');
+  const [activeAction, setActiveAction] = useState('');
+
+  const runModerationAction = async (action, submissionId) => {
+    const actionKey = `${action}-${submissionId}`;
+    if (activeAction) return;
+    setActiveAction(actionKey);
+    try {
+      if (action === 'approve') await onApprove(submissionId);
+      if (action === 'reject') await onReject(submissionId);
+      if (action === 'restore') await onRestore(submissionId);
+    } finally {
+      setActiveAction('');
+    }
+  };
 
   const pendingCount = submissions.filter((item) => item.status === 'pending').length;
   const approvedCount = submissions.filter((item) => item.status === 'approved').length;
@@ -92,17 +104,16 @@ export default function DashboardOverview({
   }, [submissions, statusFilter]);
 
   const stats = [
-    { label: 'Total Projek Aktif', value: projects.length, hint: 'Tampil di showcase', icon: FolderKanban, color: 'sky' },
-    { label: 'Menunggu Moderasi', value: pendingCount, hint: 'Perlu tinjauan', icon: ShieldCheck, color: 'amber' },
+    { label: 'Total Projek Aktif', value: projects.length, hint: 'Tampil di showcase', icon: FolderKanban, color: 'slate' },
+    { label: 'Menunggu Moderasi', value: pendingCount, hint: 'Perlu tinjauan', icon: ShieldCheck, color: 'amber', alert: pendingCount > 0 },
     { label: 'Disetujui', value: approvedCount, hint: 'Histori pengajuan', icon: CheckCircle, color: 'emerald' },
-    { label: 'Total Mahasiswa', value: students.length, hint: 'Berdasarkan data projek', icon: GraduationCap, color: 'indigo' }
+    { label: 'Total Mahasiswa', value: students.length, hint: 'Berdasarkan data projek', icon: GraduationCap, color: 'slate' }
   ];
 
   const colorClasses = {
-    sky: 'bg-sky-50 text-sky-600',
+    slate: 'bg-slate-100 text-slate-700',
     amber: 'bg-amber-50 text-amber-600',
     emerald: 'bg-emerald-50 text-emerald-600',
-    indigo: 'bg-indigo-50 text-indigo-600'
   };
 
   // DataTable Column Definitions for Submissions
@@ -114,7 +125,7 @@ export default function DashboardOverview({
       render: (row) => (
         <div>
           <strong className="block text-slate-900 font-bold">{row.student}</strong>
-          <span className="text-[10px] text-slate-400 font-mono">NIM. {row.nim}</span>
+          <span className="text-xs font-mono text-slate-600">NIM. {row.nim}</span>
         </div>
       )
     },
@@ -125,7 +136,7 @@ export default function DashboardOverview({
       render: (row) => (
         <div className="max-w-xs">
           <strong className="block truncate text-slate-800 font-semibold">{row.title}</strong>
-          <span className="block truncate text-[10px] text-slate-400">{row.desc}</span>
+          <span className="block truncate text-xs text-slate-600">{row.desc}</span>
         </div>
       )
     },
@@ -144,7 +155,7 @@ export default function DashboardOverview({
       label: 'Tanggal',
       sortable: true,
       render: (row) => (
-        <span className="text-[11px] text-slate-500 font-mono">
+        <span className="text-xs font-mono text-slate-600">
           {row.date || '2026'}
         </span>
       )
@@ -155,7 +166,7 @@ export default function DashboardOverview({
       sortable: true,
       render: (row) => (
         <span
-          className={`inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold border ${
+          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-xs font-bold ${
             statusStyles[row.status] || 'bg-slate-100 text-slate-700'
           }`}
         >
@@ -175,24 +186,29 @@ export default function DashboardOverview({
           {row.status === 'pending' ? (
             <>
               <button
-                onClick={() => onApprove(row.id)}
-                className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors shadow-2xs"
-                title="Setujui dan Terbitkan"
+                onClick={() => runModerationAction('approve', row.id)}
+                disabled={Boolean(activeAction)}
+              className="flex h-11 w-11 items-center justify-center rounded-lg bg-emerald-50 text-emerald-700 shadow-2xs transition-colors hover:bg-emerald-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+              title="Setujui dan Terbitkan"
+              aria-label={`Setujui projek ${row.title}`}
               >
                 <CheckCircle size={15} />
               </button>
               <button
-                onClick={() => onReject(row.id)}
-                className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors shadow-2xs"
-                title="Tolak Pengajuan"
+                onClick={() => runModerationAction('reject', row.id)}
+                disabled={Boolean(activeAction)}
+              className="flex h-11 w-11 items-center justify-center rounded-lg bg-rose-50 text-rose-700 shadow-2xs transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600"
+              title="Tolak Pengajuan"
+              aria-label={`Tolak projek ${row.title}`}
               >
                 <XCircle size={15} />
               </button>
             </>
           ) : (
             <button
-              onClick={() => onRestore(row.id)}
-              className="p-1.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors shadow-2xs flex items-center gap-1 text-[11px] font-bold"
+              onClick={() => runModerationAction('restore', row.id)}
+              disabled={Boolean(activeAction)}
+              className="flex min-h-11 items-center gap-1 rounded-lg bg-sky-50 px-2.5 text-xs font-bold text-sky-700 shadow-2xs transition-colors hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
               title="Kembalikan ke antrean pending"
             >
               <RotateCcw size={13} />
@@ -205,18 +221,35 @@ export default function DashboardOverview({
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="min-w-0 space-y-6">
       {/* 4 Top KPI Stat Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-        {stats.map(({ label, value, hint, icon: Icon, color }) => (
-          <div key={label} className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs flex items-center justify-between">
+      <div className="motion-dashboard-list grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+        {stats.map(({ label, value, hint, icon: Icon, color, alert }, index) => (
+          <div
+            key={label}
+            className={`motion-dashboard-item p-5 rounded-2xl border shadow-2xs flex items-center justify-between transition-[background-color,border-color,box-shadow,transform] ${
+              alert
+                ? 'bg-amber-50 border-amber-300 ring-1 ring-amber-200'
+                : 'bg-white border-slate-200/80'
+            }`}
+            style={{ '--motion-index': index }}
+          >
             <div>
-              <span className="text-[11px] font-bold text-slate-500 uppercase block mb-1">{label}</span>
-              <strong className="text-3xl font-black text-slate-900">{value}</strong>
-              <span className="text-[10px] text-slate-500 block mt-1 font-semibold">{hint}</span>
+              <span className={`mb-1 block text-xs font-bold uppercase ${alert ? 'text-amber-800' : 'text-slate-600'}`}>{label}</span>
+              <strong className={`text-3xl font-black ${alert ? 'text-amber-950' : 'text-slate-900'}`}>{value}</strong>
+              <span className={`mt-1 block text-xs font-semibold ${alert ? 'text-amber-800' : 'text-slate-600'}`}>{hint}</span>
             </div>
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${colorClasses[color]}`}>
+            <div className={`relative w-12 h-12 rounded-2xl flex items-center justify-center ${colorClasses[color]}`}>
               <Icon size={24} />
+              {alert && (
+                <span
+                  className="motion-attention-once absolute right-0 top-0 flex h-6 min-w-6 items-center justify-center rounded-full border-2 border-white bg-red-600 px-1.5 text-xs font-black text-white shadow-sm"
+                  aria-label={`${value} pengajuan menunggu moderasi`}
+                  role="status"
+                >
+                  {value > 99 ? '99+' : value}
+                </span>
+              )}
             </div>
           </div>
         ))}
@@ -227,20 +260,20 @@ export default function DashboardOverview({
         <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-heading font-bold text-sm text-slate-900">Rasio Status Moderasi</h2>
-            <span className="text-[10px] text-slate-400 font-mono">Real-time</span>
+            <span className="text-xs font-medium text-slate-600">Diperbarui langsung</span>
           </div>
           <div className="flex justify-center py-2">
             <DonutChart approved={approvedCount} pending={pendingCount} rejected={rejectedCount} />
           </div>
           <div className="grid grid-cols-3 gap-2 pt-4 border-t border-slate-100 text-center">
             {[
-              ['Disetujui', approvedCount, 'bg-blue-500'],
+              ['Disetujui', approvedCount, 'bg-emerald-600'],
               ['Menunggu', pendingCount, 'bg-amber-500'],
               ['Ditolak', rejectedCount, 'bg-red-500']
             ].map(([label, value, color]) => (
               <div key={label}>
                 <span className={`inline-block w-2.5 h-2.5 rounded-full ${color}`} />
-                <span className="block text-[10px] text-slate-500">{label}</span>
+                <span className="block text-xs text-slate-600">{label}</span>
                 <strong className="text-xs text-slate-800">{value}</strong>
               </div>
             ))}
@@ -250,10 +283,10 @@ export default function DashboardOverview({
         <div className="lg:col-span-2 bg-white p-5 rounded-2xl border border-slate-200/80 shadow-2xs">
           <div className="flex items-center justify-between mb-5">
             <h2 className="font-heading font-bold text-sm text-slate-900">Distribusi Mata Kuliah</h2>
-            <span className="text-[10px] text-slate-400">{projects.length} projek terdaftar</span>
+            <span className="text-xs text-slate-600">{projects.length} projek terdaftar</span>
           </div>
           <div className="space-y-4">
-            {courseChartData.map((course) => (
+            {courseChartData.map((course, index) => (
               <div key={course.name} className="space-y-1">
                 <div className="flex justify-between gap-4 text-xs font-semibold text-slate-700">
                   <span className="truncate">{course.name}</span>
@@ -261,8 +294,11 @@ export default function DashboardOverview({
                 </div>
                 <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-gradient-to-r from-sky-500 to-indigo-600 rounded-full"
-                    style={{ width: `${Math.round((course.count / maxCourseCount) * 100)}%` }}
+                    className="motion-chart-bar h-full rounded-full bg-slate-700"
+                    style={{
+                      width: `${Math.round((course.count / maxCourseCount) * 100)}%`,
+                      '--motion-index': index
+                    }}
                   />
                 </div>
               </div>
@@ -286,7 +322,7 @@ export default function DashboardOverview({
           </div>
 
           {/* Status Filter Tabs */}
-          <div className="flex gap-1 bg-slate-100 p-1 rounded-xl overflow-x-auto self-start sm:self-auto select-none">
+          <div className="flex max-w-full gap-1 self-start overflow-x-auto rounded-xl bg-slate-100 p-1 select-none sm:self-auto">
             {[
               ['all', 'Semua', submissions.length],
               ['pending', 'Pending', pendingCount],
@@ -296,7 +332,7 @@ export default function DashboardOverview({
               <button
                 key={value}
                 onClick={() => setStatusFilter(value)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
+                className={`min-h-11 px-3 py-1.5 rounded-lg text-xs font-bold whitespace-nowrap transition-all ${
                   statusFilter === value ? 'bg-white text-slate-900 shadow-2xs' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
@@ -308,6 +344,7 @@ export default function DashboardOverview({
 
         {/* Integrated DataTable */}
         <DataTable
+          key={activeAction ? 'moderation-busy' : 'moderation-idle'}
           data={statusFilteredData}
           columns={columns}
           searchPlaceholder="Cari pengajuan, nama mahasiswa, NIM, atau projek..."

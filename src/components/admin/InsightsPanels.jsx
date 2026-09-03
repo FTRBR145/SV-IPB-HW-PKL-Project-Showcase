@@ -18,7 +18,7 @@ export function ReportsPanel({ projects, submissions, students, logs, onExportPr
 
   return (
     <div className="space-y-6">
-      <section className="bg-gradient-to-r from-slate-900 to-sky-900 text-white rounded-2xl p-6 shadow-sm">
+      <section className="rounded-2xl bg-slate-900 p-6 text-white shadow-sm">
         <FileSpreadsheet size={28} className="text-sky-300 mb-3" />
         <h2 className="font-heading font-bold text-xl">Pusat Laporan TRK</h2>
         <p className="text-sm text-slate-300 mt-1">Unduh data CSV atau cetak ringkasan dashboard untuk dokumentasi.</p>
@@ -62,11 +62,15 @@ export function ReportsPanel({ projects, submissions, students, logs, onExportPr
 
 export function SettingsPanel({ settings, onSave, onReset }) {
   const [formData, setFormData] = useState(settings);
+  const [isSaving, setIsSaving] = useState(false);
   useEffect(() => setFormData(settings), [settings]);
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
-    onSave(formData);
+    if (isSaving) return;
+    setIsSaving(true);
+    await onSave(formData);
+    setIsSaving(false);
   };
 
   return (
@@ -74,7 +78,7 @@ export function SettingsPanel({ settings, onSave, onReset }) {
       <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
         <div>
           <h2 className="font-heading font-bold text-base text-slate-900">Pengaturan Sistem</h2>
-          <p className="text-xs text-slate-500 mt-1">Perubahan disimpan pada memori browser ini.</p>
+          <p className="text-xs text-slate-500 mt-1">Perubahan disimpan melalui backend dan berlaku untuk seluruh pengguna.</p>
         </div>
         <label className="block text-xs font-bold text-slate-700">
           Nama platform
@@ -114,15 +118,15 @@ export function SettingsPanel({ settings, onSave, onReset }) {
             </label>
           ))}
         </div>
-        <button className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 shadow-2xs transition-all">
-          <Save size={16} /> Simpan Pengaturan
+        <button disabled={isSaving} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 shadow-2xs transition-all disabled:cursor-wait disabled:opacity-60">
+          <Save size={16} /> {isSaving ? 'Menyimpan...' : 'Simpan Pengaturan'}
         </button>
       </form>
 
       <aside className="bg-rose-50 border border-rose-100 rounded-2xl p-5 shadow-2xs">
         <h2 className="font-heading font-bold text-sm text-rose-900">Zona Reset</h2>
         <p className="text-xs text-rose-700 mt-1 mb-4">
-          Mengembalikan seluruh data projek, moderasi, moderator, kategori, dan pengaturan ke data demo awal.
+          Mengembalikan seluruh data projek, moderasi, moderator, mata kuliah, dan pengaturan backend ke data demo awal.
         </p>
         <button
           onClick={onReset}
@@ -175,7 +179,7 @@ export function ActivityLogsPanel({ logs, onClear }) {
       label: 'Waktu',
       sortable: true,
       render: (row) => (
-        <span className="text-[11px] text-slate-500 font-mono">
+        <span className="text-xs font-mono text-slate-600">
           {row.timestamp}
         </span>
       )
@@ -187,7 +191,7 @@ export function ActivityLogsPanel({ logs, onClear }) {
       headerClassName: 'text-center',
       className: 'text-center',
       render: (row) => (
-        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600 font-mono">
+        <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 font-mono text-xs font-bold text-slate-600">
           {row.type}
         </span>
       )

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   ChevronDown,
   LogIn,
@@ -13,7 +13,8 @@ import {
   Home,
   LayoutDashboard
 } from 'lucide-react';
-import { SV_COURSES } from '../../data/projectsData';
+
+const EMPTY_COURSES = [];
 
 export default function Navbar({
   currentPage = 'landing', // 'landing' | 'student' | 'admin'
@@ -27,10 +28,19 @@ export default function Navbar({
   onNavigateToAdmin,
   onNavigateToStudent,
   onBackToLanding,
-  onSelectCourse
+  onSelectCourse,
+  courses = EMPTY_COURSES
 }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => setIsScrolled(window.scrollY > 10);
+    onScroll(); // check initial state
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
+  }, []);
 
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   const closeMobileMenu = () => {
@@ -39,32 +49,33 @@ export default function Navbar({
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm transition-all duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-4">
+    <header className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b shadow-sm transition-all duration-300 ${isScrolled ? 'navbar-scrolled border-slate-200/95' : 'border-slate-200'}`}>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-3 sm:gap-4">
         {/* =================================================================== */}
         {/* BRAND LOGO (OFFICIAL SV IPB) */}
         {/* =================================================================== */}
-        <div
+        <button
+          type="button"
           onClick={onBackToLanding}
-          className="flex items-center gap-2.5 cursor-pointer group flex-shrink-0"
+          className="group flex min-h-11 min-w-0 flex-shrink items-center gap-2.5 rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
           title="Beranda Showcase TRK SV IPB"
         >
           <img
             src="/sv_ipb_navbar_logo.png"
             alt="IPB University Sekolah Vokasi Logo"
-            className="h-11 sm:h-14 max-w-[210px] sm:max-w-[270px] object-contain transition-transform group-hover:scale-105"
+            className="h-9 max-w-[145px] object-contain transition-transform group-hover:scale-[1.02] sm:h-14 sm:max-w-[270px]"
           />
           {(currentPage === 'student' || currentPage === 'student-upload') && (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-sky-100 text-sky-700 text-[10px] font-bold tracking-wider font-mono uppercase">
+            <span className="hidden items-center gap-1 rounded-lg bg-sky-100 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-sky-700 sm:inline-flex">
               Portal Mahasiswa
             </span>
           )}
           {currentPage === 'admin' && (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg bg-slate-900 text-white text-[10px] font-bold tracking-wider font-mono uppercase shadow-xs">
+            <span className="hidden items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-white shadow-xs sm:inline-flex">
               Panel Admin
             </span>
           )}
-        </div>
+        </button>
 
         {/* =================================================================== */}
         {/* CENTER SEARCH BAR / NAVIGATION LINKS */}
@@ -72,12 +83,14 @@ export default function Navbar({
         {currentPage === 'student' ? (
           <div className="flex-1 max-w-xl hidden md:flex items-center justify-center px-4">
             <div className="relative w-full">
+              <label htmlFor="student-project-search" className="sr-only">Telusuri projek mahasiswa</label>
               <input
+                id="student-project-search"
                 type="text"
                 placeholder="Telusuri projek TRK, sensor, dosen, atau mata kuliah..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 text-xs sm:text-sm rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none focus:border-sky-600 focus:ring-2 focus:ring-sky-500/20 transition-all text-slate-800 placeholder-slate-400"
+                className="min-h-11 w-full rounded-xl border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-500 transition-colors focus:border-sky-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20"
               />
               <Search
                 size={16}
@@ -86,7 +99,9 @@ export default function Navbar({
               {searchQuery && (
                 <button
                   onClick={() => onSearchChange && onSearchChange('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                  type="button"
+                  className="absolute right-1 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+                  aria-label="Hapus pencarian"
                 >
                   <X size={14} />
                 </button>
@@ -144,9 +159,9 @@ export default function Navbar({
                 />
               </a>
               <div className="hidden group-hover:block absolute top-full left-0 w-64 bg-white rounded-2xl shadow-xl border border-slate-100 py-2 z-50">
-                {SV_COURSES.map((course, idx) => (
+                {['Semua Mata Kuliah', ...courses].map((course) => (
                   <a
-                    key={idx}
+                    key={course}
                     href="#matakuliah"
                     className="block px-4 py-2.5 text-xs text-slate-600 hover:bg-slate-50 hover:text-slate-900 font-medium transition-colors"
                     onClick={() => {
@@ -168,7 +183,7 @@ export default function Navbar({
           {/* Upload Button */}
           {onOpenUpload && (
             <button
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold shadow-sm hover:bg-slate-800 hover:shadow transition-all transform hover:-translate-y-0.5 active:translate-y-0"
+              className="action-strong hidden min-h-11 items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 sm:flex"
               onClick={onOpenUpload}
             >
               <Upload size={14} className="text-sky-400" />
@@ -218,7 +233,8 @@ export default function Navbar({
             <div className="relative">
               <button
                 onClick={() => setUserDropdownOpen(!userDropdownOpen)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-slate-100 transition-colors border border-slate-200/80 bg-slate-50/60"
+                className="flex min-h-11 items-center gap-2 rounded-xl border border-slate-200/80 bg-slate-50/60 px-3 py-1.5 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+                aria-label={`Menu akun ${currentUser.name}`}
               >
                 <User size={15} className="text-slate-600" />
                 <span className="hidden sm:inline text-xs font-bold text-slate-800 max-w-[130px] truncate text-left">
@@ -234,7 +250,7 @@ export default function Navbar({
                     <p className="text-xs font-bold text-slate-900 truncate">
                       {currentUser.name}
                     </p>
-                    <p className="text-[11px] text-slate-400 font-mono">
+                    <p className="text-xs font-mono text-slate-600">
                       {currentUser.nim || currentUser.email}
                     </p>
                   </div>
@@ -243,7 +259,7 @@ export default function Navbar({
                       onNavigateToStudent?.();
                       closeMobileMenu();
                     }}
-                    className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                    className="flex min-h-11 w-full items-center gap-2 px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
                   >
                     <PlaySquare size={14} className="text-sky-600" />
                     <span>Beranda Mahasiswa</span>
@@ -254,7 +270,7 @@ export default function Navbar({
                         onNavigateToAdmin?.();
                         closeMobileMenu();
                       }}
-                      className="w-full text-left px-4 py-2 text-xs text-slate-700 hover:bg-slate-50 flex items-center gap-2"
+                      className="flex min-h-11 w-full items-center gap-2 px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50"
                     >
                       <Shield size={14} className="text-slate-700" />
                       <span>Panel Admin Dosen</span>
@@ -266,7 +282,7 @@ export default function Navbar({
                       onLogout?.();
                       closeMobileMenu();
                     }}
-                    className="w-full text-left px-4 py-2 text-xs text-rose-600 hover:bg-rose-50 flex items-center gap-2 font-semibold"
+                    className="flex min-h-11 w-full items-center gap-2 px-4 py-2 text-left text-xs font-semibold text-rose-600 hover:bg-rose-50"
                   >
                     <LogOut size={14} />
                     <span>Keluar Akun</span>
@@ -286,9 +302,10 @@ export default function Navbar({
 
           {/* Mobile Menu Hamburger */}
           <button
-            className="lg:hidden p-2 rounded-xl text-slate-700 hover:bg-slate-100 transition-colors"
+            className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 lg:hidden"
             onClick={toggleMobileMenu}
-            aria-label="Toggle Menu"
+            aria-label={mobileMenuOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'}
+            aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
@@ -303,12 +320,14 @@ export default function Navbar({
           {/* Mobile Search (Student View) */}
           {currentPage === 'student' && (
             <div className="relative w-full">
+              <label htmlFor="student-project-search-mobile" className="sr-only">Telusuri projek mahasiswa</label>
               <input
+                id="student-project-search-mobile"
                 type="text"
                 placeholder="Telusuri projek TRK..."
                 value={searchQuery}
                 onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 text-xs rounded-xl border border-slate-300 bg-slate-50 focus:bg-white focus:outline-none text-slate-800"
+                className="min-h-11 w-full rounded-xl border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-base text-slate-800 placeholder-slate-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-600 sm:text-sm"
               />
               <Search
                 size={14}
@@ -324,7 +343,7 @@ export default function Navbar({
                 onBackToLanding?.();
                 closeMobileMenu();
               }}
-              className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2"
+              className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-800 hover:bg-slate-100"
             >
               <Home size={15} />
               <span>Landing Utama</span>
@@ -334,7 +353,7 @@ export default function Navbar({
                 onNavigateToStudent?.();
                 closeMobileMenu();
               }}
-              className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-sky-700 bg-sky-50 flex items-center gap-2"
+              className="flex min-h-11 w-full items-center gap-2 rounded-xl bg-sky-50 px-3 py-2 text-left text-xs font-bold text-sky-700"
             >
               <PlaySquare size={15} />
               <span>Portal Beranda Mahasiswa</span>
@@ -345,7 +364,7 @@ export default function Navbar({
                   onNavigateToAdmin?.();
                   closeMobileMenu();
                 }}
-                className="w-full text-left px-3 py-2 rounded-xl text-xs font-bold text-slate-800 hover:bg-slate-100 flex items-center gap-2"
+                className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-800 hover:bg-slate-100"
               >
                 <Shield size={15} />
                 <span>Panel Admin / Dosen</span>
@@ -359,14 +378,14 @@ export default function Navbar({
               <div className="space-y-2">
                 <div className="px-3 py-1">
                   <p className="text-xs font-bold text-slate-900">{currentUser.name}</p>
-                  <p className="text-[10px] text-slate-500">{currentUser.nim || currentUser.email}</p>
+                  <p className="text-xs text-slate-600">{currentUser.nim || currentUser.email}</p>
                 </div>
                 <button
                   onClick={() => {
                     onLogout?.();
                     closeMobileMenu();
                   }}
-                  className="w-full py-2 px-3 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5"
+                  className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-rose-50 px-3 py-2 text-center text-xs font-bold text-rose-600"
                 >
                   <LogOut size={14} />
                   <span>Keluar Akun</span>
@@ -378,7 +397,7 @@ export default function Navbar({
                   onOpenLogin?.();
                   closeMobileMenu();
                 }}
-                className="w-full py-2.5 bg-slate-900 text-white rounded-xl text-xs font-bold text-center flex items-center justify-center gap-1.5"
+                className="action-strong flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-center text-xs font-bold"
               >
                 <LogIn size={14} />
                 <span>Masuk / Login Akun</span>

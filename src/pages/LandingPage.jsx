@@ -25,7 +25,7 @@ export default function LandingPage() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { projectId } = useParams();
-  const { projects, currentUser, isLoggedIn, logout, adminSettings, showToast } = useApp();
+  const { projects, currentUser, isLoggedIn, logout, adminSettings, showToast, courses } = useApp();
 
   const [selectedSemester, setSelectedSemester] = useState('ALL');
   const [selectedCourse, setSelectedCourse] = useState('');
@@ -124,9 +124,10 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="landing-page min-h-screen bg-slate-50 flex flex-col font-sans">
+    <div className="landing-page app-canvas flex min-h-screen flex-col font-sans">
       {/* Top Navbar */}
       <Navbar
+        courses={courses}
         currentPage="landing"
         currentUser={currentUser}
         isLoggedIn={isLoggedIn}
@@ -138,27 +139,29 @@ export default function LandingPage() {
         onSelectCourse={(course) => setSelectedCourse(course)}
       />
 
-      {/* Hero Banner Section */}
-      <HeroSection onOpenUpload={handleOpenUpload} />
+      <main id="main-content">
+        {/* Hero Banner Section */}
+        <HeroSection onOpenUpload={handleOpenUpload} />
 
-      {/* About Section */}
-      <AboutSection />
+        {/* About Section */}
+        <AboutSection />
 
-      {/* Prestasi Mahasiswa Stats Card */}
-      <StatsBar />
+        {/* Prestasi Mahasiswa Stats Card */}
+        <StatsBar />
 
-      {/* Mata Kuliah Carousel Section */}
-      <MataKuliahSection onSelectCourse={(course) => setSelectedCourse(course)} />
+        {/* Mata Kuliah Carousel Section */}
+        <MataKuliahSection onSelectCourse={(course) => setSelectedCourse(course)} />
 
-      {/* Projects Showcase Catalog */}
-      <ProjectShowcase
-        projects={filteredProjects}
-        selectedSemester={selectedSemester}
-        onSelectSemester={setSelectedSemester}
-        searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
-        onClickDetail={handleOpenDetail}
-      />
+        {/* Projects Showcase Catalog */}
+        <ProjectShowcase
+          projects={filteredProjects}
+          selectedSemester={selectedSemester}
+          onSelectSemester={setSelectedSemester}
+          searchQuery={searchQuery}
+          onSearchChange={setSearchQuery}
+          onClickDetail={handleOpenDetail}
+        />
+      </main>
 
       {/* Footer */}
       <Footer />

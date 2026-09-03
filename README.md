@@ -74,7 +74,7 @@ d:\PKL IPB\
 ## 💻 Panduan Menjalankan Secara Lokal
 
 ### 1. Prasyarat
-Pastikan kamu telah menginstall [Node.js](https://nodejs.org/) (versi >= 18).
+Pastikan kamu telah menginstall [Node.js](https://nodejs.org/) (versi >= 20).
 
 ### 2. Instalasi Dependency
 ```bash
@@ -84,15 +84,18 @@ git clone https://github.com/FTRBR145/SV-IPB-HW-PKL-Project-Showcase.git
 # Masuk ke direktori projek
 cd SV-IPB-HW-PKL-Project-Showcase
 
-# Install dependency
+# Install dependency frontend dan backend
 npm install
+npm --prefix backend install
 ```
 
-### 3. Menjalankan Server Pengembang (Dev Mode)
+### 3. Menjalankan Frontend dan Backend
 ```bash
-npm run dev
+npm run dev:full
 ```
-Akses aplikasi melalui peramban web di `http://localhost:5173/`.
+Akses aplikasi melalui peramban web di `http://localhost:5173/`. Vite meneruskan request `/api` ke backend pada `http://127.0.0.1:3000`.
+
+Konfigurasi frontend tersedia di `.env.example`, sedangkan konfigurasi dan dokumentasi API tersedia di [`backend/.env.example`](backend/.env.example) dan [`backend/README.md`](backend/README.md). Backend saat ini memakai penyimpanan in-memory sampai database ditambahkan.
 
 ### 4. Build Untuk Produksi
 ```bash

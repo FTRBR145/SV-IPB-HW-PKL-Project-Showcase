@@ -1,14 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   CheckCircle2,
+  FolderGit2,
   GraduationCap,
-  Sparkles,
+  Play,
   Plus,
-  Search,
-  MoreVertical,
-  ChevronRight,
-  X
+  Search
 } from 'lucide-react';
 import Navbar from '../components/common/Navbar';
 import Footer from '../components/common/Footer';
@@ -16,440 +14,453 @@ import { getYouTubeThumbnail } from '../data/projectsData';
 import ProjectDetailModal from '../components/modals/ProjectDetailModal';
 import StudentSidebar from '../components/student/StudentSidebar';
 import useApp from '../hooks/useApp';
+import useInViewOnce from '../hooks/useInViewOnce';
+
+const SEMESTER_OPTIONS = [1, 2, 3, 4, 5, 6];
+const PAGE_SIZE = 6;
+
+function belongsToStudent(project, student) {
+  if (!project || !student) return false;
+
+  // NIM adalah identitas unik: kalau keduanya ada, itu penentu tunggal.
+  if (project.nim && student.nim) {
+    return String(project.nim) === String(student.nim);
+  }
+
+  // Fallback nama, exact match saja agar "Adi" tidak mengklaim projek "Hadi".
+  const projectStudent = project.student?.trim().toLowerCase();
+  const studentName = student.name?.trim().toLowerCase();
+  return Boolean(projectStudent && studentName && projectStudent === studentName);
+}
 
 export default function StudentHome() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { projects, currentUser, isLoggedIn, logout } = useApp();
-
+  const { projects, currentUser, isLoggedIn, logout, courses } = useApp();
   const studentUser = currentUser;
 
-  const [activeTab, setActiveTab] = useState(() =>
-    searchParams.get('tab') === 'my-projects' ? 'my-projects' : 'home'
-  );
-  const [selectedCategory, setSelectedCategory] = useState(() =>
-    searchParams.get('course') || (searchParams.get('tab') === 'my-projects' ? 'Projek Saya' : 'Semua')
-  );
-  const [selectedSemester, setSelectedSemester] = useState('ALL'); // 'ALL' | 1 | 2 | 3 | 4 | 5 | 6
-  const [isSemesterExpanded, setIsSemesterExpanded] = useState(false);
+  const [selectedSemester, setSelectedSemester] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
   const [activeDetailProject, setActiveDetailProject] = useState(null);
+  const [visibleProjectCount, setVisibleProjectCount] = useState(PAGE_SIZE);
+  const [gridRef, gridVisible] = useInViewOnce({ rootMargin: '0px 0px -8% 0px' });
 
-  // Deep-link project modal opening via ?project=:id
+  // URL jadi sumber kebenaran tab & kategori, bukan state lokal.
+  const activeTab = searchParams.get('tab') === 'my-projects' ? 'my-projects' : 'home';
+  const selectedCategory =
+    searchParams.get('course') || (activeTab === 'my-projects' ? 'Projek Saya' : 'Semua');
+
+  useEffect(() => {
+    if (!isLoggedIn || !studentUser) {
+      navigate('/', { replace: true });
+    }
+  }, [isLoggedIn, studentUser, navigate]);
+
   useEffect(() => {
     const targetId = searchParams.get('project');
-    if (targetId) {
-      const found = projects.find((p) => String(p.id) === String(targetId));
-      if (found) {
-        setActiveDetailProject(found);
-      }
+    if (!targetId) {
+      setActiveDetailProject(null);
+      return;
     }
+    const found = projects.find((project) => String(project.id) === String(targetId));
+    setActiveDetailProject(found ?? null);
   }, [searchParams, projects]);
+
+  const myProjects = useMemo(
+    () => projects.filter((project) => belongsToStudent(project, studentUser)),
+    [projects, studentUser]
+  );
+
+  const filteredProjects = useMemo(() => {
+    const normalizedQuery = searchQuery.trim().toLowerCase();
+
+    return projects.filter((project) => {
+      if (activeTab === 'my-projects' && !belongsToStudent(project, studentUser)) {
+        return false;
+      }
+
+      if (selectedSemester !== 'ALL' && Number(project.semester) !== Number(selectedSemester)) {
+        return false;
+      }
+
+      if (selectedCategory !== 'Semua' && selectedCategory !== 'Projek Saya') {
+        const categoryQuery = selectedCategory.toLowerCase();
+        const matchesCourse = project.course?.toLowerCase().includes(categoryQuery);
+        const matchesTechnology = project.techStack?.some((technology) =>
+          technology.toLowerCase().includes(categoryQuery)
+        );
+        if (!matchesCourse && !matchesTechnology) return false;
+      }
+
+      if (!normalizedQuery) return true;
+
+      return (
+        [project.title, project.student, project.course].some((value) =>
+          value?.toLowerCase().includes(normalizedQuery)
+        ) ||
+        Boolean(
+          project.techStack?.some((technology) =>
+            technology.toLowerCase().includes(normalizedQuery)
+          )
+        )
+      );
+    });
+  }, [activeTab, projects, searchQuery, selectedCategory, selectedSemester, studentUser]);
+
+  const visibleProjects = filteredProjects.slice(0, visibleProjectCount);
+  const remainingProjectCount = filteredProjects.length - visibleProjects.length;
+
+  const resetVisibleProjects = () => setVisibleProjectCount(PAGE_SIZE);
+
+  const updateParams = (mutate) => {
+    const nextParams = new URLSearchParams(searchParams);
+    mutate(nextParams);
+    setSearchParams(nextParams, { replace: true });
+  };
+
+  const handleSearchChange = (value) => {
+    setSearchQuery(value);
+    resetVisibleProjects();
+  };
+
+  const handleOpenDetail = (project) => {
+    setActiveDetailProject(project);
+    updateParams((params) => params.set('project', project.id));
+  };
 
   const handleCloseDetail = () => {
     setActiveDetailProject(null);
-    if (searchParams.get('project')) {
-      searchParams.delete('project');
-      setSearchParams(searchParams, { replace: true });
-    }
+    updateParams((params) => params.delete('project'));
   };
 
-  const handleOpenDetail = (proj) => {
-    setActiveDetailProject(proj);
-    setSearchParams({ project: proj.id });
+  const showAllProjects = () => {
+    updateParams((params) => {
+      params.delete('tab');
+      params.delete('course');
+    });
+    setSelectedSemester('ALL');
+    resetVisibleProjects();
   };
 
-  const myProjects = projects.filter(
-    (p) => p.nim === studentUser.nim || p.student?.toLowerCase().includes(studentUser.name.toLowerCase())
-  );
-
-  const semesterOptions = [1, 2, 3, 4, 5, 6];
-
-  // Filter projects logic
-  const filteredProjects = projects.filter((proj) => {
-    // Tab filter
-    if (activeTab === 'my-projects') {
-      if (proj.nim !== studentUser.nim && !proj.student?.toLowerCase().includes(studentUser.name.toLowerCase())) {
-        return false;
-      }
-    }
-
-    // Semester filter
-    if (selectedSemester !== 'ALL') {
-      if (proj.semester !== selectedSemester) {
-        return false;
-      }
-    }
-
-    // Category Chip filter
-    if (selectedCategory === 'Projek Saya') {
-      if (proj.nim !== studentUser.nim && !proj.student?.toLowerCase().includes(studentUser.name.toLowerCase())) {
-        return false;
-      }
-    } else if (selectedCategory !== 'Semua') {
-      if (selectedCategory === proj.course) {
-        // exact course match from sidebar
-      } else {
-        const qCat = selectedCategory.toLowerCase();
-        const matchCourse = proj.course?.toLowerCase().includes(qCat);
-        const matchTech = proj.techStack?.some((t) => t.toLowerCase().includes(qCat));
-        if (!matchCourse && !matchTech) return false;
-      }
-    }
-
-    // Search query filter
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      const matchTitle = proj.title?.toLowerCase().includes(q);
-      const matchStudent = proj.student?.toLowerCase().includes(q);
-      const matchCourse = proj.course?.toLowerCase().includes(q);
-      const matchTech = proj.techStack?.some((t) => t.toLowerCase().includes(q));
-      if (!matchTitle && !matchStudent && !matchCourse && !matchTech) {
-        return false;
-      }
-    }
-
-    return true;
-  });
-
-  const handleSemesterSelect = (sem) => {
-    setSelectedSemester(sem);
+  const showMyProjects = () => {
+    updateParams((params) => {
+      params.set('tab', 'my-projects');
+      params.delete('course');
+    });
+    resetVisibleProjects();
   };
+
+  const selectCourse = (course) => {
+    updateParams((params) => {
+      params.delete('tab');
+      params.set('course', course);
+    });
+    resetVisibleProjects();
+  };
+
+  const resetFilters = () => {
+    showAllProjects();
+    handleSearchChange('');
+  };
+
+  // Jangan render apa pun selagi redirect berjalan.
+  if (!isLoggedIn || !studentUser) return null;
+
+  const isDefaultFeed =
+    activeTab === 'home' &&
+    selectedCategory === 'Semua' &&
+    selectedSemester === 'ALL' &&
+    !searchQuery;
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
-      {/* ========================================================================= */}
-      {/* 1. CONSISTENT SHARED NAVBAR */}
-      {/* ========================================================================= */}
+    <div className="app-canvas flex h-screen h-dvh flex-col overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom))] font-sans md:pb-0">
       <Navbar
+        courses={courses}
         currentPage="student"
         currentUser={studentUser}
         isLoggedIn={isLoggedIn}
         searchQuery={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={handleSearchChange}
         onOpenUpload={() => navigate('/student/upload')}
-        onLogout={() => {
-          logout();
-          navigate('/');
-        }}
+        onLogout={logout}
         onNavigateToAdmin={() => navigate('/admin')}
         onBackToLanding={() => navigate('/')}
       />
 
-      {/* ========================================================================= */}
-      {/* 2. BODY: SIDEBAR + FEED GRID */}
-      {/* ========================================================================= */}
-      <div className="flex-1 flex overflow-hidden">
-        <StudentSidebar
-          activeItem={activeTab === 'my-projects' ? 'my-projects' : 'home'}
-          selectedCategory={selectedCategory}
-          projectCount={myProjects.length}
-          onSelectHome={() => {
-            setActiveTab('home');
-            setSelectedCategory('Semua');
-            setSelectedSemester('ALL');
-          }}
-          onNavigateUpload={() => navigate('/student/upload')}
-          onSelectMyProjects={() => {
-            setActiveTab('my-projects');
-            setSelectedCategory('Projek Saya');
-          }}
-          onSelectCourse={(course) => {
-            setActiveTab('home');
-            setSelectedCategory(course);
-          }}
-          onNavigateAdmin={() => navigate('/admin')}
-          showAdmin={currentUser.role === 'admin'}
-        />
+      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
+        <div className="flex min-h-[calc(100dvh-4rem)] items-stretch sm:min-h-[calc(100dvh-5rem)]">
+          <StudentSidebar
+            courses={courses}
+            activeItem={activeTab === 'my-projects' ? 'my-projects' : 'home'}
+            selectedCategory={selectedCategory}
+            projectCount={myProjects.length}
+            onSelectHome={showAllProjects}
+            onNavigateUpload={() => navigate('/student/upload')}
+            onSelectMyProjects={showMyProjects}
+            onSelectCourse={selectCourse}
+            onNavigateAdmin={() => navigate('/admin')}
+            showAdmin={studentUser?.role === 'admin'}
+          />
 
-        {/* MAIN FEED CONTENT */}
-        <main className="flex-1 overflow-y-auto bg-slate-50 flex flex-col">
-          {/* =================================================================== */}
-          {/* TOP CATEGORY CHIPS BAR (CLEAN: SEMUA, PROJEK SAYA, & EXPANDABLE SEMESTER) */}
-          {/* =================================================================== */}
-          <div className="sticky top-0 z-30 bg-white/95 backdrop-blur-sm border-b border-slate-200/80 px-4 sm:px-6 py-2.5 flex items-center gap-2 overflow-x-auto scrollbar-none select-none">
-            {/* 1. "Semua" Chip */}
-            <button
-              onClick={() => {
-                setSelectedCategory('Semua');
-                setSelectedSemester('ALL');
-                setActiveTab('home');
-              }}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                selectedCategory === 'Semua' && selectedSemester === 'ALL' && activeTab === 'home'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              Semua
-            </button>
-
-            {/* 2. "Projek Saya" Chip */}
-            <button
-              onClick={() => {
-                setSelectedCategory('Projek Saya');
-                setActiveTab('my-projects');
-              }}
-              className={`flex-shrink-0 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                selectedCategory === 'Projek Saya' || activeTab === 'my-projects'
-                  ? 'bg-slate-900 text-white shadow-sm'
-                  : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
-              }`}
-            >
-              Projek Saya ({myProjects.length})
-            </button>
-
-            {/* 3. EXPANDABLE "SEMESTER" BUTTON */}
-            <div className="flex-shrink-0 flex items-center gap-1.5 bg-slate-100/90 p-0.5 rounded-xl border border-slate-200/80 transition-all">
-              <button
-                onClick={() => setIsSemesterExpanded(!isSemesterExpanded)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                  selectedSemester !== 'ALL'
-                    ? 'bg-sky-600 text-white shadow-sm'
-                    : isSemesterExpanded
-                    ? 'bg-white text-slate-900 shadow-sm'
-                    : 'text-slate-700 hover:text-slate-900'
-                }`}
-                title="Buka Pilihan Semester"
-              >
-                <GraduationCap size={14} className={selectedSemester !== 'ALL' ? 'text-white' : 'text-sky-600'} />
-                <span>{selectedSemester !== 'ALL' ? `Semester ${selectedSemester}` : 'Semester'}</span>
-                <ChevronRight
-                  size={14}
-                  className={`transition-transform duration-200 ${isSemesterExpanded ? 'rotate-90 text-slate-800' : 'text-slate-400'}`}
+          <main id="main-content" className="min-w-0 flex-1 bg-slate-50">
+          <div className="sticky top-0 z-30 border-b border-slate-200/80 bg-white/95 px-4 py-3 backdrop-blur-sm sm:px-6">
+            <div className="mx-auto flex w-full max-w-[1480px] flex-wrap items-center gap-2">
+              <div className="relative order-first w-full md:hidden">
+                <Search size={15} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <input
+                  type="search"
+                  value={searchQuery}
+                  onChange={(event) => handleSearchChange(event.target.value)}
+                  placeholder="Cari projek..."
+                  className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-base text-slate-900 outline-none transition focus:border-sky-500 focus:bg-white focus:ring-2 focus:ring-sky-500/15 sm:text-sm"
+                  aria-label="Cari projek"
                 />
+              </div>
+
+              <button
+                type="button"
+                onClick={showAllProjects}
+                className={`min-h-11 rounded-xl px-4 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
+                  activeTab === 'home' && selectedCategory === 'Semua'
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                Semua Projek
               </button>
 
-              {/* Expanded Semester Options */}
-              {isSemesterExpanded && (
-                <div className="flex items-center gap-1 pl-1 pr-1 animate-in fade-in slide-in-from-left-2 duration-200">
-                  <button
-                    onClick={() => handleSemesterSelect('ALL')}
-                    className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                      selectedSemester === 'ALL'
-                        ? 'bg-slate-900 text-white shadow-sm'
-                        : 'bg-white text-slate-600 hover:bg-slate-200'
-                    }`}
-                  >
-                    Semua Sem
-                  </button>
-                  {semesterOptions.map((sem) => (
-                    <button
-                      key={sem}
-                      onClick={() => handleSemesterSelect(sem)}
-                      className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
-                        selectedSemester === sem
-                          ? 'bg-sky-600 text-white shadow-sm'
-                          : 'bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-700'
-                      }`}
-                    >
-                      Sem {sem}
-                    </button>
+              <button
+                type="button"
+                onClick={showMyProjects}
+                className={`min-h-11 rounded-xl px-4 text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
+                  activeTab === 'my-projects'
+                    ? 'bg-slate-900 text-white'
+                    : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                Projek Saya <span className="ml-1 opacity-70">{myProjects.length}</span>
+              </button>
+
+              <label className="relative flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-bold text-slate-700">
+                <GraduationCap size={15} className="text-sky-600" />
+                <span className="sr-only">Pilih semester</span>
+                <select
+                  value={selectedSemester}
+                  onChange={(event) => {
+                    setSelectedSemester(
+                      event.target.value === 'ALL' ? 'ALL' : Number(event.target.value)
+                    );
+                    resetVisibleProjects();
+                  }}
+                  className="cursor-pointer bg-transparent pr-1 outline-none"
+                  aria-label="Filter semester"
+                >
+                  <option value="ALL">Semua Semester</option>
+                  {SEMESTER_OPTIONS.map((semester) => (
+                    <option key={semester} value={semester}>Semester {semester}</option>
                   ))}
-                  <button
-                    onClick={() => setIsSemesterExpanded(false)}
-                    className="p-1 text-slate-400 hover:text-slate-700 rounded-md ml-0.5"
-                    title="Tutup Pilihan Semester"
-                  >
-                    <X size={13} />
-                  </button>
-                </div>
+                </select>
+              </label>
+
+              {!isDefaultFeed && (
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="ml-auto min-h-11 rounded-xl px-3 text-xs font-bold text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                >
+                  Reset filter
+                </button>
               )}
             </div>
           </div>
 
-          {/* MAIN CONTAINER */}
-          <div className="p-4 sm:p-6 lg:p-8 space-y-8 flex-1">
-            {/* STUDENT WELCOME BANNER */}
-            {activeTab === 'home' && selectedCategory === 'Semua' && selectedSemester === 'ALL' && !searchQuery && (
-              <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-slate-900 via-slate-800 to-sky-900 text-white p-5 sm:p-7 shadow-lg">
-                <div className="absolute top-0 right-0 -mr-8 -mt-8 w-60 h-60 bg-sky-500/10 rounded-full blur-3xl pointer-events-none"></div>
-                <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-5">
-                  <div className="space-y-1.5 max-w-xl">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 text-xs font-semibold border border-sky-400/20">
-                      <Sparkles size={13} />
-                      <span>Beranda Mahasiswa Terautentikasi</span>
-                    </div>
-                    <h1 className="font-heading text-xl sm:text-2xl font-black tracking-tight text-white">
-                      Hai, {studentUser.name}! 👋
+          <div className="mx-auto w-full max-w-[1480px] space-y-7 px-4 py-5 sm:px-6 sm:py-7 lg:px-8">
+            {isDefaultFeed && (
+              <section className="motion-banner-enter relative overflow-hidden rounded-2xl bg-slate-900 px-5 py-6 text-white shadow-lg shadow-slate-900/15 sm:px-7 sm:py-8">
+                <div className="absolute inset-y-0 right-0 w-1/3 bg-sky-500/10" aria-hidden="true" />
+                <div className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+                  <div className="max-w-2xl">
+                    <h1 className="font-heading text-2xl font-black tracking-[-0.025em] text-white sm:text-3xl">
+                      Selamat datang, {studentUser.name}
                     </h1>
-                    <p className="text-slate-300 text-xs sm:text-sm leading-relaxed">
-                      Jelajahi karya inovatif rekan mahasiswa TRK SV IPB atau unggah dokumentasi projek tugas akhir dan praktikum terbarumu.
+                    <p className="mt-2 max-w-[65ch] text-sm leading-6 text-slate-300">
+                      Temukan referensi karya mahasiswa TRK atau dokumentasikan projek tugas akhir dan praktikum terbaru Anda.
                     </p>
                   </div>
-
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-col gap-2 sm:flex-row">
                     <button
+                      type="button"
                       onClick={() => navigate('/student/upload')}
-                      className="px-4 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs shadow-md transition-all flex items-center gap-2"
+                      className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-sky-700 px-4 text-xs font-bold text-white transition-colors hover:bg-sky-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                     >
-                      <Plus size={16} />
-                      <span>Unggah Video Projek</span>
+                      <Plus size={17} /> Unggah Projek
                     </button>
                     <button
-                      onClick={() => {
-                        setActiveTab('my-projects');
-                        setSelectedCategory('Projek Saya');
-                      }}
-                      className="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white font-bold text-xs backdrop-blur-sm border border-white/15 transition-all"
+                      type="button"
+                      onClick={showMyProjects}
+                      className="inline-flex min-h-11 items-center justify-center rounded-xl bg-slate-800 px-4 text-xs font-bold text-white transition-colors hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
                     >
-                      Kelola Projek Saya ({myProjects.length})
+                      Kelola {myProjects.length} projek saya
                     </button>
                   </div>
                 </div>
-              </div>
+              </section>
             )}
 
-            {/* TAB TITLE HEADER */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="font-heading text-lg sm:text-xl font-extrabold text-slate-900 flex items-center gap-2">
-                  {activeTab === 'my-projects' ? '📁 Portofolio Projek Saya' : 'Feed Rekomendasi Projek TRK'}
-                  {selectedSemester !== 'ALL' && (
-                    <span className="text-xs bg-sky-100 text-sky-700 font-bold px-2 py-0.5 rounded-md font-mono">
-                      Semester {selectedSemester}
-                    </span>
-                  )}
-                  {selectedCategory !== 'Semua' && selectedCategory !== 'Projek Saya' && (
-                    <span className="text-xs bg-slate-100 text-slate-700 font-bold px-2 py-0.5 rounded-md">
-                      {selectedCategory}
-                    </span>
-                  )}
-                </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Menampilkan {filteredProjects.length} video projek dari kurikulum TRK Sekolah Vokasi IPB
-                </p>
-              </div>
-
-              {activeTab === 'my-projects' && (
-                <button
-                  onClick={() => navigate('/student/upload')}
-                  className="px-3 py-1.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors flex items-center gap-1.5"
-                >
-                  <Plus size={14} /> Tambah Baru
-                </button>
-              )}
-            </div>
-
-            {/* YOUTUBE-STYLE VIDEO GRID */}
-            {filteredProjects.length === 0 ? (
-              <div className="bg-white rounded-2xl p-12 text-center border border-slate-200/80 shadow-sm max-w-md mx-auto my-8">
-                <div className="w-16 h-16 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-4">
-                  <Search size={28} />
-                </div>
-                <h3 className="font-heading text-base font-bold text-slate-800 mb-1">
-                  Tidak Ada Video Ditemukan
-                </h3>
-                <p className="text-xs text-slate-500 mb-4">
-                  Coba ubah kata kunci pencarian atau pilih filter semester / mata kuliah yang lain.
-                </p>
-                <button
-                  onClick={() => {
-                    setSelectedCategory('Semua');
-                    setSelectedSemester('ALL');
-                    setSearchQuery('');
-                    setActiveTab('home');
-                  }}
-                  className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors"
-                >
-                  Reset Filter
-                </button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-7">
-                {filteredProjects.map((project) => {
-                  const isOwner =
-                    project.nim === studentUser.nim ||
-                    project.student?.toLowerCase().includes(studentUser.name.toLowerCase());
-                  const thumb = project.thumbnail || getYouTubeThumbnail(project.videoUrl);
-
-                  return (
-                    <div
-                      key={project.id}
-                      onClick={() => handleOpenDetail(project)}
-                      className="group flex flex-col cursor-pointer transition-all"
+            <section aria-labelledby="project-feed-title">
+              <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <FolderGit2 size={20} className="text-sky-600" />
+                    <h2
+                      id="project-feed-title"
+                      className="font-heading text-xl font-extrabold tracking-[-0.02em] text-slate-950 sm:text-2xl"
                     >
-                      {/* 1. Thumbnail Container (16:9 Aspect) */}
-                      <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-900 shadow-sm group-hover:shadow-md transition-shadow">
-                        <img
-                          src={thumb}
-                          alt={project.title}
-                          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                          loading="lazy"
-                        />
+                      {activeTab === 'my-projects' ? 'Portofolio Projek Saya' : 'Projek Mahasiswa TRK'}
+                    </h2>
+                    {selectedSemester !== 'ALL' && (
+                      <span className="rounded-lg bg-sky-100 px-2 py-1 text-xs font-bold text-sky-700">
+                        Semester {selectedSemester}
+                      </span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                    {filteredProjects.length} projek sesuai pencarian dan filter aktif.
+                  </p>
+                </div>
 
-                        {/* Duration / Semester Badge */}
-                        <div className="absolute bottom-2 right-2 bg-black/80 text-white text-[11px] font-mono font-semibold px-1.5 py-0.5 rounded backdrop-blur-sm">
-                          Sem {project.semester}
-                        </div>
-
-                        {/* Owner Badge */}
-                        {isOwner && (
-                          <div className="absolute top-2 left-2 bg-emerald-600/90 text-white text-[10px] font-bold px-2 py-0.5 rounded-md backdrop-blur-sm flex items-center gap-1 shadow-sm">
-                            <CheckCircle2 size={11} />
-                            <span>Projek Saya</span>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* 2. Metadata Section */}
-                      <div className="flex justify-between items-start gap-2 mt-3">
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-heading font-bold text-sm text-slate-900 leading-snug line-clamp-2 group-hover:text-sky-600 transition-colors mb-1.5">
-                            {project.title}
-                          </h3>
-
-                          {/* Student Name */}
-                          <div className="flex items-center gap-1 text-xs text-slate-700 font-semibold mb-0.5">
-                            <span className="truncate">{project.student}</span>
-                            <CheckCircle2 size={12} className="text-sky-600 flex-shrink-0" />
-                          </div>
-
-                          {/* Course Name */}
-                          <p className="text-[11px] text-slate-500 truncate font-medium">
-                            {project.course}
-                          </p>
-
-                          {/* Date */}
-                          <p className="text-[11px] text-slate-400 font-medium mt-0.5">
-                            {project.date || '2026'}
-                          </p>
-                        </div>
-
-                        {/* Options Icon */}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenDetail(project);
-                          }}
-                          className="text-slate-400 hover:text-slate-600 p-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0"
-                          aria-label="Lihat Detail"
-                        >
-                          <MoreVertical size={16} />
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
+                {activeTab === 'my-projects' && (
+                  <button
+                    type="button"
+                    onClick={() => navigate('/student/upload')}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 self-start rounded-xl bg-slate-900 px-4 text-xs font-bold text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                  >
+                    <Plus size={15} /> Tambah Projek
+                  </button>
+                )}
               </div>
-            )}
+
+              {filteredProjects.length === 0 ? (
+                <div className="mx-auto my-10 max-w-lg rounded-2xl border border-slate-200 bg-white px-6 py-12 text-center">
+                  <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
+                    {activeTab === 'my-projects' ? <FolderGit2 size={25} /> : <Search size={25} />}
+                  </div>
+                  <h3 className="font-heading text-lg font-bold text-slate-900">
+                    {activeTab === 'my-projects' ? 'Belum ada projek milik Anda' : 'Projek tidak ditemukan'}
+                  </h3>
+                  <p className="mx-auto mt-2 max-w-sm text-xs leading-5 text-slate-500">
+                    {activeTab === 'my-projects'
+                      ? 'Unggah dokumentasi projek pertama Anda untuk mulai membangun portofolio.'
+                      : 'Coba gunakan kata kunci lain atau kembalikan filter ke semua projek.'}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={
+                      activeTab === 'my-projects'
+                        ? () => navigate('/student/upload')
+                        : resetFilters
+                    }
+                    className="mt-5 min-h-11 rounded-xl bg-slate-900 px-4 text-xs font-bold text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                  >
+                    {activeTab === 'my-projects' ? 'Unggah Projek Pertama' : 'Reset Filter'}
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <div
+                    ref={gridRef}
+                    className={`motion-list grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 ${gridVisible ? 'is-visible' : ''}`}
+                  >
+                    {visibleProjects.map((project, index) => {
+                      const isOwner = belongsToStudent(project, studentUser);
+                      const thumbnail = project.thumbnail || getYouTubeThumbnail(project.videoUrl);
+
+                      return (
+                        <article
+                          key={project.id}
+                          className="motion-list-item min-w-0"
+                          style={{ '--motion-index': Math.min(index, 5) }}
+                        >
+                          <button
+                            type="button"
+                            onClick={() => handleOpenDetail(project)}
+                            className="group flex h-full w-full flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white text-left transition duration-200 motion-safe:hover:-translate-y-0.5 hover:border-sky-200 hover:shadow-lg hover:shadow-slate-900/10 motion-safe:active:translate-y-0 motion-safe:active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                            aria-label={`Lihat detail ${project.title}`}
+                          >
+                            <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
+                              <img
+                                src={thumbnail}
+                                alt={`Thumbnail ${project.title}`}
+                                className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
+                                loading="lazy"
+                              />
+                              <div
+                                className="absolute inset-0 flex items-center justify-center bg-slate-950/0 transition group-hover:bg-slate-950/30"
+                                aria-hidden="true"
+                              >
+                                <span className="flex h-11 w-11 scale-90 items-center justify-center rounded-full bg-white/95 text-slate-900 opacity-0 shadow-lg transition group-hover:scale-100 group-hover:opacity-100">
+                                  <Play size={18} fill="currentColor" />
+                                </span>
+                              </div>
+                              <span className="absolute bottom-2 right-2 rounded-lg bg-slate-950 px-2 py-1 text-xs font-bold text-white">
+                                Semester {project.semester}
+                              </span>
+                              {isOwner && (
+                                <span className="absolute left-2 top-2 inline-flex items-center gap-1 rounded-lg bg-emerald-700 px-2 py-1 text-xs font-bold text-white shadow-sm">
+                                  <CheckCircle2 size={12} /> Projek Saya
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex flex-1 flex-col p-4">
+                              <h3 className="line-clamp-2 font-heading text-base font-bold leading-5 text-slate-950 transition-colors group-hover:text-sky-700">
+                                {project.title}
+                              </h3>
+                              <div className="mt-3 flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                                <span className="truncate">{project.student}</span>
+                                <CheckCircle2
+                                  size={13}
+                                  className="shrink-0 text-sky-600"
+                                  aria-label="Mahasiswa terverifikasi"
+                                />
+                              </div>
+                              <p className="mt-1 line-clamp-1 text-xs font-medium text-slate-600">
+                                {project.course}
+                              </p>
+                              <p className="mt-auto pt-3 text-xs text-slate-600">
+                                {project.date || project.year || '2026'}
+                              </p>
+                            </div>
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </div>
+
+                  {remainingProjectCount > 0 && (
+                    <div className="mt-7 flex justify-center">
+                      <button
+                        type="button"
+                        onClick={() => setVisibleProjectCount((count) => count + PAGE_SIZE)}
+                        className="min-h-11 rounded-xl border border-slate-300 bg-white px-5 text-xs font-bold text-slate-700 transition-colors hover:border-sky-300 hover:bg-sky-50 hover:text-sky-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+                      >
+                        Tampilkan {PAGE_SIZE} projek berikutnya
+                        <span className="ml-1 text-slate-600">({remainingProjectCount} tersisa)</span>
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
+            </section>
+
           </div>
-        </main>
+          </main>
+        </div>
+        <Footer />
       </div>
 
-      {/* ========================================================================= */}
-      {/* 3. CONSISTENT SHARED FOOTER */}
-      {/* ========================================================================= */}
-      <Footer />
-
-      {/* ========================================================================= */}
-      {/* 4. MODALS INTEGRATION */}
-      {/* ========================================================================= */}
       {activeDetailProject && (
-        <ProjectDetailModal
-          project={activeDetailProject}
-          onClose={handleCloseDetail}
-        />
+        <ProjectDetailModal project={activeDetailProject} onClose={handleCloseDetail} />
       )}
     </div>
   );

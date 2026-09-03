@@ -4,16 +4,8 @@ import {
   Pencil,
   Plus,
   Power,
-  Search,
   Trash2,
-  UserCheck,
-  UserRound,
-  Users,
-  GraduationCap,
-  FolderKanban,
-  BookOpen,
-  Tag,
-  Cpu
+  UserCheck
 } from 'lucide-react';
 import DataTable from '../common/DataTable';
 
@@ -38,7 +30,7 @@ export function ProjectsPanel({ projects, onEdit, onDelete, onView }) {
           <strong className="block text-slate-900 font-bold leading-snug truncate">
             {row.title}
           </strong>
-          <span className="block text-[11px] text-slate-500 mt-0.5 truncate">
+          <span className="mt-0.5 block truncate text-xs text-slate-600">
             {row.course}
           </span>
           {row.techStack && row.techStack.length > 0 && (
@@ -46,13 +38,13 @@ export function ProjectsPanel({ projects, onEdit, onDelete, onView }) {
               {row.techStack.slice(0, 3).map((t, idx) => (
                 <span
                   key={idx}
-                  className="px-1.5 py-0.2 bg-slate-100 text-slate-600 rounded text-[9px] font-mono"
+                  className="rounded bg-slate-100 px-1.5 py-0.5 text-xs font-mono text-slate-600"
                 >
                   {t}
                 </span>
               ))}
               {row.techStack.length > 3 && (
-                <span className="text-[9px] text-slate-400">+{row.techStack.length - 3}</span>
+                <span className="text-xs text-slate-600">+{row.techStack.length - 3}</span>
               )}
             </div>
           )}
@@ -66,7 +58,7 @@ export function ProjectsPanel({ projects, onEdit, onDelete, onView }) {
       render: (row) => (
         <div>
           <span className="block font-bold text-slate-800">{row.student}</span>
-          <span className="text-[10px] font-mono text-slate-400 font-medium">NIM. {row.nim}</span>
+          <span className="text-xs font-medium text-slate-600">NIM. {row.nim}</span>
         </div>
       )
     },
@@ -87,7 +79,7 @@ export function ProjectsPanel({ projects, onEdit, onDelete, onView }) {
       label: 'Tahun',
       sortable: true,
       render: (row) => (
-        <span className="text-[11px] text-slate-500 font-mono">
+        <span className="text-xs font-mono text-slate-600">
           {row.year || '2026'}
         </span>
       )
@@ -195,7 +187,7 @@ export function StudentsPanel({ students, onViewProjects }) {
       label: 'NIM Mahasiswa',
       sortable: true,
       render: (row) => (
-        <span className="font-mono font-bold text-slate-900 bg-slate-100 px-2 py-1 rounded-md text-[11px]">
+        <span className="rounded-md bg-slate-100 px-2 py-1 font-mono text-xs font-bold text-slate-900">
           {row.nim}
         </span>
       )
@@ -207,7 +199,7 @@ export function StudentsPanel({ students, onViewProjects }) {
       render: (row) => (
         <div>
           <strong className="block text-slate-900 font-bold">{row.name}</strong>
-          <span className="text-[10px] text-slate-400">Mahasiswa TRK SV IPB</span>
+          <span className="text-xs text-slate-600">Mahasiswa TRK SV IPB</span>
         </div>
       )
     },
@@ -288,10 +280,15 @@ export function StudentsPanel({ students, onViewProjects }) {
 // ============================================================================
 export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
   const [formData, setFormData] = useState({ name: '', nip: '', email: '' });
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
-    if (onAdd(formData)) setFormData({ name: '', nip: '', email: '' });
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    const added = await onAdd(formData);
+    setIsSubmitting(false);
+    if (added) setFormData({ name: '', nip: '', email: '' });
   };
 
   const columns = [
@@ -306,7 +303,7 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
           </div>
           <div>
             <strong className="text-slate-900 font-bold block">{row.name}</strong>
-            <span className="text-[10px] text-slate-400 font-mono">
+            <span className="text-xs font-mono text-slate-600">
               {row.nip ? `NIP. ${row.nip}` : 'Admin'}
             </span>
           </div>
@@ -318,7 +315,7 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
       label: 'Email Akun',
       sortable: true,
       render: (row) => (
-        <span className="text-slate-600 font-mono text-[11px]">{row.email}</span>
+        <span className="font-mono text-xs text-slate-600">{row.email}</span>
       )
     },
     {
@@ -327,7 +324,7 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
       sortable: true,
       render: (row) => (
         <span
-          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+          className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-bold ${
             row.status === 'active'
               ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
               : 'bg-slate-100 text-slate-600 border-slate-200'
@@ -392,8 +389,8 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
             />
           </label>
         ))}
-        <button className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all">
-          <Plus size={15} /> Tambah Moderator
+        <button disabled={isSubmitting} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all disabled:cursor-wait disabled:opacity-60">
+          <Plus size={15} /> {isSubmitting ? 'Menambahkan...' : 'Tambah Moderator'}
         </button>
       </form>
 
@@ -430,10 +427,15 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
 // ============================================================================
 export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDelete }) {
   const [name, setName] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
-    if (onAdd(name)) setName('');
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+    const added = await onAdd(name);
+    setIsSubmitting(false);
+    if (added) setName('');
   };
 
   // Normalize items to objects if they are strings
@@ -524,8 +526,8 @@ export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDe
             className="mt-1.5 w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500/20"
           />
         </label>
-        <button className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all">
-          <Plus size={15} /> Tambah {title}
+        <button disabled={isSubmitting} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all disabled:cursor-wait disabled:opacity-60">
+          <Plus size={15} /> {isSubmitting ? 'Menambahkan...' : `Tambah ${title}`}
         </button>
       </form>
 
@@ -554,95 +556,5 @@ export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDe
         />
       </section>
     </div>
-  );
-}
-
-// ============================================================================
-// 5. TECH STACK PANEL (WITH DATATABLE)
-// ============================================================================
-export function TechStackPanel({ projects = [], techStackStats, onFilterProjects }) {
-  const normalizedStats = useMemo(() => {
-    if (techStackStats && techStackStats.length > 0) return techStackStats;
-
-    const counts = {};
-    projects.forEach((p) => {
-      (p.techStack || []).forEach((t) => {
-        counts[t] = (counts[t] || 0) + 1;
-      });
-    });
-
-    return Object.entries(counts)
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count);
-  }, [projects, techStackStats]);
-
-  const columns = [
-    {
-      key: 'name',
-      label: 'Teknologi / Library / Perangkat',
-      sortable: true,
-      render: (row) => (
-        <div className="flex items-center gap-2">
-          <div className="w-7 h-7 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-bold font-mono text-xs">
-            <Cpu size={14} />
-          </div>
-          <strong className="text-slate-900 font-bold text-xs">{row.name}</strong>
-        </div>
-      )
-    },
-    {
-      key: 'count',
-      label: 'Jumlah Penggunaan',
-      sortable: true,
-      headerClassName: 'text-center',
-      className: 'text-center',
-      render: (row) => (
-        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-700 font-bold text-xs border border-sky-100 font-mono">
-          {row.count} Projek
-        </span>
-      )
-    },
-    {
-      key: 'actions',
-      label: 'Filter',
-      sortable: false,
-      searchable: false,
-      headerClassName: 'text-center',
-      className: 'text-center',
-      render: (row) => onFilterProjects ? (
-        <button
-          onClick={() => onFilterProjects(row.name)}
-          className="inline-flex items-center gap-1 px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-bold transition-colors"
-        >
-          <span>Lihat Projek</span>
-        </button>
-      ) : null
-    }
-  ];
-
-  return (
-    <section className="bg-white rounded-2xl border border-slate-200/80 shadow-2xs p-5 space-y-4">
-      <div>
-        <h2 className="font-heading font-bold text-base text-slate-900">
-          Analisis Penggunaan Tech Stack ({normalizedStats.length})
-        </h2>
-        <p className="text-xs text-slate-500 mt-0.5">
-          Daftar perangkat keras, mikrokontroler, framework, dan teknologi yang paling sering digunakan.
-        </p>
-      </div>
-
-      <DataTable
-        data={normalizedStats}
-        columns={columns}
-        searchPlaceholder="Cari teknologi, sensor, atau library..."
-        defaultPageSize={10}
-        pageSizeOptions={[5, 10, 25, 50]}
-        defaultSortKey="count"
-        defaultSortDirection="desc"
-        showExportCsv={true}
-        exportFileName="analisis-tech-stack-trk.csv"
-        emptyMessage="Tech stack tidak ditemukan."
-      />
-    </section>
   );
 }

@@ -1,118 +1,129 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import useInViewOnce from '../../hooks/useInViewOnce';
+import useScrollReveal from '../../hooks/useScrollReveal';
 
 export default function MataKuliahSection({ onSelectCourse }) {
   const scrollRef = useRef(null);
+  const [sectionRef, isVisible] = useInViewOnce();
+  const [headingRef, headingVisible] = useScrollReveal();
 
   const baseCourses = [
     {
       name: "Rangkaian Logika & Teknik Digital",
       courseFullName: "RANGKAIAN LOGIKA DAN TEKNIK DIGITAL",
-      image: "/trk_photos/DSC09040.JPG"
+      image: "/trk_photos/optimized/DSC09040-640.webp"
     },
     {
       name: "Teknologi Bengkel Elektromekanik",
       courseFullName: "TEKNOLOGI BENGKEL ELEKTROMEKANIK",
-      image: "/trk_photos/DSC09042.JPG"
+      image: "/trk_photos/optimized/DSC09042-640.webp"
     },
     {
       name: "Aplikasi Mobile",
       courseFullName: "APLIKASI MOBILE",
-      image: "/trk_photos/DSC09048.JPG"
+      image: "/trk_photos/optimized/DSC09048-640.webp"
     },
     {
       name: "Sistem Tertanam",
       courseFullName: "SISTEM TERTANAM (EMBEDDED SYSTEM)",
-      image: "/trk_photos/DSC09038.JPG"
+      image: "/trk_photos/optimized/DSC09038-640.webp"
     },
     {
       name: "Proyek Sistem IoT",
       courseFullName: "PROYEK SISTEM IOT (INTERNET OF THINGS)",
-      image: "/trk_photos/DSC09044.JPG"
+      image: "/trk_photos/optimized/DSC09044-640.webp"
     }
   ];
-
-  // Tripled course array for endless smooth scrolling loop
-  const courses = [...baseCourses, ...baseCourses, ...baseCourses];
 
   const handleScroll = (direction) => {
     if (scrollRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollRef.current;
-      const scrollAmount = 300;
+      const scrollAmount = Math.min(320, clientWidth * 0.85);
+      const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
 
       if (direction === 'right') {
         if (scrollLeft + clientWidth >= scrollWidth - 25) {
-          scrollRef.current.scrollTo({ left: 0, behavior: 'smooth' });
+          scrollRef.current.scrollTo({ left: 0, behavior });
         } else {
-          scrollRef.current.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+          scrollRef.current.scrollBy({ left: scrollAmount, behavior });
         }
       } else {
         if (scrollLeft <= 25) {
-          scrollRef.current.scrollTo({ left: scrollWidth - clientWidth, behavior: 'smooth' });
+          scrollRef.current.scrollTo({ left: scrollWidth - clientWidth, behavior });
         } else {
-          scrollRef.current.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+          scrollRef.current.scrollBy({ left: -scrollAmount, behavior });
         }
       }
     }
   };
 
-  useEffect(() => {
-    const autoLoop = setInterval(() => {
-      handleScroll('right');
-    }, 4500);
-    return () => clearInterval(autoLoop);
-  }, []);
-
   return (
-    <section id="matakuliah" className="py-12 bg-gray-50 border-b border-gray-200">
+    <section ref={sectionRef} id="matakuliah" className="py-12 bg-gray-50 border-b border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="font-heading text-2xl sm:text-3xl font-extrabold text-gray-800 text-center mb-8">
+        <h2
+          ref={headingRef}
+          className={`font-heading text-2xl sm:text-3xl font-extrabold text-gray-800 text-center mb-8 title-underline-reveal scroll-reveal ${headingVisible ? 'is-visible' : ''}`}
+          style={{ display: 'block', textAlign: 'center' }}
+        >
           Mata Kuliah Unggulan TRK
         </h2>
 
         <div className="relative group/slider">
           <button
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-3 sm:-translate-x-5 z-20 w-10 h-10 rounded-full bg-white/90 shadow-lg border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-800 hover:text-white transition-all transform hover:scale-110 active:scale-95"
+            className="absolute left-0 top-1/2 z-20 flex h-11 w-11 -translate-x-2 -translate-y-1/2 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-lg transition-colors hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 sm:-translate-x-5"
             onClick={() => handleScroll('left')}
-            aria-label="Scroll Kiri"
+            aria-label="Geser mata kuliah ke kiri"
           >
             <ChevronLeft size={20} />
           </button>
 
           <div 
-            className="flex gap-4 overflow-x-auto scrollbar-none py-2 scroll-smooth"
+            className={`motion-list flex gap-4 overflow-x-auto py-2 scrollbar-none focus-visible:rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${isVisible ? 'is-visible' : ''}`}
             style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
             ref={scrollRef}
+            tabIndex={0}
+            role="region"
+            aria-label="Daftar mata kuliah unggulan TRK"
           >
-            {courses.map((c, idx) => (
-              <div
-                key={idx}
-                className="flex-shrink-0 w-64 sm:w-72 bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-200 cursor-pointer transform hover:-translate-y-1 transition-all duration-300 group"
+            {baseCourses.map((c, index) => (
+              <button
+                type="button"
+                key={c.courseFullName}
+                className="motion-list-item group w-[min(16rem,calc(100vw-3.5rem))] flex-shrink-0 overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-sm transition-[box-shadow,transform] duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-xl motion-safe:active:translate-y-0 motion-safe:active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 sm:w-72"
+                style={{ '--motion-index': index }}
                 onClick={() => {
                   if (onSelectCourse) onSelectCourse(c.courseFullName);
                   const el = document.getElementById('projects');
-                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                  if (el) {
+                    const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+                    el.scrollIntoView({ behavior });
+                  }
                 }}
               >
                 <div className="relative h-44 overflow-hidden">
                   <img 
                     src={c.image} 
                     alt={c.name} 
+                    loading="lazy"
+                    decoding="async"
+                    width="640"
+                    height="426"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-gray-950/70 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gray-950/25" />
                 </div>
                 <div className="p-4 bg-gray-800 text-white font-semibold text-sm text-center line-clamp-2">
                   <span>{c.name}</span>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
 
           <button
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-3 sm:translate-x-5 z-20 w-10 h-10 rounded-full bg-white/90 shadow-lg border border-gray-200 text-gray-700 flex items-center justify-center hover:bg-gray-800 hover:text-white transition-all transform hover:scale-110 active:scale-95"
+            className="absolute right-0 top-1/2 z-20 flex h-11 w-11 translate-x-2 -translate-y-1/2 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-lg transition-colors hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 sm:translate-x-5"
             onClick={() => handleScroll('right')}
-            aria-label="Scroll Kanan"
+            aria-label="Geser mata kuliah ke kanan"
           >
             <ChevronRight size={20} />
           </button>

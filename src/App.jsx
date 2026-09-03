@@ -1,21 +1,36 @@
+import { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import LandingPage from './pages/LandingPage';
-import StudentHome from './pages/StudentHome';
-import UploadProjectPage from './pages/UploadProjectPage';
-import AdminDashboard from './pages/AdminDashboard';
 import { AppProvider } from './context/AppContext';
 import Toast from './components/common/Toast';
 import ScrollToTop from './components/common/ScrollToTop';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import ProtectedRoute from './components/auth/ProtectedRoute';
 
+const LandingPage = lazy(() => import('./pages/LandingPage'));
+const StudentHome = lazy(() => import('./pages/StudentHome'));
+const UploadProjectPage = lazy(() => import('./pages/UploadProjectPage'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+
+function RouteLoader() {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-slate-100 px-6" role="status" aria-live="polite">
+      <div className="flex items-center gap-3 text-sm font-bold text-slate-600">
+        <span className="h-5 w-5 animate-spin rounded-full border-2 border-slate-300 border-t-sky-600" aria-hidden="true" />
+        Memuat halaman...
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   return (
     <ErrorBoundary>
       <AppProvider>
         <BrowserRouter>
+          <a href="#main-content" className="skip-link">Lewati ke konten utama</a>
           <ScrollToTop />
-          <Routes>
+          <Suspense fallback={<RouteLoader />}>
+            <Routes>
             {/* Landing Public Page */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/project/:projectId" element={<LandingPage />} />
@@ -51,7 +66,8 @@ export default function App() {
 
             {/* Catch-all fallback */}
             <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
+            </Routes>
+          </Suspense>
           <Toast />
         </BrowserRouter>
       </AppProvider>

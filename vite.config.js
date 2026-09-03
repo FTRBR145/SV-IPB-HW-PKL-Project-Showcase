@@ -12,5 +12,11 @@ export default defineConfig({
     host: true,
     port: 5173,
     allowedHosts: true,
+    proxy: {
+      '/api': {
+        target: process.env.VITE_BACKEND_PROXY || 'http://127.0.0.1:3000',
+        changeOrigin: true,
+      },
+    },
   },
 })

@@ -2,19 +2,26 @@ import React from 'react';
 import { Play } from 'lucide-react';
 import { getYouTubeThumbnail } from '../../data/projectsData';
 
-export default function ProjectCard({ project, onClickDetail }) {
+export default function ProjectCard({ project, onClickDetail, motionIndex = 0 }) {
   const displayThumbnail = getYouTubeThumbnail(project.videoUrl) || project.thumbnail;
 
   return (
-    <div className="bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl border border-gray-200/80 transition-all duration-300 transform hover:-translate-y-1.5 flex flex-col group">
+    <article
+      className="motion-list-item card-tilt shimmer-hover card-shimmer-border group flex flex-col overflow-hidden rounded-2xl border border-gray-200/80 bg-white shadow-sm"
+      style={{ '--motion-index': motionIndex }}
+    >
       {/* Thumbnail Wrapper */}
-      <div 
-        className="relative h-48 sm:h-52 overflow-hidden bg-gray-900 cursor-pointer"
+      <button
+        type="button"
+        className="relative h-48 overflow-hidden bg-gray-900 text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-sky-500 sm:h-52"
         onClick={() => onClickDetail(project)}
+        aria-label={`Lihat detail ${project.title}`}
       >
         <img 
           src={displayThumbnail} 
           alt={project.title} 
+          loading="lazy"
+          decoding="async"
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100" 
         />
         <span className="absolute top-3 left-3 bg-gray-900/80 backdrop-blur-md text-gray-200 text-xs font-semibold px-2.5 py-1 rounded-full border border-gray-700">
@@ -25,7 +32,7 @@ export default function ProjectCard({ project, onClickDetail }) {
             <Play size={22} fill="currentColor" className="ml-1" />
           </div>
         </div>
-      </div>
+      </button>
 
       {/* Card Body */}
       <div className="p-5 flex-1 flex flex-col justify-between">
@@ -33,15 +40,15 @@ export default function ProjectCard({ project, onClickDetail }) {
           <h3 className="font-heading text-base font-bold text-gray-800 line-clamp-2 mb-1 group-hover:text-gray-600 transition-colors">
             {project.title}
           </h3>
-          <p className="text-xs text-gray-500 mb-3 font-medium">By {project.student}</p>
+          <p className="mb-3 text-xs font-medium text-gray-600">Oleh {project.student}</p>
 
           <span className="inline-block bg-gray-100 text-gray-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-gray-200 mb-3">
             {project.course}
           </span>
 
           <div className="flex flex-wrap gap-1.5 mb-4">
-            {project.techStack.map((tech, idx) => (
-              <span key={idx} className="bg-gray-100 text-gray-700 text-[11px] font-medium px-2 py-0.5 rounded border border-gray-200">
+            {(project.techStack || []).map((tech, idx) => (
+              <span key={idx} className="rounded border border-gray-200 bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-700">
                 {tech}
               </span>
             ))}
@@ -49,12 +56,12 @@ export default function ProjectCard({ project, onClickDetail }) {
         </div>
 
         <button 
-          className="w-full py-2.5 rounded-xl bg-gray-800 hover:bg-gray-700 text-white font-semibold text-xs transition-colors shadow-sm"
+          className="min-h-11 w-full rounded-xl bg-gray-800 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-gray-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2"
           onClick={() => onClickDetail(project)}
         >
-          View Details
+          Lihat Detail
         </button>
       </div>
-    </div>
+    </article>
   );
 }

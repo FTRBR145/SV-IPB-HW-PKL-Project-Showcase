@@ -1,51 +1,49 @@
 import React from 'react';
 import { ArrowLeft, FileVideo2, Info, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-import Footer from '../components/common/Footer';
 import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
 import ProjectForm from '../components/projects/ProjectForm';
 import StudentSidebar from '../components/student/StudentSidebar';
 import useApp from '../hooks/useApp';
 
 export default function UploadProjectPage() {
   const navigate = useNavigate();
-  const { projects, currentUser, isLoggedIn, logout, adminSettings } = useApp();
+  const { projects, currentUser, isLoggedIn, logout, adminSettings, courses } = useApp();
   const projectCount = projects.filter((project) => project.nim === currentUser.nim).length;
 
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 flex flex-col font-sans">
+    <div className="app-canvas flex h-screen h-dvh flex-col overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom))] font-sans md:pb-0">
       <Navbar
+        courses={courses}
         currentPage="student-upload"
         currentUser={currentUser}
         isLoggedIn={isLoggedIn}
-        onLogout={handleLogout}
+        onLogout={logout}
         onNavigateToAdmin={currentUser.role === 'admin' ? () => navigate('/admin') : undefined}
         onBackToLanding={() => navigate('/')}
       />
 
-      <div className="flex-1 flex overflow-hidden">
-        <StudentSidebar
-          activeItem="upload"
-          projectCount={projectCount}
-          onSelectHome={() => navigate('/student')}
-          onNavigateUpload={() => {}}
-          onSelectMyProjects={() => navigate('/student?tab=my-projects')}
-          onSelectCourse={(course) => navigate(`/student?course=${encodeURIComponent(course)}`)}
-          onNavigateAdmin={() => navigate('/admin')}
-          showAdmin={currentUser.role === 'admin'}
-        />
+      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
+        <div className="flex min-h-[calc(100dvh-4rem)] items-stretch sm:min-h-[calc(100dvh-5rem)]">
+          <StudentSidebar
+            courses={courses}
+            activeItem="upload"
+            projectCount={projectCount}
+            onSelectHome={() => navigate('/student')}
+            onNavigateUpload={() => {}}
+            onSelectMyProjects={() => navigate('/student?tab=my-projects')}
+            onSelectCourse={(course) => navigate(`/student?course=${encodeURIComponent(course)}`)}
+            onNavigateAdmin={() => navigate('/admin')}
+            showAdmin={currentUser.role === 'admin'}
+          />
 
-        <main className="flex-1 overflow-y-auto">
+          <main id="main-content" className="min-w-0 flex-1 overflow-x-hidden">
           <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-7 sm:py-10">
             <button
               type="button"
               onClick={() => navigate('/student')}
-              className="md:hidden inline-flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-slate-900 mb-5"
+              className="mb-5 inline-flex min-h-11 items-center gap-2 rounded-lg px-1 text-sm font-bold text-slate-600 hover:text-slate-900 md:hidden"
             >
               <ArrowLeft size={17} /> Kembali ke Beranda
             </button>
@@ -100,10 +98,11 @@ export default function UploadProjectPage() {
               </aside>
             </div>
           </div>
-        </main>
+          </main>
+        </div>
+        <Footer />
       </div>
 
-      <Footer />
     </div>
   );
 }

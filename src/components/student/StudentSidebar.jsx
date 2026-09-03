@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Binary,
+  BookOpen,
   Cpu,
   FolderGit2,
   GraduationCap,
@@ -9,50 +10,29 @@ import {
   Smartphone,
   Upload,
   Wifi,
-  Wrench
+  Wrench,
+  X
 } from 'lucide-react';
 
-const courses = [
-  {
-    value: 'SISTEM TERTANAM (EMBEDDED SYSTEM)',
-    label: 'Sistem Tertanam',
-    icon: Cpu,
-    activeClass: 'bg-sky-50 text-sky-700',
-    iconClass: 'text-sky-500'
-  },
-  {
-    value: 'APLIKASI MOBILE',
-    label: 'Aplikasi Mobile',
-    icon: Smartphone,
-    activeClass: 'bg-emerald-50 text-emerald-700',
-    iconClass: 'text-emerald-500'
-  },
-  {
-    value: 'PROYEK SISTEM IOT (INTERNET OF THINGS)',
-    label: 'Sistem IoT',
-    icon: Wifi,
-    activeClass: 'bg-indigo-50 text-indigo-700',
-    iconClass: 'text-indigo-500'
-  },
-  {
-    value: 'TEKNOLOGI BENGKEL ELEKTROMEKANIK',
-    label: 'Bengkel Elektromekanik',
-    icon: Wrench,
-    activeClass: 'bg-amber-50 text-amber-700',
-    iconClass: 'text-amber-500'
-  },
-  {
-    value: 'RANGKAIAN LOGIKA DAN TEKNIK DIGITAL',
-    label: 'Rangkaian Logika Digital',
-    icon: Binary,
-    activeClass: 'bg-rose-50 text-rose-700',
-    iconClass: 'text-rose-500'
-  }
-];
+const coursePresentation = {
+  'SISTEM TERTANAM (EMBEDDED SYSTEM)': { label: 'Sistem Tertanam', icon: Cpu },
+  'APLIKASI MOBILE': { label: 'Aplikasi Mobile', icon: Smartphone },
+  'PROYEK SISTEM IOT (INTERNET OF THINGS)': { label: 'Sistem IoT', icon: Wifi },
+  'TEKNOLOGI BENGKEL ELEKTROMEKANIK': { label: 'Bengkel Elektromekanik', icon: Wrench },
+  'RANGKAIAN LOGIKA DAN TEKNIK DIGITAL': { label: 'Rangkaian Logika Digital', icon: Binary }
+};
+const EMPTY_COURSES = [];
 
-const mainItemClass = 'w-full flex items-center gap-3.5 px-3 py-2.5 rounded-xl text-xs font-bold transition-colors';
+function formatCourseLabel(value) {
+  return value
+    .toLocaleLowerCase('id-ID')
+    .replace(/(^|\s)\p{L}/gu, (letter) => letter.toLocaleUpperCase('id-ID'));
+}
+
+const mainItemClass = 'w-full flex min-h-10 items-center gap-3 px-3 rounded-xl text-xs font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500';
 
 export default function StudentSidebar({
+  courses = EMPTY_COURSES,
   activeItem = 'home',
   selectedCategory = 'Semua',
   projectCount = 0,
@@ -63,89 +43,187 @@ export default function StudentSidebar({
   onNavigateAdmin,
   showAdmin = false
 }) {
+  const [isCourseMenuOpen, setIsCourseMenuOpen] = useState(false);
+  const courseItems = useMemo(() => courses.map((value) => ({
+    value,
+    label: coursePresentation[value]?.label || formatCourseLabel(value),
+    icon: coursePresentation[value]?.icon || BookOpen,
+    activeClass: 'bg-sky-50 text-sky-800',
+    iconClass: 'text-sky-600'
+  })), [courses]);
+  const courseIsActive = courseItems.some((course) => course.value === selectedCategory);
+
+  const selectCourse = (course) => {
+    onSelectCourse?.(course);
+    setIsCourseMenuOpen(false);
+  };
+
   return (
-    <aside className="hidden md:flex w-60 p-3 flex-col border-r border-slate-200 bg-white flex-shrink-0 overflow-y-auto select-none">
-      <div className="space-y-1 w-full pb-3 border-b border-slate-100">
-        <button
-          onClick={onSelectHome}
-          className={`${mainItemClass} ${
-            activeItem === 'home'
-              ? 'bg-slate-100 text-slate-900 font-extrabold'
-              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-          }`}
-        >
-          <Home size={17} className={activeItem === 'home' ? 'text-sky-600' : ''} />
-          <span>Beranda</span>
-        </button>
-
-        <button
-          onClick={onNavigateUpload}
-          className={`${mainItemClass} ${
-            activeItem === 'upload'
-              ? 'bg-sky-600 text-white shadow-sm'
-              : 'text-slate-600 hover:bg-sky-50 hover:text-sky-700'
-          }`}
-        >
-          <Upload size={17} />
-          <span>Upload Projek</span>
-        </button>
-
-        <button
-          onClick={onSelectMyProjects}
-          className={`${mainItemClass} ${
-            activeItem === 'my-projects'
-              ? 'bg-slate-100 text-slate-900 font-extrabold'
-              : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-          }`}
-        >
-          <FolderGit2 size={17} className={activeItem === 'my-projects' ? 'text-sky-600' : ''} />
-          <span>Projek Saya</span>
-          <span className="ml-auto bg-sky-100 text-sky-700 text-[10px] px-2 py-0.5 rounded-full font-bold">
-            {projectCount}
-          </span>
-        </button>
-      </div>
-
-      <div className="py-3 border-b border-slate-100 space-y-1">
-        <span className="px-3 text-[11px] font-extrabold text-slate-400 uppercase tracking-wider block mb-1">
-          Mata Kuliah TRK
-        </span>
-        {courses.map(({ value, label, icon: Icon, activeClass, iconClass }) => (
+    <>
+      <aside className="hidden w-64 shrink-0 select-none flex-col overflow-y-auto border-r border-slate-200 bg-white p-4 md:sticky md:top-0 md:flex md:h-[calc(100dvh-5rem)] md:self-start">
+        <nav className="w-full space-y-1 border-b border-slate-100 pb-4" aria-label="Navigasi mahasiswa">
           <button
-            key={value}
-            onClick={() => onSelectCourse?.(value)}
-            className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold text-left truncate transition-colors ${
-              selectedCategory === value
-                ? `${activeClass} font-bold`
+            type="button"
+            onClick={onSelectHome}
+            className={`${mainItemClass} ${
+              activeItem === 'home'
+                ? 'bg-slate-900 text-white'
                 : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
             }`}
           >
-            <Icon size={15} className={`${iconClass} flex-shrink-0`} />
-            <span className="truncate">{label}</span>
+            <Home size={17} className={activeItem === 'home' ? 'text-sky-400' : ''} />
+            <span>Beranda</span>
           </button>
-        ))}
-      </div>
 
-      <div className="pt-3 space-y-1">
-        {showAdmin && (
           <button
-            onClick={onNavigateAdmin}
-            className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 bg-slate-100/70 hover:bg-slate-200 transition-colors"
+            type="button"
+            onClick={onNavigateUpload}
+            className={`${mainItemClass} ${
+              activeItem === 'upload'
+                ? 'bg-sky-600 text-white'
+                : 'text-sky-800 hover:bg-sky-50'
+            }`}
           >
-            <ShieldCheck size={16} className="text-slate-800" />
-            <span>Panel Admin / Dosen</span>
+            <Upload size={17} />
+            <span>Upload Projek</span>
           </button>
-        )}
-        <div className="p-3 bg-sky-50/60 rounded-xl border border-sky-100 mt-3">
-          <div className="flex items-center gap-1.5 text-[11px] font-bold text-sky-900 mb-1">
-            <GraduationCap size={14} className="text-sky-600" />
-            <span>TRK SV IPB 2026</span>
-          </div>
-          <p className="text-[10px] text-sky-700/90 leading-tight">
-            Showcase Tugas Akhir & Praktikum Mahasiswa SV IPB University.
+
+          <button
+            type="button"
+            onClick={onSelectMyProjects}
+            className={`${mainItemClass} ${
+              activeItem === 'my-projects'
+                ? 'bg-slate-900 text-white'
+                : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+            }`}
+          >
+            <FolderGit2 size={17} className={activeItem === 'my-projects' ? 'text-sky-400' : ''} />
+            <span>Projek Saya</span>
+            <span className={`ml-auto rounded-full px-2 py-0.5 text-xs font-bold ${
+              activeItem === 'my-projects' ? 'bg-white/15 text-white' : 'bg-sky-100 text-sky-700'
+            }`}>
+              {projectCount}
+            </span>
+          </button>
+        </nav>
+
+        <div className="space-y-1 border-b border-slate-100 py-4">
+          <p className="mb-2 px-3 text-xs font-extrabold uppercase tracking-[0.12em] text-slate-600">
+            Mata Kuliah TRK
           </p>
+          {courseItems.map(({ value, label, icon: Icon, activeClass, iconClass }) => (
+            <button
+              key={value}
+              type="button"
+              onClick={() => onSelectCourse?.(value)}
+              className={`flex min-h-10 w-full items-center gap-2.5 rounded-xl px-3 text-left text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
+                selectedCategory === value
+                  ? `${activeClass} font-bold`
+                  : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+              }`}
+            >
+              <Icon size={15} className={`${iconClass} shrink-0`} />
+              <span className="truncate">{label}</span>
+            </button>
+          ))}
         </div>
-      </div>
-    </aside>
+
+        <div className="mt-auto space-y-3 pt-4">
+          {showAdmin && (
+            <button
+              type="button"
+              onClick={onNavigateAdmin}
+              className="flex min-h-10 w-full items-center gap-2.5 rounded-xl bg-slate-100 px-3 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
+            >
+              <ShieldCheck size={16} />
+              <span>Panel Admin / Dosen</span>
+            </button>
+          )}
+          <div className="rounded-xl bg-sky-50 px-3 py-3 text-sky-900">
+            <div className="mb-1 flex items-center gap-1.5 text-xs font-bold">
+              <GraduationCap size={14} className="text-sky-600" />
+              <span>TRK SV IPB 2026</span>
+            </div>
+            <p className="text-xs leading-4 text-sky-800">
+              Showcase tugas akhir dan praktikum mahasiswa.
+            </p>
+          </div>
+        </div>
+      </aside>
+
+      {isCourseMenuOpen && (
+        <div className="fixed inset-0 z-40 bg-slate-950/45 md:hidden" onClick={() => setIsCourseMenuOpen(false)}>
+          <section
+            id="student-course-menu"
+            className="absolute inset-x-3 bottom-[calc(5rem+env(safe-area-inset-bottom))] max-h-[70vh] overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl"
+            onClick={(event) => event.stopPropagation()}
+            aria-label="Pilih mata kuliah"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <div>
+                <h2 className="font-heading text-base font-bold text-slate-900">Mata Kuliah TRK</h2>
+                <p className="mt-0.5 text-xs text-slate-600">Pilih kategori projek yang ingin ditampilkan.</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsCourseMenuOpen(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600"
+                aria-label="Tutup pilihan mata kuliah"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="space-y-2">
+              {courseItems.map(({ value, label, icon: Icon, activeClass, iconClass }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => selectCourse(value)}
+                  className={`flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-xs font-bold ${
+                    selectedCategory === value ? activeClass : 'bg-slate-50 text-slate-700'
+                  }`}
+                >
+                  <Icon size={17} className={iconClass} />
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+            {showAdmin && (
+              <button
+                type="button"
+                onClick={onNavigateAdmin}
+                className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-3 text-xs font-bold text-white"
+              >
+                <ShieldCheck size={15} /> Panel Admin
+              </button>
+            )}
+          </section>
+        </div>
+      )}
+
+      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.10)] backdrop-blur md:hidden" aria-label="Navigasi mahasiswa mobile">
+        <div className="mx-auto grid min-h-16 max-w-lg grid-cols-4 items-stretch py-1.5">
+          <button type="button" onClick={onSelectHome} aria-label="Beranda mahasiswa" className={`flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${activeItem === 'home' ? 'text-sky-700' : 'text-slate-600'}`}>
+            <span className={`rounded-xl p-1.5 ${activeItem === 'home' ? 'mobile-nav-active bg-sky-100' : ''}`}><Home size={19} /></span>
+            <span className="max-w-full">Awal</span>
+          </button>
+          <button type="button" onClick={onNavigateUpload} aria-label="Upload projek" className={`flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${activeItem === 'upload' ? 'text-sky-700' : 'text-slate-600'}`}>
+            <span className={`rounded-xl p-1.5 ${activeItem === 'upload' ? 'mobile-nav-active bg-sky-100' : ''}`}><Upload size={19} /></span>
+            <span className="max-w-full">Unggah</span>
+          </button>
+          <button type="button" onClick={onSelectMyProjects} aria-label="Projek saya" className={`relative flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${activeItem === 'my-projects' ? 'text-sky-700' : 'text-slate-600'}`}>
+            <span className={`relative rounded-xl p-1.5 ${activeItem === 'my-projects' ? 'mobile-nav-active bg-sky-100' : ''}`}>
+              <FolderGit2 size={19} />
+              {projectCount > 0 && <span className="absolute -right-2 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-900 px-1 text-xs text-white">{projectCount}</span>}
+            </span>
+            <span className="max-w-full">Projek</span>
+          </button>
+          <button type="button" onClick={() => setIsCourseMenuOpen((open) => !open)} aria-label="Pilih mata kuliah" aria-expanded={isCourseMenuOpen} aria-controls="student-course-menu" className={`flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${isCourseMenuOpen || courseIsActive ? 'text-sky-700' : 'text-slate-600'}`}>
+            <span className={`rounded-xl p-1.5 ${isCourseMenuOpen || courseIsActive ? 'mobile-nav-active bg-sky-100' : ''}`}><BookOpen size={19} /></span>
+            <span className="max-w-full">Kuliah</span>
+          </button>
+        </div>
+      </nav>
+    </>
   );
 }

@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AdminSidebar from '../components/admin/AdminSidebar';
@@ -8,19 +8,20 @@ import {
   ModeratorsPanel,
   ProjectsPanel,
   StudentsPanel,
-  TaxonomyPanel,
-  TechStackPanel
+  TaxonomyPanel
 } from '../components/admin/ManagementPanels';
 import {
   ActivityLogsPanel,
   ReportsPanel,
   SettingsPanel
 } from '../components/admin/InsightsPanels';
-import Footer from '../components/common/Footer';
 import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
+import ProjectDetailModal from '../components/modals/ProjectDetailModal';
 import UploadModal from '../components/modals/UploadModal';
 import { ADMIN_MENU } from '../data/adminNavigation';
 import useApp from '../hooks/useApp';
+import { buildStudentSummaries } from '../utils/dataIntegrity';
 
 const menuDescriptions = {
   dashboard: ['Dashboard Admin', 'Pantau kondisi showcase dan proses moderasi secara real-time.'],
@@ -28,8 +29,6 @@ const menuDescriptions = {
   moderators: ['Manajemen Moderator', 'Atur dosen dan admin yang memiliki akses moderasi.'],
   students: ['Data Mahasiswa', 'Lihat mahasiswa berdasarkan projek dan pengajuan yang tersimpan.'],
   courses: ['Manajemen Mata Kuliah', 'Tambah dan kelola daftar mata kuliah TRK.'],
-  categories: ['Manajemen Kategori', 'Kelola kategori yang digunakan untuk mengelompokkan projek.'],
-  techstack: ['Tech Stack', 'Pantau teknologi yang paling sering digunakan mahasiswa.'],
   reports: ['Laporan', 'Unduh data atau cetak ringkasan operasional showcase.'],
   settings: ['Pengaturan Sistem', 'Atur kebijakan upload, moderasi, dan informasi platform.'],
   logs: ['Log Aktivitas', 'Tinjau jejak perubahan yang dilakukan pada dashboard.']
@@ -66,7 +65,6 @@ export default function AdminDashboard() {
     logout,
     submissions,
     courses,
-    categories,
     moderators,
     adminSettings,
     activityLogs,
@@ -79,8 +77,6 @@ export default function AdminDashboard() {
     deleteModerator,
     addCourse,
     deleteCourse,
-    addCategory,
-    deleteCategory,
     updateAdminSettings,
     clearActivityLogs,
     resetToDefaultData
@@ -91,28 +87,19 @@ export default function AdminDashboard() {
   const [activeMenu, setActiveMenu] = useState(initialMenu);
   const [projectSearch, setProjectSearch] = useState('');
   const [isUploadOpen, setIsUploadOpen] = useState(false);
+  const [previewProject, setPreviewProject] = useState(null);
   const [editingProject, setEditingProject] = useState(null);
 
   const students = useMemo(() => {
-    const studentMap = new Map();
-    [...projects, ...submissions].forEach((item) => {
-      if (!item.nim) return;
-      const existing = studentMap.get(item.nim) || {
-        nim: item.nim,
-        name: item.student,
-        semester: item.semester,
-        projectCount: 0
-      };
-      if (projects.some((project) => project.id === item.id && project.nim === item.nim)) {
-        existing.projectCount += 1;
-      }
-      existing.semester = existing.semester || item.semester;
-      studentMap.set(item.nim, existing);
-    });
-    return [...studentMap.values()].sort((a, b) => a.name.localeCompare(b.name));
+    return buildStudentSummaries(projects, submissions);
   }, [projects, submissions]);
 
-  const pendingCount = submissions.filter((submission) => submission.status === 'pending').length;
+  useEffect(() => {
+    if (requestedSection && !ADMIN_MENU.some((item) => item.id === requestedSection)) {
+      setSearchParams({}, { replace: true });
+    }
+  }, [requestedSection, setSearchParams]);
+
   const [pageTitle, pageDescription] = menuDescriptions[activeMenu];
 
   const selectMenu = (menuId) => {
@@ -135,7 +122,7 @@ export default function AdminDashboard() {
             onSearchChange={setProjectSearch}
             onEdit={setEditingProject}
             onDelete={deleteProject}
-            onView={(project) => navigate(`/project/${project.id}`)}
+            onView={setPreviewProject}
           />
         );
       case 'moderators':
@@ -153,19 +140,6 @@ export default function AdminDashboard() {
             onDelete={deleteCourse}
           />
         );
-      case 'categories':
-        return (
-          <TaxonomyPanel
-            title="Kategori"
-            description="Kategori membantu admin mengelompokkan jenis karya mahasiswa."
-            items={categories}
-            getCount={(category) => projects.filter((project) => project.category === category).length + submissions.filter((submission) => submission.category === category).length}
-            onAdd={addCategory}
-            onDelete={deleteCategory}
-          />
-        );
-      case 'techstack':
-        return <TechStackPanel projects={projects} onFilterProjects={(tech) => { setProjectSearch(tech); selectMenu('projects'); }} />;
       case 'reports':
         return (
           <ReportsPanel
@@ -183,7 +157,7 @@ export default function AdminDashboard() {
           <SettingsPanel
             settings={adminSettings}
             onSave={updateAdminSettings}
-            onReset={() => window.confirm('Reset seluruh data demo? Tindakan ini mengganti data lokal saat ini.') && resetToDefaultData()}
+            onReset={() => window.confirm('Reset seluruh data demo backend? Tindakan ini mengganti data sistem saat ini.') && resetToDefaultData()}
           />
         );
       case 'logs':
@@ -203,55 +177,58 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 text-slate-800 flex flex-col font-sans">
+    <div className="app-workspace flex h-screen h-dvh flex-col overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom))] font-sans md:pb-0">
       <Navbar
+        courses={courses}
         currentPage="admin"
         currentUser={currentUser}
         isLoggedIn={isLoggedIn}
         onOpenUpload={() => setIsUploadOpen(true)}
-        onLogout={() => { logout(); navigate('/'); }}
+        onLogout={logout}
         onNavigateToStudent={() => navigate('/student')}
         onBackToLanding={() => navigate('/')}
       />
 
-      <div className="flex-1 flex overflow-hidden">
-        <AdminSidebar activeMenu={activeMenu} onSelectMenu={selectMenu} pendingCount={pendingCount} onBack={() => navigate('/')} />
+      <div className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto">
+        <div className="flex min-h-[calc(100dvh-4rem)] items-stretch sm:min-h-[calc(100dvh-5rem)]">
+          <AdminSidebar activeMenu={activeMenu} onSelectMenu={selectMenu} onBack={() => navigate('/')} />
 
-        <main className="flex-1 overflow-y-auto bg-slate-100 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1500px] mx-auto space-y-6">
-            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-              <div>
-                <h1 className="font-heading text-xl sm:text-2xl font-black text-slate-900 tracking-tight">{pageTitle}</h1>
-                <p className="text-xs text-slate-500 mt-1">{pageDescription}</p>
-              </div>
-              <div className="flex items-center gap-2">
-                <select
-                  value={activeMenu}
-                  onChange={(event) => selectMenu(event.target.value)}
-                  className="md:hidden flex-1 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold"
-                  aria-label="Pilih menu admin"
-                >
-                  {ADMIN_MENU.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}
-                </select>
-                <button onClick={() => setIsUploadOpen(true)} className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-sm whitespace-nowrap">
-                  <Plus size={15} /> Tambah Projek
-                </button>
+          <main id="main-content" className="app-workspace min-w-0 flex-1 overflow-x-hidden">
+            <div className="p-4 sm:p-6 lg:p-8">
+              <div className="mx-auto min-w-0 max-w-[1500px] space-y-6">
+                <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+                  <div>
+                    <h1 className="font-heading text-xl font-black tracking-tight text-slate-900 sm:text-2xl">{pageTitle}</h1>
+                    <p className="mt-1 text-xs text-slate-600">{pageDescription}</p>
+                  </div>
+                  {activeMenu === 'projects' && (
+                    <button type="button" onClick={() => setIsUploadOpen(true)} className="action-strong inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm whitespace-nowrap">
+                      <Plus size={15} /> Tambah Projek
+                    </button>
+                  )}
+                </div>
+
+                {adminSettings.maintenanceMode && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs font-semibold text-amber-800">
+                    Mode pemeliharaan sedang aktif. Pengaturan ini tersimpan pada dashboard.
+                  </div>
+                )}
+
+                {renderContent()}
               </div>
             </div>
-
-            {adminSettings.maintenanceMode && (
-              <div className="px-4 py-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs font-semibold">
-                Mode pemeliharaan sedang aktif. Pengaturan ini tersimpan pada dashboard.
-              </div>
-            )}
-
-            {renderContent()}
-          </div>
-        </main>
+          </main>
+        </div>
+        <Footer />
       </div>
 
-      <Footer />
       <UploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />
+      {previewProject && (
+        <ProjectDetailModal
+          project={previewProject}
+          onClose={() => setPreviewProject(null)}
+        />
+      )}
       {editingProject && <EditProjectModal key={editingProject.id} project={editingProject} onClose={() => setEditingProject(null)} />}
     </div>
   );

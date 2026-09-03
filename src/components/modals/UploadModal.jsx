@@ -1,21 +1,19 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import ProjectForm from '../projects/ProjectForm';
+import ModalShell from '../common/ModalShell';
 
 export default function UploadModal({ isOpen, onClose, onAddProject }) {
-  if (!isOpen) return null;
-
   return (
-    <div
-      className="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4 sm:p-6 animate-in fade-in duration-200"
-      onClick={onClose}
+    <ModalShell
+      isOpen={isOpen}
+      onClose={onClose}
+      ariaLabel="Unggah projek TRK"
+      panelClassName="max-w-2xl max-h-[90vh] flex flex-col overflow-hidden rounded-3xl"
     >
-      <div
-        className="relative bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[88vh] flex flex-col overflow-hidden border border-slate-100 animate-in zoom-in-95 duration-200"
-        onClick={(event) => event.stopPropagation()}
-      >
         <button
-          className="absolute top-4 right-4 p-1.5 rounded-full text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors z-10"
+          type="button"
+          className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
           onClick={onClose}
           aria-label="Tutup"
         >
@@ -38,7 +36,6 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
             onSuccess={onClose}
           />
         </div>
-      </div>
-    </div>
+    </ModalShell>
   );
 }

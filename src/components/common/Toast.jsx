@@ -20,9 +20,12 @@ export default function Toast() {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-in fade-in slide-in-from-bottom-5 duration-300 pointer-events-auto">
+    <div className="pointer-events-none fixed inset-x-4 bottom-[calc(5.5rem+env(safe-area-inset-bottom))] z-50 flex justify-center md:inset-x-auto md:bottom-6 md:right-6 md:block">
       <div
-        className={`flex items-center gap-3 px-4 py-3 rounded-2xl shadow-2xl border backdrop-blur-md ${
+        role={toast.type === 'error' ? 'alert' : 'status'}
+        aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
+        aria-atomic="true"
+        className={`pointer-events-auto flex max-w-sm animate-in items-center gap-3 rounded-xl border px-4 py-3 shadow-xl backdrop-blur-md duration-300 fade-in slide-in-from-bottom-5 ${
           bgStyles[toast.type] || bgStyles.info
         }`}
       >

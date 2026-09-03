@@ -1,371 +1,402 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DEFAULT_ADMIN_SETTINGS,
   DEFAULT_CATEGORIES,
-  DEFAULT_MODERATORS,
-  INITIAL_ACTIVITY_LOGS,
-  INITIAL_SUBMISSIONS
+  DEFAULT_MODERATORS
 } from '../data/adminData';
 import { initialProjects, SV_COURSES } from '../data/projectsData';
-import { DEFAULT_ADMIN_USER, DEFAULT_STUDENT_USER } from '../data/users';
+import {
+  ApiClientError,
+  apiRequest,
+  getAccessToken,
+  setAccessToken
+} from '../services/apiClient';
 import AppContext from './AppContextStore';
-
-const STORAGE_KEYS = {
-  PROJECTS: 'trk_showcase_projects',
-  USER: 'trk_showcase_user',
-  SUBMISSIONS: 'trk_showcase_submissions',
-  COURSES: 'trk_showcase_courses',
-  CATEGORIES: 'trk_showcase_categories',
-  MODERATORS: 'trk_showcase_moderators',
-  SETTINGS: 'trk_showcase_admin_settings',
-  ACTIVITY_LOGS: 'trk_showcase_activity_logs'
-};
 
 const DEFAULT_COURSES = SV_COURSES.filter((course) => course !== 'Semua Mata Kuliah');
 
-function readStoredValue(key, fallback) {
-  try {
-    const saved = localStorage.getItem(key);
-    return saved ? JSON.parse(saved) : fallback;
-  } catch (error) {
-    console.warn(`Failed to load ${key} from localStorage:`, error);
-    return fallback;
-  }
-}
-
-function formatTimestamp() {
+function formatApiTimestamp(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat('id-ID', {
     dateStyle: 'medium',
     timeStyle: 'short'
-  }).format(new Date());
+  }).format(date);
+}
+
+function normalizeActivityLogs(logs) {
+  return logs.map((log) => ({
+    ...log,
+    timestamp: formatApiTimestamp(log.timestamp)
+  }));
 }
 
 export function AppProvider({ children }) {
-  const [projects, setProjects] = useState(() => {
-    const saved = readStoredValue(STORAGE_KEYS.PROJECTS, initialProjects);
-    return Array.isArray(saved) ? saved : initialProjects;
-  });
-  const [currentUser, setCurrentUser] = useState(() => readStoredValue(STORAGE_KEYS.USER, null));
-  const [submissions, setSubmissions] = useState(() => {
-    const saved = readStoredValue(STORAGE_KEYS.SUBMISSIONS, INITIAL_SUBMISSIONS);
-    return Array.isArray(saved) ? saved : INITIAL_SUBMISSIONS;
-  });
-  const [courses, setCourses] = useState(() => readStoredValue(STORAGE_KEYS.COURSES, DEFAULT_COURSES));
-  const [categories, setCategories] = useState(() =>
-    readStoredValue(STORAGE_KEYS.CATEGORIES, DEFAULT_CATEGORIES)
-  );
-  const [moderators, setModerators] = useState(() =>
-    readStoredValue(STORAGE_KEYS.MODERATORS, DEFAULT_MODERATORS)
-  );
-  const [adminSettings, setAdminSettings] = useState(() => ({
-    ...DEFAULT_ADMIN_SETTINGS,
-    ...readStoredValue(STORAGE_KEYS.SETTINGS, {})
-  }));
-  const [activityLogs, setActivityLogs] = useState(() =>
-    readStoredValue(STORAGE_KEYS.ACTIVITY_LOGS, INITIAL_ACTIVITY_LOGS)
-  );
+  const [projects, setProjects] = useState([]);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [submissions, setSubmissions] = useState([]);
+  const [courses, setCourses] = useState(DEFAULT_COURSES);
+  const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
+  const [moderators, setModerators] = useState(DEFAULT_MODERATORS);
+  const [adminSettings, setAdminSettings] = useState(DEFAULT_ADMIN_SETTINGS);
+  const [activityLogs, setActivityLogs] = useState([]);
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAuthReady, setIsAuthReady] = useState(false);
+  const toastTimerRef = useRef(null);
 
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.PROJECTS, JSON.stringify(projects)), [projects]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.SUBMISSIONS, JSON.stringify(submissions)), [submissions]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.COURSES, JSON.stringify(courses)), [courses]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.CATEGORIES, JSON.stringify(categories)), [categories]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.MODERATORS, JSON.stringify(moderators)), [moderators]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(adminSettings)), [adminSettings]);
-  useEffect(() => localStorage.setItem(STORAGE_KEYS.ACTIVITY_LOGS, JSON.stringify(activityLogs)), [activityLogs]);
   useEffect(() => {
     document.title = adminSettings.siteName;
   }, [adminSettings.siteName]);
 
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(currentUser));
-    } else {
-      localStorage.removeItem(STORAGE_KEYS.USER);
-    }
-  }, [currentUser]);
+  useEffect(() => () => {
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
+  }, []);
 
-  const showToast = (message, type = 'success') => {
+  const showToast = useCallback((message, type = 'success') => {
+    if (toastTimerRef.current) window.clearTimeout(toastTimerRef.current);
     setToast({ show: true, message, type });
-    window.setTimeout(() => setToast({ show: false, message: '', type: 'info' }), 3500);
-  };
+    toastTimerRef.current = window.setTimeout(() => {
+      setToast({ show: false, message: '', type: 'info' });
+      toastTimerRef.current = null;
+    }, 4200);
+  }, []);
 
-  const recordActivity = (message, type = 'info') => {
-    const entry = {
-      id: `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-      type,
-      message,
-      actor: currentUser?.name || 'Sistem',
-      timestamp: formatTimestamp()
+  const loadPublicData = useCallback(async (signal) => {
+    const [projectResponse, courseResponse, categoryResponse, settingResponse] = await Promise.all([
+      apiRequest('/projects?limit=100', { signal }),
+      apiRequest('/courses', { signal }),
+      apiRequest('/categories', { signal }),
+      apiRequest('/settings/public', { signal })
+    ]);
+    setProjects(projectResponse);
+    setCourses(courseResponse);
+    setCategories(categoryResponse);
+    setAdminSettings(settingResponse);
+  }, []);
+
+  const loadPrivateData = useCallback(async (role, signal) => {
+    if (role === 'admin') {
+      const [submissionResponse, moderatorResponse, logResponse] = await Promise.all([
+        apiRequest('/submissions', { signal }),
+        apiRequest('/moderators', { signal }),
+        apiRequest('/activity-logs', { signal })
+      ]);
+      setSubmissions(submissionResponse);
+      setModerators(moderatorResponse);
+      setActivityLogs(normalizeActivityLogs(logResponse));
+      return;
+    }
+
+    if (role === 'student') {
+      const ownSubmissions = await apiRequest('/submissions/mine', { signal });
+      setSubmissions(ownSubmissions);
+    }
+    setModerators([]);
+    setActivityLogs([]);
+  }, []);
+
+  const refreshActivityLogs = useCallback(async () => {
+    try {
+      const logs = await apiRequest('/activity-logs');
+      setActivityLogs(normalizeActivityLogs(logs));
+    } catch (error) {
+      console.warn('Log aktivitas belum dapat disegarkan:', error);
+    }
+  }, []);
+
+  const endSession = useCallback(() => {
+    setAccessToken(null);
+    setCurrentUser(null);
+    setSubmissions([]);
+    setModerators([]);
+    setActivityLogs([]);
+  }, []);
+
+  const reportApiError = useCallback((error, fallbackMessage) => {
+    if (error instanceof ApiClientError && error.status === 401) endSession();
+    showToast(error?.message || fallbackMessage, 'error');
+    return false;
+  }, [endSession, showToast]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    const initialize = async () => {
+      setIsLoading(true);
+      try {
+        await loadPublicData(controller.signal);
+      } catch (error) {
+        if (active) {
+          setProjects(initialProjects);
+          showToast(`${error.message} Data demo lokal ditampilkan sementara.`, 'error');
+        }
+      }
+
+      const storedToken = getAccessToken();
+      if (storedToken && active) {
+        try {
+          const user = await apiRequest('/auth/me', { signal: controller.signal });
+          if (active) {
+            setCurrentUser(user);
+            await loadPrivateData(user.role, controller.signal);
+          }
+        } catch (error) {
+          if (active) {
+            endSession();
+            showToast(
+              error.status === 401
+                ? 'Sesi telah berakhir. Silakan masuk kembali.'
+                : error.message,
+              'error'
+            );
+          }
+        }
+      }
+
+      if (active) {
+        setIsLoading(false);
+        setIsAuthReady(true);
+      }
     };
-    setActivityLogs((previous) => [entry, ...previous].slice(0, 100));
+
+    initialize();
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [endSession, loadPrivateData, loadPublicData, showToast]);
+
+  const loginForRole = async (expectedRole, credentials) => {
+    setIsLoading(true);
+    try {
+      const session = await apiRequest('/auth/login', {
+        method: 'POST',
+        token: null,
+        body: {
+          identifier: credentials.username.trim(),
+          password: credentials.password
+        }
+      });
+      if (session.user.role !== expectedRole) {
+        throw new ApiClientError(
+          expectedRole === 'admin'
+            ? 'Akun tersebut bukan akun administrator.'
+            : 'Akun tersebut bukan akun mahasiswa.',
+          { status: 403, code: 'ROLE_MISMATCH' }
+        );
+      }
+      setAccessToken(session.accessToken);
+      setCurrentUser(session.user);
+      await Promise.all([loadPublicData(), loadPrivateData(session.user.role)]);
+      showToast(`Selamat datang, ${session.user.name}!`);
+      return session.user;
+    } catch (error) {
+      endSession();
+      throw error;
+    } finally {
+      setIsLoading(false);
+      setIsAuthReady(true);
+    }
   };
 
-  const loginAsStudent = () => {
-    setCurrentUser(DEFAULT_STUDENT_USER);
-    showToast(`Selamat datang, ${DEFAULT_STUDENT_USER.name}!`);
-  };
-
-  const loginAsAdmin = () => {
-    setCurrentUser(DEFAULT_ADMIN_USER);
-    showToast('Masuk sebagai Administrator TRK');
-  };
+  const loginAsStudent = (credentials) => loginForRole('student', credentials);
+  const loginAsAdmin = (credentials) => loginForRole('admin', credentials);
 
   const logout = () => {
-    setCurrentUser(null);
-    showToast('Anda telah berhasil keluar.', 'info');
+    endSession();
+    window.location.replace('/');
   };
 
-  const addProject = (projectData) => {
-    const authorName = currentUser?.role === 'student'
-      ? currentUser.name
-      : projectData.student || currentUser?.name || 'Mahasiswa TRK';
-    const authorNim = currentUser?.role === 'student'
-      ? currentUser.nim
-      : projectData.nim || currentUser?.nim || '-';
-
-    if (adminSettings.moderationRequired && currentUser?.role === 'student') {
-      const newSubmission = {
-        ...projectData,
-        id: submissions.length > 0 ? Math.max(...submissions.map((item) => Number(item.id))) + 1 : 1,
-        student: authorName,
-        nim: authorNim,
-        desc: projectData.description,
-        status: 'pending',
-        date: projectData.date || 'Hari ini'
-      };
-      setSubmissions((previous) => [newSubmission, ...previous]);
-      recordActivity(`Pengajuan baru diterima dari ${authorName}.`, 'submission');
-      showToast('Projek dikirim dan menunggu persetujuan admin.', 'info');
-      return newSubmission;
+  const addProject = async (projectData) => {
+    try {
+      const result = await apiRequest('/projects', { method: 'POST', body: projectData });
+      if (result.type === 'submission') {
+        setSubmissions((previous) => [result.item, ...previous]);
+        showToast('Projek dikirim dan menunggu persetujuan admin.', 'info');
+      } else {
+        setProjects((previous) => [result.item, ...previous]);
+        showToast('Video projek berhasil disimpan dan dipublikasikan!');
+      }
+      return result.item;
+    } catch (error) {
+      reportApiError(error, 'Projek belum dapat disimpan.');
+      throw error;
     }
-
-    const newProject = {
-      ...projectData,
-      id: projects.length > 0 ? Math.max(...projects.map((project) => Number(project.id))) + 1 : 1,
-      student: authorName,
-      nim: authorNim,
-      prodi: 'Teknik Komputer / Teknologi Rekayasa Komputer',
-      prodiCode: 'TRK',
-      date: projectData.date || 'Hari ini',
-      year: projectData.year || adminSettings.academicYear,
-      comments: projectData.comments || []
-    };
-    setProjects((previous) => [newProject, ...previous]);
-    recordActivity(`Projek “${newProject.title}” dipublikasikan.`, 'project');
-    showToast('Video projek berhasil disimpan dan dipublikasikan!');
-    return newProject;
   };
 
-  const updateProject = (projectId, updates) => {
-    const target = projects.find((project) => project.id === projectId);
-    if (!target) return false;
-    setProjects((previous) =>
-      previous.map((project) => (project.id === projectId ? { ...project, ...updates } : project))
-    );
-    recordActivity(`Projek “${target.title}” diperbarui.`, 'project');
-    showToast('Perubahan projek berhasil disimpan.');
-    return true;
-  };
-
-  const deleteProject = (projectId) => {
-    const target = projects.find((project) => project.id === projectId);
-    if (!target) return false;
-    setProjects((previous) => previous.filter((project) => project.id !== projectId));
-    recordActivity(`Projek “${target.title}” dihapus.`, 'danger');
-    showToast('Projek berhasil dihapus.', 'info');
-    return true;
-  };
-
-  const approveSubmission = (submissionId) => {
-    const target = submissions.find((submission) => submission.id === submissionId);
-    if (!target || target.status !== 'pending') return false;
-
-    const approvedProject = {
-      id: projects.length > 0 ? Math.max(...projects.map((project) => Number(project.id))) + 1 : 1,
-      title: target.title,
-      student: target.student,
-      nim: target.nim,
-      prodi: 'Teknik Komputer / Teknologi Rekayasa Komputer',
-      prodiCode: 'TRK',
-      course: target.course,
-      category: target.category || categories[0],
-      semester: target.semester || 4,
-      techStack: target.techStack || ['ESP32', 'Sensor', 'IoT'],
-      videoUrl: target.videoUrl || 'https://www.youtube.com/embed/9KxU30uM3qM',
-      thumbnail: target.thumbnail,
-      supervisor: target.supervisor || 'Dosen Pembimbing TRK',
-      year: target.year || adminSettings.academicYear,
-      date: target.date || 'Hari ini',
-      description: target.description || target.desc,
-      comments: []
-    };
-
-    setProjects((previous) => [approvedProject, ...previous]);
-    setSubmissions((previous) => previous.map((submission) =>
-      submission.id === submissionId
-        ? { ...submission, status: 'approved', moderatedAt: formatTimestamp() }
-        : submission
-    ));
-    recordActivity(`Pengajuan ${target.student} disetujui dan dipublikasikan.`, 'success');
-    showToast(`Projek dari ${target.student} berhasil disetujui dan dipublikasikan!`);
-    return true;
-  };
-
-  const rejectSubmission = (submissionId) => {
-    const target = submissions.find((submission) => submission.id === submissionId);
-    if (!target || target.status !== 'pending') return false;
-    setSubmissions((previous) => previous.map((submission) =>
-      submission.id === submissionId
-        ? { ...submission, status: 'rejected', moderatedAt: formatTimestamp() }
-        : submission
-    ));
-    recordActivity(`Pengajuan ${target.student} ditolak.`, 'danger');
-    showToast('Pengajuan projek telah ditolak.', 'info');
-    return true;
-  };
-
-  const restoreSubmission = (submissionId) => {
-    const target = submissions.find((submission) => submission.id === submissionId);
-    if (!target) return false;
-    setSubmissions((previous) => previous.map((submission) =>
-      submission.id === submissionId
-        ? { ...submission, status: 'pending', moderatedAt: null }
-        : submission
-    ));
-    recordActivity(`Pengajuan ${target.student} dikembalikan ke antrean moderasi.`, 'submission');
-    showToast('Pengajuan dikembalikan ke status menunggu.', 'info');
-    return true;
-  };
-
-  const addModerator = (moderatorData) => {
-    const email = moderatorData.email.trim().toLowerCase();
-    if (moderators.some((moderator) => moderator.email.toLowerCase() === email)) {
-      showToast('Email moderator sudah terdaftar.', 'error');
-      return false;
+  const updateProject = async (projectId, updates) => {
+    try {
+      const project = await apiRequest(`/projects/${projectId}`, {
+        method: 'PATCH',
+        body: updates
+      });
+      setProjects((previous) => previous.map((item) => item.id === project.id ? project : item));
+      await refreshActivityLogs();
+      showToast('Perubahan projek berhasil disimpan.');
+      return project;
+    } catch (error) {
+      return reportApiError(error, 'Perubahan projek gagal disimpan.');
     }
-    const moderator = {
-      name: moderatorData.name.trim(),
-      nip: moderatorData.nip.trim(),
-      email,
-      id: moderators.length > 0 ? Math.max(...moderators.map((item) => Number(item.id))) + 1 : 1,
-      status: 'active'
-    };
-    setModerators((previous) => [...previous, moderator]);
-    recordActivity(`Moderator ${moderator.name} ditambahkan.`, 'user');
-    showToast('Moderator berhasil ditambahkan.');
-    return moderator;
   };
 
-  const toggleModerator = (moderatorId) => {
-    const target = moderators.find((moderator) => moderator.id === moderatorId);
-    const activeCount = moderators.filter((moderator) => moderator.status === 'active').length;
-    if (target?.status === 'active' && activeCount <= 1) {
-      showToast('Minimal satu moderator harus tetap aktif.', 'error');
-      return false;
+  const deleteProject = async (projectId) => {
+    try {
+      await apiRequest(`/projects/${projectId}`, { method: 'DELETE' });
+      setProjects((previous) => previous.filter((project) => project.id !== projectId));
+      await refreshActivityLogs();
+      showToast('Projek berhasil dihapus.', 'info');
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Projek gagal dihapus.');
     }
-    setModerators((previous) => previous.map((moderator) =>
-      moderator.id === moderatorId
-        ? { ...moderator, status: moderator.status === 'active' ? 'inactive' : 'active' }
-        : moderator
-    ));
-    recordActivity('Status moderator diperbarui.', 'user');
-    showToast('Status moderator berhasil diperbarui.', 'info');
-    return true;
   };
 
-  const deleteModerator = (moderatorId) => {
-    const target = moderators.find((moderator) => moderator.id === moderatorId);
-    if (!target || moderators.length <= 1) {
-      showToast('Minimal satu moderator harus tetap aktif.', 'error');
-      return false;
+  const approveSubmission = async (submissionId) => {
+    try {
+      const result = await apiRequest(`/submissions/${submissionId}/approve`, { method: 'POST' });
+      setSubmissions((previous) => previous.map((item) =>
+        item.id === result.submission.id ? result.submission : item
+      ));
+      setProjects((previous) => [result.project, ...previous]);
+      await refreshActivityLogs();
+      showToast(`Projek dari ${result.submission.student} berhasil disetujui dan dipublikasikan!`);
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Pengajuan gagal disetujui.');
     }
-    setModerators((previous) => previous.filter((moderator) => moderator.id !== moderatorId));
-    recordActivity(`Moderator ${target.name} dihapus.`, 'danger');
-    showToast('Moderator berhasil dihapus.', 'info');
-    return true;
   };
 
-  const addCourse = (courseName) => {
-    const normalized = courseName.trim().toUpperCase();
-    if (!normalized || courses.includes(normalized)) {
-      showToast('Nama mata kuliah kosong atau sudah tersedia.', 'error');
-      return false;
+  const rejectSubmission = async (submissionId) => {
+    try {
+      const result = await apiRequest(`/submissions/${submissionId}/reject`, { method: 'POST' });
+      setSubmissions((previous) => previous.map((item) =>
+        item.id === result.submission.id ? result.submission : item
+      ));
+      await refreshActivityLogs();
+      showToast('Pengajuan projek telah ditolak.', 'info');
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Pengajuan gagal ditolak.');
     }
-    setCourses((previous) => [...previous, normalized]);
-    recordActivity(`Mata kuliah “${normalized}” ditambahkan.`, 'taxonomy');
-    showToast('Mata kuliah berhasil ditambahkan.');
-    return true;
   };
 
-  const deleteCourse = (courseName) => {
-    const inUse = projects.some((project) => project.course === courseName) ||
-      submissions.some((submission) => submission.course === courseName);
-    if (inUse) {
-      showToast('Mata kuliah masih digunakan oleh projek atau pengajuan.', 'error');
-      return false;
+  const restoreSubmission = async (submissionId) => {
+    try {
+      const result = await apiRequest(`/submissions/${submissionId}/restore`, { method: 'POST' });
+      setSubmissions((previous) => previous.map((item) =>
+        item.id === result.submission.id ? result.submission : item
+      ));
+      await refreshActivityLogs();
+      showToast('Pengajuan dikembalikan ke status menunggu.', 'info');
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Pengajuan gagal dipulihkan.');
     }
-    setCourses((previous) => previous.filter((course) => course !== courseName));
-    recordActivity(`Mata kuliah “${courseName}” dihapus.`, 'taxonomy');
-    showToast('Mata kuliah berhasil dihapus.', 'info');
-    return true;
   };
 
-  const addCategory = (categoryName) => {
-    const normalized = categoryName.trim();
-    if (!normalized || categories.some((category) => category.toLowerCase() === normalized.toLowerCase())) {
-      showToast('Nama kategori kosong atau sudah tersedia.', 'error');
-      return false;
+  const addModerator = async (moderatorData) => {
+    try {
+      const moderator = await apiRequest('/moderators', { method: 'POST', body: moderatorData });
+      setModerators((previous) => [...previous, moderator]);
+      await refreshActivityLogs();
+      showToast('Moderator berhasil ditambahkan.');
+      return moderator;
+    } catch (error) {
+      return reportApiError(error, 'Moderator gagal ditambahkan.');
     }
-    setCategories((previous) => [...previous, normalized]);
-    recordActivity(`Kategori “${normalized}” ditambahkan.`, 'taxonomy');
-    showToast('Kategori berhasil ditambahkan.');
-    return true;
   };
 
-  const deleteCategory = (categoryName) => {
-    const inUse = projects.some((project) => project.category === categoryName) ||
-      submissions.some((submission) => submission.category === categoryName);
-    if (inUse) {
-      showToast('Kategori masih digunakan oleh projek atau pengajuan.', 'error');
-      return false;
+  const toggleModerator = async (moderatorId) => {
+    try {
+      const moderator = await apiRequest(`/moderators/${moderatorId}/status`, { method: 'PATCH' });
+      setModerators((previous) => previous.map((item) => item.id === moderator.id ? moderator : item));
+      await refreshActivityLogs();
+      showToast('Status moderator berhasil diperbarui.', 'info');
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Status moderator gagal diperbarui.');
     }
-    setCategories((previous) => previous.filter((category) => category !== categoryName));
-    recordActivity(`Kategori “${categoryName}” dihapus.`, 'taxonomy');
-    showToast('Kategori berhasil dihapus.', 'info');
-    return true;
   };
 
-  const updateAdminSettings = (updates) => {
-    setAdminSettings((previous) => ({ ...previous, ...updates }));
-    recordActivity('Pengaturan dashboard diperbarui.', 'settings');
-    showToast('Pengaturan berhasil disimpan.');
+  const deleteModerator = async (moderatorId) => {
+    try {
+      await apiRequest(`/moderators/${moderatorId}`, { method: 'DELETE' });
+      setModerators((previous) => previous.filter((moderator) => moderator.id !== moderatorId));
+      await refreshActivityLogs();
+      showToast('Moderator berhasil dihapus.', 'info');
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Moderator gagal dihapus.');
+    }
   };
 
-  const clearActivityLogs = () => {
-    setActivityLogs([]);
-    showToast('Log aktivitas dibersihkan.', 'info');
+  const addCourse = async (courseName) => {
+    try {
+      const result = await apiRequest('/courses', { method: 'POST', body: { name: courseName } });
+      setCourses((previous) => [...previous, result.name]);
+      await refreshActivityLogs();
+      showToast('Mata kuliah berhasil ditambahkan.');
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Mata kuliah gagal ditambahkan.');
+    }
   };
 
-  const resetToDefaultData = () => {
-    setProjects(initialProjects);
-    setSubmissions(INITIAL_SUBMISSIONS);
-    setCourses(DEFAULT_COURSES);
-    setCategories(DEFAULT_CATEGORIES);
-    setModerators(DEFAULT_MODERATORS);
-    setAdminSettings(DEFAULT_ADMIN_SETTINGS);
-    setActivityLogs(INITIAL_ACTIVITY_LOGS);
-    showToast('Seluruh data demo berhasil direset.', 'info');
+  const deleteCourse = async (courseName) => {
+    try {
+      await apiRequest(`/courses/${encodeURIComponent(courseName)}`, { method: 'DELETE' });
+      setCourses((previous) => previous.filter((course) => course !== courseName));
+      await refreshActivityLogs();
+      showToast('Mata kuliah berhasil dihapus.', 'info');
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Mata kuliah gagal dihapus.');
+    }
+  };
+
+  const updateAdminSettings = async (updates) => {
+    try {
+      const settings = await apiRequest('/settings', { method: 'PATCH', body: updates });
+      setAdminSettings(settings);
+      await refreshActivityLogs();
+      showToast('Pengaturan berhasil disimpan.');
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Pengaturan gagal disimpan.');
+    }
+  };
+
+  const clearActivityLogs = async () => {
+    try {
+      await apiRequest('/activity-logs', { method: 'DELETE' });
+      await refreshActivityLogs();
+      showToast('Log aktivitas dibersihkan.', 'info');
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Log aktivitas gagal dibersihkan.');
+    }
+  };
+
+  const resetToDefaultData = async () => {
+    try {
+      await apiRequest('/system/reset', { method: 'POST' });
+      await Promise.all([loadPublicData(), loadPrivateData(currentUser?.role)]);
+      showToast('Seluruh data demo backend berhasil direset.', 'info');
+      return true;
+    } catch (error) {
+      return reportApiError(error, 'Data demo gagal direset.');
+    }
   };
 
   return (
     <AppContext.Provider value={{
       projects,
-      setProjects,
       currentUser,
-      setCurrentUser,
       isLoggedIn: Boolean(currentUser),
+      isAuthReady,
       submissions,
       courses,
       categories,
@@ -374,7 +405,6 @@ export function AppProvider({ children }) {
       activityLogs,
       toast,
       isLoading,
-      setIsLoading,
       showToast,
       loginAsStudent,
       loginAsAdmin,
@@ -390,8 +420,6 @@ export function AppProvider({ children }) {
       deleteModerator,
       addCourse,
       deleteCourse,
-      addCategory,
-      deleteCategory,
       updateAdminSettings,
       clearActivityLogs,
       resetToDefaultData

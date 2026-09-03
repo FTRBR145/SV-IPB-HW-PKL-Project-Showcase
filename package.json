@@ -5,11 +5,17 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:frontend": "vite",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:full": "concurrently -k -n FRONTEND,BACKEND -c cyan,green \"npm:dev:frontend\" \"npm:dev:backend\"",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test"
   },
   "dependencies": {
+    "datatables.net-dt": "^3.0.2",
+    "datatables.net-react": "^1.0.2",
     "lucide-react": "^1.28.0",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
@@ -22,6 +28,7 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.4",
     "autoprefixer": "^10.5.4",
+    "concurrently": "^9.2.1",
     "oxlint": "^1.75.0",
     "postcss": "^8.5.26",
     "tailwindcss": "^4.3.3",
