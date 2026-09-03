@@ -1,104 +1,174 @@
-# Student Project Showcase - Sekolah Vokasi IPB 🎓📹
+# Student Project Showcase - TRK Sekolah Vokasi IPB 🎓📹
 
 ![Vite](https://img.shields.io/badge/Vite-8.2.0-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![React](https://img.shields.io/badge/React-19.0.0-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![JavaScript](https://img.shields.io/badge/JavaScript-ES6+-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+![React](https://img.shields.io/badge/React-19.2.8-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![Node.js](https://img.shields.io/badge/Node.js-20+-339933?style=for-the-badge&logo=node.js&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-v4.3-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
 ![IPB University](https://img.shields.io/badge/IPB_University-Sekolah_Vokasi-003366?style=for-the-badge)
 
-Platform web **Showcase Video Project Semester dan Projek Akhir Mahasiswa Sekolah Vokasi (SV) IPB University**. Aplikasi ini dirancang untuk menampilkan hasil pembelajaran praktikum secara nyata, memamerkan karya inovatif mahasiswa, serta menghubungkan mahasiswa dengan dosen dan mitra industri.
+Platform web **Showcase Video Projek Praktikum dan Tugas Akhir Mahasiswa Program Studi Teknologi Rekayasa Komputer (TRK) Sekolah Vokasi IPB University**. Aplikasi ini dirancang sebagai ruang digital terpusat untuk memamerkan inovasi sistem IoT, mikrokontroler, jaringan komputer, dan sistem tertanam, sekaligus menyediakan alur moderasi karya yang terkelola antara mahasiswa, dosen, dan publik.
 
 ---
 
 ## 📌 Fitur Utama
 
-- **🎨 Identitas & Branding SV IPB**:
-  - Desain visual berbasis skema warna resmi **Biru IPB** (`#003366`) dan **Magenta SV IPB** (`#e30613`).
-  - Font modern *Outfit* & *Inter* dengan sentuhan *glassmorphism* dan animasi mikro.
-- **🚀 Hero & Introduction Banner**:
-  - Headline utama **"Preview Project Video Semester"** sesuai rancangan mockup rujukan.
-  - Latar belakang foto visual Kampus Sekolah Vokasi IPB.
-- **📊 Stats Counter Bar**:
-  - Indikator pencapaian platform (250+ Projects, 450+ Students, 85+ Tutors).
-- **🔍 Filter Semester & Program Studi Interaktif**:
-  - Filter tab cepat **Semester 1 hingga Semester 8**.
-  - Filter Program Studi (TRPL, KMN, INF, TEK, MAB, dll.).
-  - Bilah pencarian real-time berdasarkan judul, mahasiswa, mata kuliah, atau tech stack.
-- **🎬 Modal Pemutar Video & Detail Projek**:
-  - Pemutar video terintegrasi (iframe YouTube / HTML5).
-  - Rincian dosen pembimbing, mata kuliah, deskripsi & tujuan projek, serta tag teknologi.
-- **📤 Modal Unggah Projek Mahasiswa**:
-  - Form interaktif bagi mahasiswa untuk menambah karya projek semester secara langsung.
-- **🔐 Portal Login SSO IPB**:
-  - Modal login autentikasi civitas akademika Mahasiswa & Dosen.
+### 1. 🏠 Landing Page Publik
+- **Hero Banner & Slideshow**: Transisi foto kegiatan mahasiswa TRK dengan indikator durasi, kontrol *Play/Pause*, efek parallax halus, dan floating badge institusi.
+- **Dynamic Stats Counter Bar**: Indikator capaian (*Total Projek, Mahasiswa, Mata Kuliah, Teknologi*) yang dihitung dinamis dari data dan memiliki animasi *count-up* saat digulir ke viewport.
+- **Katalog & Filter Projek Interaktif**:
+  - Filter tab cepat **Semester 1 hingga Semester 8** dan **Semua Semester**.
+  - Filter kategori mata kuliah unggulan TRK (IoT, Sistem Tertanam, Aplikasi Mobile, Bengkel Elektromekanik, Rangkaian Logika Digital).
+  - Kolom pencarian real-time (berdasarkan judul, nama mahasiswa/NIM, mata kuliah, dan teknologi).
+- **Modal Pemutar Video & Detail Projek**:
+  - Pemutar video YouTube responsif terintegrasi.
+  - Rincian metadata lengkap (nama mahasiswa, NIM, dosen pembimbing, tanggal/tahun, deskripsi, dan *tech stack pills*).
+- **Footer Kampus Lengkap**: 4 kolom informasi profil TRK, navigasi cepat, 5 fokus keahlian, alamat detail Kampus IPB Bogor & Sukabumi, serta kontak resmi.
+
+### 2. 🎓 Portal Mahasiswa (`/student` & `/student/upload`)
+- **Layout App-Shell Khusus**: Sidebar navigasi kategori mata kuliah, pemisahan tab *"Semua Projek"* dan *"Projek Saya"*.
+- **Formulir Pengunggahan Projek**:
+  - Input judul, mata kuliah, semester, dosen pembimbing, deskripsi, dan tag teknologi.
+  - Validasi URL video YouTube dengan *live video embed preview* otomatis.
+  - Alur moderasi transparan: pengajuan langsung masuk ke antrean moderasi admin sebelum diterbitkan.
+- **Compact Portal Footer**: Footer 1 baris yang rapi di bagian bawah scroll container agar tidak memakan area kerja.
+
+### 3. 🛡️ Dashboard Admin & Dosen (`/admin`)
+- **Antrean Moderasi Pengajuan**: Meninjau pengajuan karya mahasiswa dengan opsi **Setujui (Approve)** atau **Tolak (Reject)** disertai catatan revisi.
+- **Manajemen Data Projek & Civitas**: Kelola projek terpublikasi, direktori mahasiswa, akun moderator/dosen, katalog mata kuliah, dan kategori sistem.
+- **Audit Log & Pengaturan Sistem**: Riwayat log aktivitas operasional dan kontrol pengaturan publik/mode pemeliharaan.
+- **DataTables Integration**: Fitur pencarian instan, sorting multi-kolom, dan pagination tabel data admin.
+
+### 4. ✨ Desain, Mikro-animasi & Aksesibilitas
+- **Scroll-Reveal Animations**: Elemen heading dan konten muncul bertahap (*fade-up*, *underline reveal*, *staggered entrance*) saat digulir.
+- **Card Micro-interactions**: Efek interaktif **3D Tilt Perspective** dan kilau cahaya (**Shimmer Border Sweep**) saat kursor diarahkan ke kartu projek.
+- **Aksesibilitas (a11y)**: Mendukung navigasi keyboard, modal focus trap, skip-to-content link, serta sepenuhnya menghormati preferensi OS **`prefers-reduced-motion`**.
 
 ---
 
-## 🛠️ Teknologi Yang Digunakan
+## 🛠️ Arsitektur & Teknologi
 
-- **Core Framework**: React 19 + Vite 8
-- **Styling**: Vanilla CSS Modern (CSS Variables, Flexbox, CSS Grid, Glassmorphism, Animations)
-- **Icons**: Lucide React Icons
-- **Typography**: Google Fonts (*Outfit* & *Inter*)
+### Frontend
+- **Framework**: React 19 + Vite 8
+- **Routing**: React Router v7 (dengan `ProtectedRoute` berbasis peran)
+- **Styling**: Tailwind CSS v4 + Vanilla CSS Design Tokens
+- **Icons**: Lucide React
+- **Table Component**: DataTables.net React
+
+### Backend (REST API)
+- **Runtime**: Node.js 20+
+- **Server Framework**: Express.js
+- **Autentikasi**: JSON Web Token (JWT) & bcrypt hashing
+- **Arsitektur Data**: Repository pattern terstruktur (in-memory / pluggable database)
 
 ---
 
-## 📁 Struktur Direktori Projek
+## 📁 Struktur Direktori
 
 ```text
-d:\PKL IPB\
-├── public/                 # Static public assets
-├── src/
-│   ├── components/         # Modular React Components
-│   │   ├── Navbar.jsx              # Navigation Bar & Branding
-│   │   ├── HeroSection.jsx         # Main Hero Banner
-│   │   ├── AboutSection.jsx        # SV IPB About & Mission
-│   │   ├── StatsBar.jsx            # Platform Statistics Counter
-│   │   ├── ProjectShowcase.jsx     # Filterable Projects Showcase
-│   │   ├── ProjectCard.jsx         # Project Thumbnail & Info Card
-│   │   ├── ProjectDetailModal.jsx  # Video Player & Comments Modal
-│   │   ├── UploadModal.jsx         # New Project Submission Form
-│   │   ├── LoginModal.jsx          # Student/Lecturer Auth Modal
-│   │   └── Footer.jsx              # SV IPB Campus Footer
-│   ├── data/
-│   │   └── projectsData.js         # Mock Dataset & Course Metadata
-│   ├── App.jsx             # Main Application Logic & States
-│   ├── index.css           # Global Design System & Variables
-│   └── main.jsx            # React Root Entrypoint
-├── index.html              # HTML Root & SEO Meta Tags
-├── package.json            # Project Dependencies & Scripts
-└── README.md               # Documentation
+SV-IPB-HW-PKL-Project-Showcase/
+├── backend/                        # Backend REST API (Express.js)
+│   ├── src/
+│   │   ├── config/                 # Konfigurasi environment & konstanta
+│   │   ├── data/                   # Initial seed data (projek, users, courses)
+│   │   ├── middleware/             # Auth JWT & Role authorization guard
+│   │   ├── repositories/           # Data layer (Repository pattern)
+│   │   ├── routes/                 # API Route handlers (/projects, /auth, /submissions, dll)
+│   │   ├── schemas/                # Skema validasi input (422 response)
+│   │   ├── app.js                  # Express app setup & CORS
+│   │   └── server.js               # Server entry point (Port 3000)
+│   ├── test/                       # Backend automated unit tests
+│   └── package.json
+├── public/                         # Aset publik statis (Logo SV IPB, foto kegiatan TRK)
+├── src/                            # Frontend Source Code (React 19)
+│   ├── components/
+│   │   ├── admin/                  # Komponen panel dashboard admin
+│   │   ├── auth/                   # ProtectedRoute role guard
+│   │   ├── common/                 # Navbar, Footer, ModalShell, Toast, ErrorBoundary
+│   │   ├── landing/                # HeroSection, AboutSection, StatsBar, MataKuliah, Showcase
+│   │   ├── modals/                 # LoginModal, ProjectDetailModal, UploadModal
+│   │   ├── projects/               # ProjectCard, ProjectForm
+│   │   └── student/                # StudentSidebar
+│   ├── context/                    # AppContext (Global State & API Synchronization)
+│   ├── data/                       # Fallback demo datasets
+│   ├── hooks/                      # useApp, useScrollReveal, useInViewOnce
+│   ├── pages/                      # LandingPage, StudentHome, UploadProjectPage, AdminDashboard
+│   ├── App.jsx                     # Route definitions & layout wrappers
+│   ├── index.css                   # Tailwind v4 directives & keyframe animations
+│   └── main.jsx                    # React root entry point
+├── tests/                          # Frontend & integration tests
+├── index.html                      # HTML root template & SEO meta tags
+├── vite.config.js                  # Vite configuration & backend proxy
+├── package.json                    # Root package configuration
+└── README.md                       # Dokumentasi utama proyek
 ```
 
 ---
 
-## 💻 Panduan Menjalankan Secara Lokal
+## 💻 Panduan Instalasi & Menjalankan
 
 ### 1. Prasyarat
-Pastikan kamu telah menginstall [Node.js](https://nodejs.org/) (versi >= 20).
+- [Node.js](https://nodejs.org/) versi **>= 20.0.0**
+- Git
 
-### 2. Instalasi Dependency
+### 2. Kloning Repositori
 ```bash
-# Clone repositori
 git clone https://github.com/FTRBR145/SV-IPB-HW-PKL-Project-Showcase.git
-
-# Masuk ke direktori projek
 cd SV-IPB-HW-PKL-Project-Showcase
+```
 
-# Install dependency frontend dan backend
+### 3. Instalasi Dependensi
+```bash
+# Install dependensi frontend (root)
 npm install
+
+# Install dependensi backend
 npm --prefix backend install
 ```
 
-### 3. Menjalankan Frontend dan Backend
+### 4. Konfigurasi Environment
+Salin template konfigurasi environment:
+```bash
+# Frontend
+copy .env.example .env
+
+# Backend
+copy backend\.env.example backend\.env
+```
+
+### 5. Menjalankan Fullstack (Frontend + Backend)
+Jalankan kedua service secara bersamaan menggunakan script:
 ```bash
 npm run dev:full
 ```
-Akses aplikasi melalui peramban web di `http://localhost:5173/`. Vite meneruskan request `/api` ke backend pada `http://127.0.0.1:3000`.
+- **Frontend**: `http://localhost:5173/`
+- **Backend API**: `http://localhost:3000/api` (diproyeksikan otomatis via Vite proxy)
 
-Konfigurasi frontend tersedia di `.env.example`, sedangkan konfigurasi dan dokumentasi API tersedia di [`backend/.env.example`](backend/.env.example) dan [`backend/README.md`](backend/README.md). Backend saat ini memakai penyimpanan in-memory sampai database ditambahkan.
+*(Atau jalankan terpisah via `npm run dev:frontend` dan `npm run dev:backend`)*.
 
-### 4. Build Untuk Produksi
+---
+
+## 🔑 Akun Demo Pengujian
+
+| Peran | Identitas (Email / NIM / NIP) | Password | Hak Akses |
+|---|---|---|---|
+| **Admin / Dosen** | `admin.trk@apps.ipb.ac.id` / `198503152010121002` | `AdminTRK123!` | Akses penuh dashboard `/admin`, moderasi karya, kelola sistem |
+| **Mahasiswa** | `nabila.putri@apps.ipb.ac.id` / `J0304211015` | `MahasiswaTRK123!` | Akses portal `/student`, upload projek `/student/upload` |
+
+---
+
+## 🧪 Pengujian & Kualitas Kode
+
 ```bash
+# Menjalankan seluruh unit test (Frontend + API Integration)
+npm test
+
+# Menjalankan unit test backend secara spesifik
+npm --prefix backend test
+
+# Menjalankan linting (Oxlint)
+npm run lint
+
+# Build bundle produksi
 npm run build
 ```
 
@@ -106,5 +176,6 @@ npm run build
 
 ## 📄 Lisensi & Kredit
 
-Dikembangkan untuk memenuhi tugas Praktik Kerja Lapangan (PKL) di **Sekolah Vokasi IPB University**.
+Dikembangkan untuk memenuhi tugas Praktik Kerja Lapangan (PKL) pada **Program Studi Teknologi Rekayasa Komputer (TRK), Sekolah Vokasi IPB University**.
+
 © 2026 Sekolah Vokasi IPB University.
