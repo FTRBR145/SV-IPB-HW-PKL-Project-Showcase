@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Cpu, Smartphone, Wifi, Wrench, Binary } from 'lucide-react';
 import useScrollReveal from '../../hooks/useScrollReveal';
 
@@ -15,6 +16,8 @@ export default function Footer() {
               <img
                 src="/sv_ipb_logo.png"
                 alt="Logo Resmi IPB University Sekolah Vokasi"
+                width="48"
+                height="48"
                 className="w-12 h-auto object-contain flex-shrink-0"
               />
               <div>
@@ -30,9 +33,9 @@ export default function Footer() {
           <div className={`scroll-reveal reveal-delay-1 ${isVisible ? 'is-visible' : ''}`}>
             <h4 className="font-heading text-sm font-bold text-white mb-4 uppercase tracking-wider">Navigasi</h4>
             <ul className="space-y-2.5">
-              <li><a href="/" className="hover:text-white transition-colors">Home Landing</a></li>
-              <li><a href="/student" className="hover:text-white transition-colors">Beranda Mahasiswa</a></li>
-              <li><a href="/admin" className="hover:text-white transition-colors">Panel Admin / Dosen</a></li>
+              <li><Link to="/" className="hover:text-white transition-colors">Home Landing</Link></li>
+              <li><Link to="/student" className="hover:text-white transition-colors">Beranda Mahasiswa</Link></li>
+              <li><Link to="/admin" className="hover:text-white transition-colors">Panel Admin / Dosen</Link></li>
               <li><a href="/#about" className="hover:text-white transition-colors">Tentang Showcase</a></li>
               <li><a href="/#matakuliah" className="hover:text-white transition-colors">Katalog Mata Kuliah</a></li>
             </ul>

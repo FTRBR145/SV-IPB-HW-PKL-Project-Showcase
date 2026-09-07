@@ -13,6 +13,7 @@ export default function ModalShell({
   isOpen = true,
   onClose,
   ariaLabel,
+  panelId,
   children,
   overlayClassName = '',
   panelClassName = ''
@@ -82,6 +83,7 @@ export default function ModalShell({
       }}
     >
       <div
+        id={panelId}
         ref={panelRef}
         role="dialog"
         aria-modal="true"

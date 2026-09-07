@@ -101,6 +101,16 @@ export default function LandingPage() {
     });
   };
 
+  const handleNavigateToStudent = () => {
+    if (isLoggedIn) {
+      navigate('/student');
+    } else {
+      navigate('/?login=required', { state: { from: '/student' }, replace: true });
+      setIsLoginOpen(true);
+      showToast('Silakan masuk untuk mengakses Portal Mahasiswa.', 'info');
+    }
+  };
+
   const handleOpenUpload = () => {
     if (adminSettings.maintenanceMode) {
       showToast('Upload sedang dinonaktifkan selama pemeliharaan.', 'info');
@@ -135,13 +145,16 @@ export default function LandingPage() {
         onOpenLogin={() => setIsLoginOpen(true)}
         onLogout={logout}
         onNavigateToAdmin={() => navigate('/admin')}
-        onNavigateToStudent={() => navigate('/student')}
+        onNavigateToStudent={handleNavigateToStudent}
         onSelectCourse={(course) => setSelectedCourse(course)}
       />
 
       <main id="main-content">
         {/* Hero Banner Section */}
-        <HeroSection onOpenUpload={handleOpenUpload} />
+        <HeroSection
+          onOpenUpload={handleOpenUpload}
+          onNavigateToStudent={handleNavigateToStudent}
+        />
 
         {/* About Section */}
         <AboutSection />
@@ -160,6 +173,7 @@ export default function LandingPage() {
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}
           onClickDetail={handleOpenDetail}
+          onNavigateToStudent={handleNavigateToStudent}
         />
       </main>
 

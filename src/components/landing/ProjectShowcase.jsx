@@ -10,7 +10,8 @@ export default function ProjectShowcase({
   onSelectSemester,
   searchQuery,
   onSearchChange,
-  onClickDetail
+  onClickDetail,
+  onNavigateToStudent
 }) {
   const semesters = ['ALL', 1, 2, 3, 4, 5, 6, 7, 8];
   const [sectionRef, isVisible] = useInViewOnce();
@@ -23,22 +24,23 @@ export default function ProjectShowcase({
         <div ref={headingRef} className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
             <h2
-              className={`font-heading text-2xl sm:text-3xl font-extrabold text-gray-800 title-underline-reveal scroll-reveal ${headingVisible ? 'is-visible' : ''}`}
+              className={`font-heading text-2xl sm:text-3xl font-extrabold text-slate-800 title-underline-reveal scroll-reveal ${headingVisible ? 'is-visible' : ''}`}
             >
               Projek TRK Terbaru
             </h2>
             <p
-              className={`text-gray-500 text-sm mt-1 scroll-reveal reveal-delay-1 ${headingVisible ? 'is-visible' : ''}`}
+              className={`text-slate-500 text-sm mt-1 scroll-reveal reveal-delay-1 ${headingVisible ? 'is-visible' : ''}`}
             >
               Karya teknik komputer, IoT, sistem tertanam & jaringan mahasiswa TRK SV IPB.
             </p>
           </div>
-          <a
-            href="#projects"
-            className={`inline-flex min-h-11 items-center gap-1.5 self-start rounded-xl border border-gray-300 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 sm:self-auto scroll-reveal reveal-delay-2 ${headingVisible ? 'is-visible' : ''}`}
+          <button
+            type="button"
+            onClick={onNavigateToStudent}
+            className={`inline-flex min-h-11 items-center gap-1.5 self-start rounded-xl border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 sm:self-auto scroll-reveal reveal-delay-2 ${headingVisible ? 'is-visible' : ''}`}
           >
-            Lihat Semua Pengajuan <ArrowRight size={14} />
-          </a>
+            Lihat Semua Projek <ArrowRight size={14} />
+          </button>
         </div>
 
         {/* Controls: Semester Tabs & Search */}
@@ -51,8 +53,8 @@ export default function ProjectShowcase({
                 key={sem}
                 className={`min-h-11 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${
                   selectedSemester === sem
-                    ? 'bg-gray-800 text-white shadow-md'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    ? 'bg-slate-900 text-white shadow-md'
+                    : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
                 }`}
                 onClick={() => onSelectSemester(sem)}
               >
@@ -63,14 +65,14 @@ export default function ProjectShowcase({
 
           <div className="relative w-full min-w-0 md:w-auto md:min-w-[260px]">
             <label htmlFor="project-search" className="sr-only">Cari projek</label>
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
             <input
               id="project-search"
               type="text"
               placeholder="Cari judul, mahasiswa, atau stack..."
               value={searchQuery}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="min-h-11 w-full rounded-xl border border-gray-300 bg-gray-50 py-2 pl-10 pr-4 text-base text-gray-800 placeholder-gray-500 transition-colors focus:border-sky-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:text-sm"
+              className="min-h-11 w-full rounded-xl border border-slate-300 bg-slate-50 py-2 pl-10 pr-4 text-base text-slate-800 placeholder-slate-500 transition-colors focus:border-sky-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:text-sm"
             />
           </div>
         </div>
@@ -88,9 +90,9 @@ export default function ProjectShowcase({
             ))}
           </div>
         ) : (
-          <div className="py-16 text-center bg-gray-50 rounded-3xl border border-dashed border-gray-200">
-            <h3 className="font-heading text-lg font-bold text-gray-700 mb-1">Tidak ada projek ditemukan</h3>
-            <p className="text-gray-500 text-xs">
+          <div className="py-16 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200">
+            <h3 className="font-heading text-lg font-bold text-slate-700 mb-1">Tidak ada projek ditemukan</h3>
+            <p className="text-slate-500 text-xs">
               Coba sesuaikan kata kunci pencarian atau filter semester yang dipilih.
             </p>
           </div>

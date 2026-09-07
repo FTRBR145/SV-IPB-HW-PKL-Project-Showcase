@@ -5,6 +5,7 @@ import Toast from './components/common/Toast';
 import ScrollToTop from './components/common/ScrollToTop';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import ProtectedRoute from './components/auth/ProtectedRoute';
+import { ROUTE_ACCESS } from './utils/accessControl';
 
 const LandingPage = lazy(() => import('./pages/LandingPage'));
 const StudentHome = lazy(() => import('./pages/StudentHome'));
@@ -39,7 +40,7 @@ export default function App() {
             <Route
               path="/student"
               element={(
-                <ProtectedRoute allowedRoles={['student', 'admin']}>
+                <ProtectedRoute allowedRoles={ROUTE_ACCESS.studentPortal}>
                   <StudentHome />
                 </ProtectedRoute>
               )}
@@ -47,7 +48,7 @@ export default function App() {
             <Route
               path="/student/upload"
               element={(
-                <ProtectedRoute allowedRoles={['student', 'admin']}>
+                <ProtectedRoute allowedRoles={ROUTE_ACCESS.studentUpload}>
                   <UploadProjectPage />
                 </ProtectedRoute>
               )}
@@ -58,7 +59,7 @@ export default function App() {
             <Route
               path="/admin"
               element={(
-                <ProtectedRoute allowedRoles={['admin']}>
+                <ProtectedRoute allowedRoles={ROUTE_ACCESS.admin}>
                   <AdminDashboard />
                 </ProtectedRoute>
               )}

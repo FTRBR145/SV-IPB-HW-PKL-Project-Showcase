@@ -59,11 +59,11 @@ export default function MataKuliahSection({ onSelectCourse }) {
   };
 
   return (
-    <section ref={sectionRef} id="matakuliah" className="py-12 bg-gray-50 border-b border-gray-200">
+    <section ref={sectionRef} id="matakuliah" className="py-12 bg-slate-50 border-b border-slate-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <h2
           ref={headingRef}
-          className={`font-heading text-2xl sm:text-3xl font-extrabold text-gray-800 text-center mb-8 title-underline-reveal scroll-reveal ${headingVisible ? 'is-visible' : ''}`}
+          className={`font-heading text-2xl sm:text-3xl font-extrabold text-slate-800 text-center mb-8 title-underline-reveal scroll-reveal ${headingVisible ? 'is-visible' : ''}`}
           style={{ display: 'block', textAlign: 'center' }}
         >
           Mata Kuliah Unggulan TRK
@@ -71,7 +71,7 @@ export default function MataKuliahSection({ onSelectCourse }) {
 
         <div className="relative group/slider">
           <button
-            className="absolute left-0 top-1/2 z-20 flex h-11 w-11 -translate-x-2 -translate-y-1/2 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-lg transition-colors hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 sm:-translate-x-5"
+            className="absolute left-0 top-1/2 z-20 flex h-11 w-11 -translate-x-2 -translate-y-1/2 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-lg transition-colors hover:bg-slate-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 sm:-translate-x-5"
             onClick={() => handleScroll('left')}
             aria-label="Geser mata kuliah ke kiri"
           >
@@ -90,7 +90,7 @@ export default function MataKuliahSection({ onSelectCourse }) {
               <button
                 type="button"
                 key={c.courseFullName}
-                className="motion-list-item group w-[min(16rem,calc(100vw-3.5rem))] flex-shrink-0 overflow-hidden rounded-2xl border border-gray-200 bg-white text-left shadow-sm transition-[box-shadow,transform] duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-xl motion-safe:active:translate-y-0 motion-safe:active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 sm:w-72"
+                className="motion-list-item group w-[min(16rem,calc(100vw-3.5rem))] flex-shrink-0 overflow-hidden rounded-2xl border border-slate-200 bg-white text-left shadow-sm transition-[box-shadow,transform] duration-300 motion-safe:hover:-translate-y-1 motion-safe:hover:shadow-xl motion-safe:active:translate-y-0 motion-safe:active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 sm:w-72"
                 style={{ '--motion-index': index }}
                 onClick={() => {
                   if (onSelectCourse) onSelectCourse(c.courseFullName);
@@ -111,9 +111,9 @@ export default function MataKuliahSection({ onSelectCourse }) {
                     height="426"
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                   />
-                  <div className="absolute inset-0 bg-gray-950/25" />
+                  <div className="absolute inset-0 bg-slate-950/25" />
                 </div>
-                <div className="p-4 bg-gray-800 text-white font-semibold text-sm text-center line-clamp-2">
+                <div className="p-4 bg-slate-900 text-white font-semibold text-sm text-center line-clamp-2">
                   <span>{c.name}</span>
                 </div>
               </button>
@@ -121,7 +121,7 @@ export default function MataKuliahSection({ onSelectCourse }) {
           </div>
 
           <button
-            className="absolute right-0 top-1/2 z-20 flex h-11 w-11 translate-x-2 -translate-y-1/2 items-center justify-center rounded-xl border border-gray-200 bg-white text-gray-700 shadow-lg transition-colors hover:bg-gray-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 sm:translate-x-5"
+            className="absolute right-0 top-1/2 z-20 flex h-11 w-11 translate-x-2 -translate-y-1/2 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-lg transition-colors hover:bg-slate-900 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 sm:translate-x-5"
             onClick={() => handleScroll('right')}
             aria-label="Geser mata kuliah ke kanan"
           >

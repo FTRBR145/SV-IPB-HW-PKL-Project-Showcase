@@ -19,7 +19,7 @@ function DonutChart({ approved, pending, rejected }) {
 
   return (
     <div className="relative w-40 h-40 flex items-center justify-center">
-      <svg viewBox="0 0 180 180" className="w-40 h-40 -rotate-90">
+      <svg viewBox="0 0 180 180" className="w-40 h-40 -rotate-90" aria-hidden="true">
         {values.map((value, index) => {
           const dash = (value / total) * circumference;
           const offset = -accumulated;

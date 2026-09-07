@@ -101,13 +101,14 @@ export default function DataTable({
               title="Unduh hasil tabel dalam format CSV"
             >
               <Download size={14} className="text-sky-600" />
-              Export CSV
+              Unduh CSV
             </button>
           )}
         </div>
       )}
 
-      <div className="admin-datatable max-w-full overflow-x-auto rounded-2xl border border-slate-200/80 bg-white p-3 shadow-2xs sm:p-4">
+      <div className="admin-datatable workspace-panel max-w-full overflow-hidden rounded-2xl border p-3 shadow-2xs sm:p-4">
+        <p className="mb-2 text-xs font-semibold text-slate-500 md:hidden">Geser tabel ke samping untuk melihat semua kolom.</p>
         <DataTablesReact
           ref={tableRef}
           data={data}
@@ -116,6 +117,7 @@ export default function DataTable({
           className="display w-full text-left text-xs"
           options={{
             autoWidth: false,
+            scrollX: true,
             deferRender: true,
             pageLength: defaultPageSize,
             lengthMenu: pageSizeOptions,
@@ -130,15 +132,30 @@ export default function DataTable({
             language: {
               emptyTable: emptyMessage,
               zeroRecords: emptyMessage,
-              search: '',
+              search: 'Cari:',
               searchPlaceholder,
               lengthMenu: 'Tampilkan _MENU_ data',
               info: 'Menampilkan _START_–_END_ dari _TOTAL_ data',
               infoEmpty: 'Tidak ada data',
               infoFiltered: '(difilter dari _MAX_ data)',
               paginate: {
+                first: 'Pertama',
+                last: 'Terakhir',
                 previous: 'Sebelumnya',
-                next: 'Berikutnya'
+                next: 'Berikutnya',
+                number: 'Halaman %d'
+              },
+              aria: {
+                orderable: 'Urutkan kolom ini',
+                orderableReverse: 'Balikkan urutan kolom ini',
+                orderableRemove: 'Hapus urutan kolom ini',
+                paginate: {
+                  first: 'Halaman pertama',
+                  last: 'Halaman terakhir',
+                  previous: 'Halaman sebelumnya',
+                  next: 'Halaman berikutnya',
+                  number: 'Halaman %d'
+                }
               }
             }
           }}

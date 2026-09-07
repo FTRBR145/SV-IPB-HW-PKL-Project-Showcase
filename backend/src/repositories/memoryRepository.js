@@ -55,7 +55,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
         if (semester && String(project.semester) !== String(semester)) return false;
         if (nim && project.nim !== nim) return false;
         if (!query) return true;
-        return [project.title, project.student, project.nim, project.course, ...(project.techStack || [])]
+        return [project.title, project.student, project.nim, project.course, project.supervisor, ...(project.techStack || [])]
           .some((value) => includesText(value, query));
       });
       const safePage = Math.max(1, Number(page) || 1);

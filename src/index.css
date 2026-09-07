@@ -20,8 +20,12 @@
   --ui-focus: #0284c7;
   --ui-focus-soft: rgb(2 132 199 / 0.14);
   --ui-success: #059669;
+  --ui-success-soft: #ecfdf5;
   --ui-warning: #d97706;
+  --ui-warning-soft: #fffbeb;
   --ui-danger: #dc2626;
+  --ui-danger-soft: #fff1f2;
+  --ui-overlay: rgb(2 6 23 / 0.7);
   --ui-shadow-rgb: 15 23 42;
   /* 1. Warna Utama & Identitas (Neutral Gray Theme) */
   --ipb-navy-dark: #1f2937;
@@ -80,6 +84,26 @@ body {
 .app-workspace {
   background-color: var(--ui-canvas-muted);
   color: var(--ui-ink);
+}
+
+.workspace-sidebar {
+  border-color: var(--ui-border);
+  background-color: var(--ui-surface);
+}
+
+.workspace-panel {
+  border-color: var(--ui-border);
+  background-color: var(--ui-surface);
+  color: var(--ui-ink);
+}
+
+.workspace-toolbar {
+  border-color: var(--ui-border);
+  background-color: rgb(255 255 255 / 0.95);
+}
+
+.ui-copy-muted {
+  color: var(--ui-muted);
 }
 
 .action-strong {
@@ -347,7 +371,6 @@ h1, h2, h3, h4, h5, h6 {
 /* Base state — hidden, waiting for intersection trigger */
 .scroll-reveal {
   opacity: 0;
-  will-change: opacity, transform, filter;
 }
 
 /* Triggered state — play the entrance animation */
@@ -599,7 +622,7 @@ h1, h2, h3, h4, h5, h6 {
   left: 0;
   width: 48px;
   height: 3px;
-  border-radius: 2px;
+  border-radius: 0.5rem;
   background: linear-gradient(90deg, #0284c7, #38bdf8);
   transform: scaleX(0);
   transform-origin: left;
@@ -611,9 +634,18 @@ h1, h2, h3, h4, h5, h6 {
 
 /* DataTables admin theme */
 .admin-datatable .dt-container {
-  min-width: 720px;
+  min-width: 0;
   color: var(--ui-muted);
   font-size: 0.75rem;
+}
+
+.admin-datatable .dt-scroll {
+  max-width: 100%;
+}
+
+.admin-datatable .dt-scroll-body {
+  overflow-x: auto !important;
+  overscroll-behavior-inline: contain;
 }
 
 .admin-datatable .dt-layout-row {
@@ -669,6 +701,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .admin-datatable table.dataTable {
+  min-width: 720px;
   margin: 0 !important;
   border-collapse: collapse !important;
 }
@@ -711,17 +744,20 @@ h1, h2, h3, h4, h5, h6 {
   align-items: center;
   gap: 0.25rem;
   border: 1px solid var(--ui-border);
-  border-radius: 0.875rem;
+  border-radius: 0.75rem;
   background: var(--ui-surface-muted);
   padding: 0.25rem;
 }
 
 .admin-datatable .dt-paging .dt-paging-button {
-  min-width: 2.75rem;
-  min-height: 2.75rem;
+  display: inline-flex !important;
+  min-inline-size: 2.75rem !important;
+  min-block-size: 2.75rem !important;
+  align-items: center;
+  justify-content: center;
   margin: 0 !important;
   border: 1px solid transparent !important;
-  border-radius: 0.625rem !important;
+  border-radius: 0.5rem !important;
   background: transparent !important;
   color: var(--ui-muted) !important;
   padding: 0.65rem 0.875rem !important;

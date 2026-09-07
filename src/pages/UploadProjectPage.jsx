@@ -2,15 +2,18 @@ import React from 'react';
 import { ArrowLeft, FileVideo2, Info, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
-import Footer from '../components/common/Footer';
 import ProjectForm from '../components/projects/ProjectForm';
 import StudentSidebar from '../components/student/StudentSidebar';
 import useApp from '../hooks/useApp';
 
 export default function UploadProjectPage() {
   const navigate = useNavigate();
-  const { projects, currentUser, isLoggedIn, logout, adminSettings, courses } = useApp();
-  const projectCount = projects.filter((project) => project.nim === currentUser.nim).length;
+  const { projects, submissions, currentUser, isLoggedIn, logout, adminSettings, courses } = useApp();
+  const myPublishedCount = projects.filter((project) => project.nim === currentUser?.nim).length;
+  const myPendingCount = (submissions || []).filter(
+    (submission) => submission.status === 'pending' && submission.nim === currentUser?.nim
+  ).length;
+  const projectCount = myPublishedCount + myPendingCount;
 
   return (
     <div className="app-canvas flex h-screen h-dvh flex-col overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom))] font-sans md:pb-0">
@@ -73,7 +76,7 @@ export default function UploadProjectPage() {
                     lockIdentity
                     submitLabel={adminSettings.moderationRequired ? 'Kirim untuk Ditinjau' : 'Simpan dan Publikasikan'}
                     onCancel={() => navigate('/student')}
-                    onSuccess={(result) => navigate(result?.status === 'pending' ? '/student' : '/student?tab=my-projects', { replace: true })}
+                    onSuccess={() => navigate('/student?tab=my-projects', { replace: true })}
                   />
                 )}
               </section>
@@ -100,7 +103,6 @@ export default function UploadProjectPage() {
           </div>
           </main>
         </div>
-        <Footer />
       </div>
 
     </div>

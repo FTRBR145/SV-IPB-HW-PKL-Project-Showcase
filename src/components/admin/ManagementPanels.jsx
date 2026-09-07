@@ -94,27 +94,33 @@ export function ProjectsPanel({ projects, onEdit, onDelete, onView }) {
       render: (row) => (
         <div className="flex items-center justify-center gap-1.5">
           <button
+            type="button"
             onClick={() => onView(row)}
-            className="p-1.5 rounded-lg bg-sky-50 text-sky-600 hover:bg-sky-100 transition-colors shadow-2xs"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-sky-50 p-2.5 text-sky-700 shadow-2xs transition-colors hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
             title="Lihat Detail Projek"
+            aria-label={`Lihat detail projek ${row.title}`}
           >
-            <Eye size={14} />
+            <Eye size={16} />
           </button>
           <button
+            type="button"
             onClick={() => onEdit(row)}
-            className="p-1.5 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors shadow-2xs"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-amber-50 p-2.5 text-amber-700 shadow-2xs transition-colors hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
             title="Edit Data Projek"
+            aria-label={`Edit data projek ${row.title}`}
           >
-            <Pencil size={14} />
+            <Pencil size={16} />
           </button>
           <button
+            type="button"
             onClick={() => {
               if (window.confirm(`Hapus projek “${row.title}”?`)) onDelete(row.id);
             }}
-            className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors shadow-2xs"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-rose-50 p-2.5 text-rose-700 shadow-2xs transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600"
             title="Hapus Projek"
+            aria-label={`Hapus projek ${row.title}`}
           >
-            <Trash2 size={14} />
+            <Trash2 size={16} />
           </button>
         </div>
       )
@@ -236,10 +242,12 @@ export function StudentsPanel({ students, onViewProjects }) {
       className: 'text-center',
       render: (row) => (
         <button
+          type="button"
           onClick={() => onViewProjects(row.nim)}
-          className="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors shadow-2xs"
+          className="inline-flex min-h-11 items-center gap-1.5 px-3.5 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+          aria-label={`Lihat seluruh projek karya ${row.name}`}
         >
-          <Eye size={13} />
+          <Eye size={15} />
           <span>Lihat Projek</span>
         </button>
       )
@@ -281,12 +289,27 @@ export function StudentsPanel({ students, onViewProjects }) {
 export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
   const [formData, setFormData] = useState({ name: '', nip: '', email: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formError, setFormError] = useState('');
 
   const submit = async (event) => {
     event.preventDefault();
     if (isSubmitting) return;
+    const normalized = {
+      name: formData.name.trim(),
+      nip: formData.nip.trim(),
+      email: formData.email.trim().toLocaleLowerCase('id-ID')
+    };
+    if (normalized.name.length < 3) {
+      setFormError('Nama moderator minimal 3 karakter.');
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalized.email)) {
+      setFormError('Masukkan alamat email moderator yang valid.');
+      return;
+    }
     setIsSubmitting(true);
-    const added = await onAdd(formData);
+    setFormError('');
+    const added = await onAdd(normalized);
     setIsSubmitting(false);
     if (added) setFormData({ name: '', nip: '', email: '' });
   };
@@ -344,20 +367,24 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
       render: (row) => (
         <div className="flex items-center justify-center gap-1.5">
           <button
+            type="button"
             onClick={() => onToggle(row.id)}
-            className="p-1.5 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors shadow-2xs"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-amber-50 p-2.5 text-amber-700 shadow-2xs transition-colors hover:bg-amber-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
             title="Ubah status akses"
+            aria-label={`Ubah status akses moderator ${row.name}`}
           >
-            <Power size={14} />
+            <Power size={16} />
           </button>
           <button
+            type="button"
             onClick={() => {
               if (window.confirm(`Hapus moderator ${row.name}?`)) onDelete(row.id);
             }}
-            className="p-1.5 rounded-lg bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors shadow-2xs"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl bg-rose-50 p-2.5 text-rose-700 shadow-2xs transition-colors hover:bg-rose-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-600"
             title="Hapus moderator"
+            aria-label={`Hapus moderator ${row.name}`}
           >
-            <Trash2 size={14} />
+            <Trash2 size={16} />
           </button>
         </div>
       )
@@ -367,7 +394,7 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
   return (
     <div className="grid grid-cols-1 xl:grid-cols-[340px_minmax(0,1fr)] gap-6 items-start">
       {/* Form Tambah */}
-      <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-4">
+      <form onSubmit={submit} className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs" noValidate>
         <div>
           <h2 className="font-heading font-bold text-base text-slate-900">Tambah Moderator</h2>
           <p className="text-xs text-slate-500 mt-1">Daftarkan dosen pembimbing atau admin baru.</p>
@@ -380,16 +407,23 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
           <label key={name} className="block text-xs font-bold text-slate-700">
             {label}{name !== 'nip' && ' *'}
             <input
+              id={`moderator-${name}`}
               type={name === 'email' ? 'email' : 'text'}
               value={formData[name]}
-              onChange={(event) => setFormData((previous) => ({ ...previous, [name]: event.target.value }))}
+              onChange={(event) => {
+                setFormData((previous) => ({ ...previous, [name]: event.target.value }));
+                setFormError('');
+              }}
               placeholder={placeholder}
               required={name !== 'nip'}
-              className="mt-1.5 w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+              autoComplete={name === 'email' ? 'email' : 'off'}
+              aria-describedby={formError ? 'moderator-form-error' : undefined}
+              className="mt-1.5 min-h-11 w-full rounded-xl border border-slate-200 px-3.5 py-2 text-base focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:text-xs"
             />
           </label>
         ))}
-        <button disabled={isSubmitting} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all disabled:cursor-wait disabled:opacity-60">
+        {formError && <p id="moderator-form-error" role="alert" className="text-xs font-semibold text-rose-700">{formError}</p>}
+        <button disabled={isSubmitting} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white shadow-2xs transition-all hover:bg-slate-800 disabled:cursor-wait disabled:opacity-60">
           <Plus size={15} /> {isSubmitting ? 'Menambahkan...' : 'Tambah Moderator'}
         </button>
       </form>
@@ -486,6 +520,7 @@ export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDe
       render: (row) => (
         <div className="flex items-center justify-center">
           <button
+            type="button"
             onClick={() => {
               if (row.projectCount > 0) {
                 alert(`Tidak dapat menghapus “${row.name}” karena masih digunakan oleh ${row.projectCount} projek.`);
@@ -494,14 +529,15 @@ export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDe
               if (window.confirm(`Hapus ${title.toLowerCase()} “${row.name}”?`)) onDelete(row.name);
             }}
             disabled={row.projectCount > 0}
-            className={`p-1.5 rounded-lg transition-colors ${
+            className={`inline-flex min-h-11 min-w-11 items-center justify-center rounded-xl p-2.5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 ${
               row.projectCount > 0
-                ? 'bg-slate-100 text-slate-300 cursor-not-allowed'
-                : 'bg-rose-50 text-rose-600 hover:bg-rose-100 shadow-2xs'
+                ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+                : 'bg-rose-50 text-rose-700 hover:bg-rose-100 shadow-2xs'
             }`}
             title={row.projectCount > 0 ? 'Masih digunakan oleh projek' : 'Hapus item'}
+            aria-label={`Hapus ${title.toLowerCase()} ${row.name}`}
           >
-            <Trash2 size={14} />
+            <Trash2 size={16} />
           </button>
         </div>
       )

@@ -1,9 +1,11 @@
 import React from 'react';
-import { X, User, GraduationCap, Calendar } from 'lucide-react';
+import { X, User, GraduationCap, Calendar, Clock } from 'lucide-react';
 import ModalShell from '../common/ModalShell';
+import { getYouTubeEmbedUrl } from '../../data/projectsData';
 
 export default function ProjectDetailModal({ project, onClose }) {
   if (!project) return null;
+  const embedUrl = getYouTubeEmbedUrl(project.videoUrl);
 
   return (
     <ModalShell
@@ -27,7 +29,7 @@ export default function ProjectDetailModal({ project, onClose }) {
           <div className="lg:w-3/5 flex-shrink-0 bg-black">
             <div className="relative w-full aspect-video">
               <iframe
-                src={project.videoUrl}
+                src={embedUrl}
                 title={project.title}
                 className="absolute inset-0 w-full h-full border-none lg:rounded-l-3xl"
                 allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -39,6 +41,18 @@ export default function ProjectDetailModal({ project, onClose }) {
           {/* Right: Info Panel — absolute on desktop to match video height exactly, scrolls internally */}
           <div className="lg:w-2/5 lg:absolute lg:top-0 lg:bottom-0 lg:right-0 overflow-y-auto">
             <div className="p-5 sm:p-6 space-y-4">
+              {project.status === 'pending' && (
+                <div className="flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 p-3.5 text-xs text-amber-950">
+                  <Clock size={16} className="mt-0.5 shrink-0 text-amber-600" />
+                  <div>
+                    <p className="font-bold text-amber-900">Status: Menunggu Persetujuan</p>
+                    <p className="mt-0.5 leading-relaxed text-amber-800">
+                      Projek ini sedang menunggu peninjauan administrator TRK SV IPB. Hanya Anda dan pengelola sistem yang dapat melihat pratinjau ini sebelum disetujui untuk dipublikasikan ke publik.
+                    </p>
+                  </div>
+                </div>
+              )}
+
               {/* Title & Metadata */}
               <div>
                 <h2 className="font-heading text-lg font-extrabold text-slate-800 mb-1.5 leading-snug pr-8">
@@ -79,10 +93,10 @@ export default function ProjectDetailModal({ project, onClose }) {
               </div>
 
               {/* Deskripsi */}
-              {project.description && (
+              {(project.description || project.desc) && (
                 <div>
                   <h4 className="font-heading text-xs font-bold text-slate-800 mb-1">Deskripsi Projek</h4>
-                  <p className="text-slate-600 text-xs leading-relaxed">{project.description}</p>
+                  <p className="text-slate-600 text-xs leading-relaxed">{project.description || project.desc}</p>
                 </div>
               )}
 

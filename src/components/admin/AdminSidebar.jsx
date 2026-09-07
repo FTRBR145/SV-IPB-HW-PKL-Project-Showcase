@@ -6,6 +6,7 @@ import {
   X,
 } from 'lucide-react';
 import { ADMIN_MENU } from '../../data/adminNavigation';
+import ModalShell from '../common/ModalShell';
 
 const MOBILE_PRIMARY_MENU_IDS = ['dashboard', 'projects', 'students'];
 const MOBILE_LABELS = {
@@ -28,7 +29,7 @@ export default function AdminSidebar({ activeMenu, onSelectMenu, onBack }) {
 
   return (
     <>
-      <aside className="hidden w-60 flex-shrink-0 select-none flex-col overflow-y-auto border-r border-slate-200 bg-white p-3 md:sticky md:top-0 md:flex md:h-[calc(100dvh-5rem)] md:self-start">
+      <aside className="workspace-sidebar hidden w-60 flex-shrink-0 select-none flex-col overflow-y-auto border-r p-3 md:sticky md:top-0 md:flex md:h-[calc(100dvh-5rem)] md:self-start">
         <div className="space-y-1 w-full pb-3 border-b border-slate-100">
           {ADMIN_MENU.slice(0, 5).map(({ icon: Icon, label, id }) => {
             const active = activeMenu === id;
@@ -36,7 +37,7 @@ export default function AdminSidebar({ activeMenu, onSelectMenu, onBack }) {
               <button
                 key={id}
                 onClick={() => onSelectMenu(id)}
-                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-xs font-bold transition-all ${
+                className={`flex min-h-11 w-full items-center justify-between rounded-xl px-3 py-2.5 text-xs font-bold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
                   active
                     ? 'bg-slate-900 text-white shadow-sm'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -61,7 +62,7 @@ export default function AdminSidebar({ activeMenu, onSelectMenu, onBack }) {
               <button
                 key={id}
                 onClick={() => onSelectMenu(id)}
-                className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-xs font-semibold transition-colors ${
+                className={`flex min-h-11 w-full items-center gap-2.5 rounded-xl px-3 py-2 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
                   active
                     ? 'bg-sky-50 text-sky-700 font-bold'
                     : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
@@ -84,21 +85,21 @@ export default function AdminSidebar({ activeMenu, onSelectMenu, onBack }) {
           </div>
           <button
             onClick={onBack}
-            className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition-colors"
+            className="flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
           >
             <ArrowLeft size={14} /> Kembali ke Website
           </button>
         </div>
       </aside>
 
-      {isMoreOpen && (
-        <div className="fixed inset-0 z-40 bg-slate-950/45 md:hidden" onClick={() => setIsMoreOpen(false)}>
-          <section
-            id="admin-more-menu"
-            className="absolute inset-x-3 bottom-[calc(5rem+env(safe-area-inset-bottom))] rounded-3xl border border-slate-200 bg-white p-4 shadow-2xl"
-            onClick={(event) => event.stopPropagation()}
-            aria-label="Menu admin lainnya"
-          >
+      <ModalShell
+        isOpen={isMoreOpen}
+        onClose={() => setIsMoreOpen(false)}
+        ariaLabel="Menu admin lainnya"
+        panelId="admin-more-menu"
+        overlayClassName="items-end bg-slate-950/45 p-3 pb-[calc(5rem+env(safe-area-inset-bottom))] md:hidden"
+        panelClassName="max-h-[70vh] overflow-y-auto rounded-3xl border border-slate-200 p-4"
+      >
             <div className="mb-3 flex items-center justify-between">
               <div>
                 <h2 className="text-sm font-black text-slate-900">Menu Lainnya</h2>
@@ -107,7 +108,7 @@ export default function AdminSidebar({ activeMenu, onSelectMenu, onBack }) {
               <button
                 type="button"
                 onClick={() => setIsMoreOpen(false)}
-                className="rounded-full bg-slate-100 p-2 text-slate-600"
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-slate-100 text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                 aria-label="Tutup menu lainnya"
               >
                 <X size={17} />
@@ -136,15 +137,13 @@ export default function AdminSidebar({ activeMenu, onSelectMenu, onBack }) {
             <button
               type="button"
               onClick={onBack}
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl bg-slate-100 px-3 py-2.5 text-xs font-bold text-slate-700"
+              className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-100 px-3 py-2.5 text-xs font-bold text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
               <ArrowLeft size={14} /> Kembali ke Website
             </button>
-          </section>
-        </div>
-      )}
+      </ModalShell>
 
-      <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-slate-200 bg-white/95 px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.10)] backdrop-blur md:hidden" aria-label="Navigasi admin mobile">
+      <nav className="workspace-toolbar fixed inset-x-0 bottom-0 z-50 border-t px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.10)] backdrop-blur md:hidden" aria-label="Navigasi admin mobile">
         <div className="mx-auto grid min-h-16 max-w-lg grid-cols-4 items-stretch py-1.5">
           {primaryMenu.map(({ icon: Icon, label, id }) => {
             const active = activeMenu === id;

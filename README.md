@@ -14,7 +14,7 @@ Platform web **Showcase Video Projek Praktikum dan Tugas Akhir Mahasiswa Program
 
 ### 1. 🏠 Landing Page Publik
 - **Hero Banner & Slideshow**: Transisi foto kegiatan mahasiswa TRK dengan indikator durasi, kontrol *Play/Pause*, efek parallax halus, dan floating badge institusi.
-- **Dynamic Stats Counter Bar**: Indikator capaian (*Total Projek, Mahasiswa, Mata Kuliah, Teknologi*) yang dihitung dinamis dari data dan memiliki animasi *count-up* saat digulir ke viewport.
+- **Dynamic Stats Counter Bar**: Indikator capaian (*Total Projek, Mahasiswa, Mata Kuliah, Dosen*) yang dihitung dinamis dari data dan memiliki animasi *count-up* saat digulir ke viewport.
 - **Katalog & Filter Projek Interaktif**:
   - Filter tab cepat **Semester 1 hingga Semester 8** dan **Semua Semester**.
   - Filter kategori mata kuliah unggulan TRK (IoT, Sistem Tertanam, Aplikasi Mobile, Bengkel Elektromekanik, Rangkaian Logika Digital).

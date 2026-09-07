@@ -16,7 +16,6 @@ import {
   SettingsPanel
 } from '../components/admin/InsightsPanels';
 import Navbar from '../components/common/Navbar';
-import Footer from '../components/common/Footer';
 import ProjectDetailModal from '../components/modals/ProjectDetailModal';
 import UploadModal from '../components/modals/UploadModal';
 import { ADMIN_MENU } from '../data/adminNavigation';
@@ -183,7 +182,6 @@ export default function AdminDashboard() {
         currentPage="admin"
         currentUser={currentUser}
         isLoggedIn={isLoggedIn}
-        onOpenUpload={() => setIsUploadOpen(true)}
         onLogout={logout}
         onNavigateToStudent={() => navigate('/student')}
         onBackToLanding={() => navigate('/')}
@@ -219,7 +217,6 @@ export default function AdminDashboard() {
             </div>
           </main>
         </div>
-        <Footer />
       </div>
 
       <UploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />

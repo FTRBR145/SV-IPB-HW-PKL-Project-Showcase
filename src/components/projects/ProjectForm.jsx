@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { CheckCircle2, Upload } from 'lucide-react';
+import { CheckCircle2, Clock, Upload } from 'lucide-react';
 import { getYouTubeThumbnail } from '../../data/projectsData';
 import useApp from '../../hooks/useApp';
 
@@ -82,7 +82,7 @@ export default function ProjectForm({
   lockIdentity = false,
   submitLabel = 'Unggah Sekarang'
 }) {
-  const { addProject, currentUser, courses, categories, adminSettings } = useApp();
+  const { addProject, currentUser, courses, categories } = useApp();
   const today = new Date().toISOString().split('T')[0];
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
@@ -178,19 +178,41 @@ export default function ProjectForm({
 
   const fieldClass = (name) => `${inputClass} ${errors[name] ? invalidInputClass : ''}`;
 
+  if (lockIdentity && currentUser?.role !== 'student') {
+    return (
+      <div className="rounded-2xl border border-amber-200 bg-amber-50 px-5 py-8 text-center" role="alert">
+        <h2 className="font-heading text-lg font-bold text-amber-950">Form khusus akun mahasiswa</h2>
+        <p className="mx-auto mt-2 max-w-md text-sm leading-relaxed text-amber-800">
+          Nama dan NIM hanya dapat diisi dari identitas akun mahasiswa yang terverifikasi.
+        </p>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            className="mt-5 min-h-11 rounded-xl bg-slate-900 px-4 text-sm font-bold text-white transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+          >
+            Kembali
+          </button>
+        )}
+      </div>
+    );
+  }
+
   if (submitted) {
-    const requiresModeration = adminSettings.moderationRequired && currentUser?.role === 'student';
+    const isStudent = currentUser?.role === 'student';
     return (
       <div className="space-y-3 py-12 text-center" role="status" aria-live="polite">
-        <div className="w-16 h-16 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center mx-auto shadow-inner">
-          <CheckCircle2 size={36} />
+        <div className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl shadow-inner ${
+          isStudent ? 'bg-amber-50 text-amber-600' : 'bg-emerald-50 text-emerald-600'
+        }`}>
+          {isStudent ? <Clock size={36} /> : <CheckCircle2 size={36} />}
         </div>
         <h2 className="font-heading text-xl font-bold text-slate-800">
-          {requiresModeration ? 'Projek Berhasil Dikirim!' : 'Projek TRK Berhasil Diunggah!'}
+          {isStudent ? 'Projek Berhasil Dikirim!' : 'Projek TRK Berhasil Diunggah!'}
         </h2>
-        <p className="text-slate-500 text-sm">
-          {requiresModeration
-            ? 'Karya video kamu masuk ke antrean dan menunggu persetujuan admin.'
+        <p className="mx-auto max-w-md text-sm leading-relaxed text-slate-600">
+          {isStudent
+            ? 'Karya video Anda berstatus Menunggu Persetujuan dan hanya tampil di tab Projek Saya milik Anda hingga disetujui oleh admin.'
             : 'Karya video kamu telah tersimpan dan langsung muncul di showcase.'}
         </p>
       </div>
