@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { courseLabel } from '../../utils/courseLabel';
 import {
   ChevronDown,
   LogIn,
@@ -77,7 +78,7 @@ export default function Navbar({
   };
 
   return (
-    <header className={`sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b shadow-sm transition-all duration-300 ${isScrolled ? 'navbar-scrolled border-slate-200/95' : 'border-slate-200'}`}>
+    <header className={`sticky top-0 z-50 bg-white border-b transition-colors duration-200 ${isScrolled ? 'navbar-scrolled border-slate-200/95' : 'border-slate-200'}`}>
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4 sm:h-20 sm:gap-4 sm:px-6 lg:px-8">
         {/* =================================================================== */}
         {/* BRAND LOGO (OFFICIAL SV IPB) */}
@@ -91,7 +92,7 @@ export default function Navbar({
           <img
             src="/sv_ipb_navbar_logo.png"
             alt="IPB University Sekolah Vokasi Logo"
-            className="h-9 max-w-[145px] object-contain transition-transform group-hover:scale-[1.02] sm:h-14 sm:max-w-[270px]"
+            className="h-9 max-w-[145px] object-contain sm:h-14 sm:max-w-[270px]"
           />
           {(currentPage === 'student' || currentPage === 'student-upload') && (
             <span className="hidden items-center gap-1 rounded-lg bg-sky-100 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-sky-700 sm:inline-flex">
@@ -108,7 +109,7 @@ export default function Navbar({
         {/* =================================================================== */}
         {/* CENTER SEARCH BAR / NAVIGATION LINKS */}
         {/* =================================================================== */}
-        {currentPage === 'student' ? (
+        {currentPage === 'student' && onSearchChange ? (
           <div className="hidden max-w-xl flex-1 items-center justify-center px-4 xl:flex">
             <div className="relative w-full">
               <label htmlFor="student-project-search" className="sr-only">Telusuri projek mahasiswa</label>
@@ -136,7 +137,7 @@ export default function Navbar({
               )}
             </div>
           </div>
-        ) : currentPage === 'student-upload' ? (
+        ) : currentPage === 'student' || currentPage === 'student-upload' ? (
           <div className="hidden md:block flex-1" />
         ) : currentPage === 'admin' ? (
           <nav className="hidden items-center gap-2 text-xs font-medium text-slate-700 xl:flex">
@@ -198,7 +199,7 @@ export default function Navbar({
                   {['Semua Mata Kuliah', ...courses].map((course) => (
                     <a
                       key={course}
-                      href="#matakuliah"
+                      href="#projects"
                       role="menuitem"
                       className="flex min-h-11 items-center px-4 py-2.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:bg-slate-50 focus-visible:text-slate-900"
                       onClick={() => {
@@ -206,7 +207,7 @@ export default function Navbar({
                         setCourseDropdownOpen(false);
                       }}
                     >
-                      {course}
+                      {courseLabel(course)}
                     </a>
                   ))}
                 </div>
@@ -386,15 +387,22 @@ export default function Navbar({
 
           {/* Links */}
           <div className="space-y-1 pt-1">
+            {currentPage === 'landing' && (
+              <>
+                <a href="#about" onClick={closeMobileMenu} className="flex min-h-11 items-center px-3 text-sm text-slate-700">Tentang</a>
+                <a href="#matakuliah" onClick={closeMobileMenu} className="flex min-h-11 items-center px-3 text-sm text-slate-700">Mata Kuliah</a>
+              </>
+            )}
             <button
               onClick={() => {
-                onBackToLanding?.();
+                if (currentPage === 'landing') window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+                else onBackToLanding?.();
                 closeMobileMenu();
               }}
               className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-800 hover:bg-slate-100"
             >
               <Home size={15} />
-              <span>Landing Utama</span>
+              <span>Home</span>
             </button>
             <button
               onClick={() => {

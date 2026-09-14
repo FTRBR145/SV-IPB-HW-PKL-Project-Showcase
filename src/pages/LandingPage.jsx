@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import '../landing.css';
 import { useLocation, useNavigate, useSearchParams, useParams } from 'react-router-dom';
 
 // Common Components
@@ -169,6 +170,8 @@ export default function LandingPage() {
         <ProjectShowcase
           projects={filteredProjects}
           selectedSemester={selectedSemester}
+          selectedCourse={selectedCourse}
+          onClearFilters={() => { setSelectedCourse(''); setSelectedSemester('ALL'); setSearchQuery(''); }}
           onSelectSemester={setSelectedSemester}
           searchQuery={searchQuery}
           onSearchChange={setSearchQuery}

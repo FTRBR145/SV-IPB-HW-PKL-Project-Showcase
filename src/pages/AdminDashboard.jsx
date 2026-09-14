@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import '../admin.css';
 import { Plus } from 'lucide-react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import AdminSidebar from '../components/admin/AdminSidebar';
@@ -16,6 +17,7 @@ import {
   SettingsPanel
 } from '../components/admin/InsightsPanels';
 import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
 import ProjectDetailModal from '../components/modals/ProjectDetailModal';
 import UploadModal from '../components/modals/UploadModal';
 import { ADMIN_MENU } from '../data/adminNavigation';
@@ -176,7 +178,7 @@ export default function AdminDashboard() {
   };
 
   return (
-    <div className="app-workspace flex h-screen h-dvh flex-col overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom))] font-sans md:pb-0">
+    <div className="admin-page app-workspace flex h-screen h-dvh flex-col overflow-hidden pb-[calc(5rem+env(safe-area-inset-bottom))] font-sans md:pb-0">
       <Navbar
         courses={courses}
         currentPage="admin"
@@ -192,12 +194,12 @@ export default function AdminDashboard() {
           <AdminSidebar activeMenu={activeMenu} onSelectMenu={selectMenu} onBack={() => navigate('/')} />
 
           <main id="main-content" className="app-workspace min-w-0 flex-1 overflow-x-hidden">
-            <div className="p-4 sm:p-6 lg:p-8">
+            <div className="p-4 sm:p-6">
               <div className="mx-auto min-w-0 max-w-[1500px] space-y-6">
-                <div className="flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
+                <div className="admin-page-heading flex flex-col justify-between gap-4 lg:flex-row lg:items-center">
                   <div>
-                    <h1 className="font-heading text-xl font-black tracking-tight text-slate-900 sm:text-2xl">{pageTitle}</h1>
-                    <p className="mt-1 text-xs text-slate-600">{pageDescription}</p>
+                    <h1 className="text-xl font-semibold tracking-tight text-slate-900 sm:text-2xl">{pageTitle}</h1>
+                    <p className="mt-2 text-sm text-slate-600">{pageDescription}</p>
                   </div>
                   {activeMenu === 'projects' && (
                     <button type="button" onClick={() => setIsUploadOpen(true)} className="action-strong inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-xs font-bold shadow-sm whitespace-nowrap">
@@ -217,6 +219,7 @@ export default function AdminDashboard() {
             </div>
           </main>
         </div>
+        <Footer />
       </div>
 
       <UploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />

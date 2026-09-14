@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, User, GraduationCap, Calendar, Clock } from 'lucide-react';
 import ModalShell from '../common/ModalShell';
+import { DialogClose } from '../ui/dialog';
 import { getYouTubeEmbedUrl } from '../../data/projectsData';
 
 export default function ProjectDetailModal({ project, onClose }) {
@@ -14,14 +15,13 @@ export default function ProjectDetailModal({ project, onClose }) {
       panelClassName="max-w-5xl max-h-[92vh] overflow-y-auto rounded-3xl lg:overflow-hidden"
     >
         {/* Close Button */}
-        <button
+        <DialogClose
           type="button"
           className="absolute right-3 top-3 z-30 flex h-11 w-11 items-center justify-center rounded-xl bg-slate-950/85 text-white shadow-lg transition-colors hover:bg-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
-          onClick={onClose}
           aria-label="Tutup Modal"
         >
           <X size={18} />
-        </button>
+        </DialogClose>
 
         {/* Layout: side-by-side on lg, stacked on mobile */}
         <div className="flex flex-col lg:flex-row relative">

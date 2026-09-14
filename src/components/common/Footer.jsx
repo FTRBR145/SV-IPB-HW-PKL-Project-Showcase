@@ -1,24 +1,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Cpu, Smartphone, Wifi, Wrench, Binary } from 'lucide-react';
-import useScrollReveal from '../../hooks/useScrollReveal';
 
 export default function Footer() {
-  const [footerRef, isVisible] = useScrollReveal({ rootMargin: '0px 0px -40px 0px' });
 
   return (
-    <footer ref={footerRef} className="site-footer border-t border-slate-900 bg-slate-950 py-14 text-xs text-slate-300">
+    <footer className="site-footer border-t border-slate-900 bg-slate-950 py-8 text-xs text-slate-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-12 grid grid-cols-1 gap-10 md:grid-cols-2 xl:grid-cols-4">
+        <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2 xl:grid-cols-4">
           {/* Brand Info & Official Shield Logo */}
-          <div className={`lg:col-span-1 scroll-reveal ${isVisible ? 'is-visible' : ''}`}>
-            <div className="flex items-start gap-3 mb-4">
+          <div className="lg:col-span-1">
+            <div className="flex items-start gap-3">
               <img
                 src="/sv_ipb_logo.png"
                 alt="Logo Resmi IPB University Sekolah Vokasi"
                 width="48"
                 height="48"
-                className="w-12 h-auto object-contain flex-shrink-0"
+                className="w-10 h-auto object-contain flex-shrink-0"
               />
               <div>
                 <h3 className="font-heading text-base font-bold text-white mb-1">TRK Sekolah Vokasi IPB</h3>
@@ -30,9 +28,9 @@ export default function Footer() {
           </div>
 
           {/* Quick Links */}
-          <div className={`scroll-reveal reveal-delay-1 ${isVisible ? 'is-visible' : ''}`}>
-            <h4 className="font-heading text-sm font-bold text-white mb-4 uppercase tracking-wider">Navigasi</h4>
-            <ul className="space-y-2.5">
+          <div>
+            <h4 className="font-heading text-sm font-bold text-white mb-2">Navigasi</h4>
+            <ul>
               <li><Link to="/" className="hover:text-white transition-colors">Home Landing</Link></li>
               <li><Link to="/student" className="hover:text-white transition-colors">Beranda Mahasiswa</Link></li>
               <li><Link to="/admin" className="hover:text-white transition-colors">Panel Admin / Dosen</Link></li>
@@ -42,9 +40,9 @@ export default function Footer() {
           </div>
 
           {/* Fokus Keahlian TRK SV IPB (5 Mata Kuliah Utama) */}
-          <div className={`scroll-reveal reveal-delay-2 ${isVisible ? 'is-visible' : ''}`}>
-            <h4 className="font-heading text-sm font-bold text-white mb-4 uppercase tracking-wider">Fokus Keahlian TRK</h4>
-            <ul className="space-y-2.5">
+          <div>
+            <h4 className="font-heading text-sm font-bold text-white mb-2">Fokus Keahlian TRK</h4>
+            <ul>
               <li>
                 <a href="/#matakuliah" className="hover:text-sky-400 transition-colors flex items-center gap-2">
                   <Cpu size={14} className="text-sky-400 flex-shrink-0" />
@@ -79,20 +77,20 @@ export default function Footer() {
           </div>
 
           {/* Contact */}
-          <div className={`scroll-reveal reveal-delay-3 ${isVisible ? 'is-visible' : ''}`}>
-            <h4 className="font-heading text-sm font-bold text-white mb-4 uppercase tracking-wider">Alamat & Kontak</h4>
-            <ul className="space-y-3">
+          <div>
+            <h4 className="font-heading text-sm font-bold text-white mb-2">Alamat & Kontak</h4>
+            <ul className="space-y-2">
               <li className="flex gap-2.5 items-start">
                 <MapPin size={16} className="text-slate-400 flex-shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white block font-semibold">KAMPUS BOGOR</strong>
+                  <strong className="text-white block font-semibold">Kampus Bogor</strong>
                   Jl. Kumbang No.14, Babakan, Kota Bogor, Jawa Barat 16128
                 </span>
               </li>
               <li className="flex gap-2.5 items-start">
                 <MapPin size={16} className="text-slate-400 flex-shrink-0 mt-0.5" />
                 <span>
-                  <strong className="text-white block font-semibold">KAMPUS SUKABUMI</strong>
+                  <strong className="text-white block font-semibold">Kampus Sukabumi</strong>
                   Jl. Sarasa No. 45, Babakan, Kota Sukabumi, Jawa Barat 43142
                 </span>
               </li>
@@ -106,7 +104,7 @@ export default function Footer() {
           </div>
         </div>
 
-        <div className={`border-t border-slate-800 pt-8 text-center text-xs text-slate-400 scroll-reveal reveal-delay-4 ${isVisible ? 'is-visible' : ''}`}>
+        <div className="border-t border-slate-800 pt-4 text-center text-xs text-slate-400">
           <p>© 2026 Sekolah Vokasi IPB University. Teknologi Rekayasa Komputer (TRK) Project Showcase.</p>
         </div>
       </div>

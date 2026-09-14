@@ -1,7 +1,8 @@
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import DataTablesReact from 'datatables.net-react';
 import DataTablesCore from 'datatables.net-dt';
 import 'datatables.net-dt/css/dataTables.dataTables.css';
+import './DataTable.css';
 import { Download } from 'lucide-react';
 
 const registerDataTables = DataTablesReact.use;
@@ -24,33 +25,48 @@ export default function DataTable({
   defaultSortDirection = 'asc',
   showExportCsv = false,
   exportFileName = 'data-export.csv',
-  emptyMessage = 'Tidak ada data yang ditemukan.'
+  emptyMessage = 'Tidak ada data yang ditemukan.',
+  searchTerm = ''
 }) {
   const tableRef = useRef(null);
+  const sortId = useId();
+  const [sortSelection, setSortSelection] = useState(defaultSortKey ? `${defaultSortKey}:${defaultSortDirection}` : '');
   const columnsRef = useRef(columns);
   columnsRef.current = columns;
 
-  const dataTableColumns = useMemo(() => columns.map((column, index) => ({
-    data: column.key || null,
-    name: column.key || `column-${index}`,
-    orderable: column.sortable !== false && Boolean(column.key),
-    searchable: column.searchable !== false && Boolean(column.key),
-    className: column.className || '',
-    defaultContent: ''
-  })), [columns]);
+  const dataTableColumns = useMemo(() => {
+    const weights = columns.map(column => column.weight || ({ title: 2.4, course: 1.8, student: 1.6, name: 1.8, email: 1.8, actions: 1.3 }[column.key] || 1));
+    const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+    return columns.map((column, index) => ({
+      data: column.key || null,
+      name: column.key || `column-${index}`,
+      orderable: column.sortable !== false && Boolean(column.key),
+      searchable: column.searchable !== false && Boolean(column.key),
+      className: column.className || '',
+      width: `${weights[index] / totalWeight * 100}%`,
+      createdCell: (cell) => { cell.setAttribute('role', 'cell'); },
+      defaultContent: ''
+    }));
+  }, [columns]);
 
   const slots = useMemo(() => {
     const renderSlots = {};
 
     columns.forEach((column, index) => {
-      if (!column.render) return;
-
       renderSlots[index] = (cellData, type, row, meta) => {
         const currentColumn = columnsRef.current[index];
         const rawValue = currentColumn?.key ? row[currentColumn.key] : cellData;
 
+        if (type === 'filter' && currentColumn.searchValue) return currentColumn.searchValue(row);
         if (type !== 'display') return normalizeCellValue(rawValue);
-        return currentColumn.render(row, meta.row);
+        return (
+          <div className="table-cell">
+            <span className="table-cell-label" aria-hidden="true">{currentColumn.label}</span>
+            <div className="table-cell-value">
+              {currentColumn.render ? currentColumn.render(row, meta.row) : normalizeCellValue(rawValue)}
+            </div>
+          </div>
+        );
       };
     });
 
@@ -59,6 +75,19 @@ export default function DataTable({
 
   const defaultSortIndex = columns.findIndex((column) => column.key === defaultSortKey);
   const order = defaultSortIndex >= 0 ? [[defaultSortIndex, defaultSortDirection]] : [];
+
+  useEffect(() => {
+    const table = tableRef.current?.dt();
+    if (table && table.search() !== searchTerm) table.search(searchTerm).draw();
+  }, [searchTerm]);
+
+  const changeSort = (event) => {
+    const selection = event.target.value;
+    setSortSelection(selection);
+    const [key, direction] = selection.split(':');
+    const index = columns.findIndex(column => column.key === key);
+    tableRef.current?.dt()?.order(index < 0 ? [] : [[index, direction]]).draw();
+  };
 
   const handleExportCsv = () => {
     const table = tableRef.current?.dt();
@@ -89,10 +118,10 @@ export default function DataTable({
   };
 
   return (
-    <div className="w-full space-y-3">
+    <div className="data-table-shell min-w-0 w-full space-y-3">
       {(extraHeaderActions || showExportCsv) && (
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <div>{extraHeaderActions}</div>
+          <div className="min-w-0 max-w-full">{extraHeaderActions}</div>
           {showExportCsv && (
             <button
               type="button"
@@ -107,17 +136,35 @@ export default function DataTable({
         </div>
       )}
 
-      <div className="admin-datatable workspace-panel max-w-full overflow-hidden rounded-2xl border p-3 shadow-2xs sm:p-4">
-        <p className="mb-2 text-xs font-semibold text-slate-500 md:hidden">Geser tabel ke samping untuk melihat semua kolom.</p>
+      <div className="admin-datatable">
+        <div className="table-mobile-sort">
+          <label htmlFor={sortId}>Urutkan data</label>
+          <select id={sortId} value={sortSelection} onChange={changeSort}>
+            <option value="">Urutan awal</option>
+            {columns.filter(column => column.key && column.sortable !== false).flatMap(column => [
+              <option key={`${column.key}:asc`} value={`${column.key}:asc`}>{column.label} · naik</option>,
+              <option key={`${column.key}:desc`} value={`${column.key}:desc`}>{column.label} · turun</option>
+            ])}
+          </select>
+        </div>
         <DataTablesReact
           ref={tableRef}
           data={data}
           columns={dataTableColumns}
           slots={slots}
-          className="display w-full text-left text-xs"
+          className="w-full text-left"
+          onOrder={() => {
+            const currentOrder = tableRef.current?.dt()?.order();
+            if (!currentOrder) return;
+            const [index, direction] = currentOrder[0] || [];
+            const key = columnsRef.current[index]?.key;
+            setSortSelection(key ? `${key}:${direction}` : '');
+          }}
           options={{
             autoWidth: false,
-            scrollX: true,
+            scrollX: false,
+            search: { search: searchTerm },
+            createdRow: (row) => row.setAttribute('role', 'row'),
             deferRender: true,
             pageLength: defaultPageSize,
             lengthMenu: pageSizeOptions,
@@ -146,15 +193,15 @@ export default function DataTable({
                 number: 'Halaman %d'
               },
               aria: {
-                orderable: 'Urutkan kolom ini',
-                orderableReverse: 'Balikkan urutan kolom ini',
-                orderableRemove: 'Hapus urutan kolom ini',
+                orderable: ': Urutkan kolom ini',
+                orderableReverse: ': Balikkan urutan kolom ini',
+                orderableRemove: ': Hapus urutan kolom ini',
                 paginate: {
                   first: 'Halaman pertama',
                   last: 'Halaman terakhir',
                   previous: 'Halaman sebelumnya',
                   next: 'Halaman berikutnya',
-                  number: 'Halaman %d'
+                  number: 'Halaman '
                 }
               }
             }
@@ -163,7 +210,7 @@ export default function DataTable({
           <thead>
             <tr>
               {columns.map((column, index) => (
-                <th key={column.key || index} className={column.headerClassName || ''}>
+                <th scope="col" key={column.key || index} className={column.headerClassName || ''}>
                   {column.label}
                 </th>
               ))}

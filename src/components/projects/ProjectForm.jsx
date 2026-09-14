@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { CheckCircle2, Clock, Upload } from 'lucide-react';
 import { getYouTubeThumbnail } from '../../data/projectsData';
+import { normalizeProjectVideo, projectContentErrors, configuredAcademicYear } from '../../utils/projectInput';
 import useApp from '../../hooks/useApp';
 
 const inputClass = 'w-full min-h-11 rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-2.5 text-base text-slate-800 placeholder-slate-500 transition-colors focus:border-sky-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-600 sm:text-sm';
@@ -13,31 +14,18 @@ const FIELD_IDS = {
   date: 'project-date',
   year: 'project-year',
   course: 'project-course',
-  category: 'project-category',
-  videoUrl: 'project-video-url'
+  videoUrl: 'project-video-url',
+  description: 'project-description'
 };
 
-function isValidYouTubeUrl(value) {
-  if (!value.trim()) return true;
-
-  try {
-    const url = new URL(value);
-    return ['youtube.com', 'www.youtube.com', 'm.youtube.com', 'youtu.be'].includes(url.hostname);
-  } catch {
-    return false;
-  }
-}
-
 function validateProject(formData) {
-  const nextErrors = {};
+  const nextErrors = projectContentErrors(formData);
   if (formData.title.trim().length < 5) nextErrors.title = 'Judul projek minimal 5 karakter.';
   if (!formData.student.trim()) nextErrors.student = 'Nama mahasiswa wajib diisi.';
   if (!formData.nim.trim()) nextErrors.nim = 'NIM mahasiswa wajib diisi.';
   if (!formData.date) nextErrors.date = 'Tanggal pelaksanaan wajib dipilih.';
-  if (!/^\d{4}\/\d{4}$/.test(formData.year.trim())) nextErrors.year = 'Gunakan format tahun ajaran seperti 2025/2026.';
+  if (!configuredAcademicYear(formData.year)) nextErrors.year = 'Masukkan dua tahun berurutan dengan format YYYY/YYYY.';
   if (!formData.course) nextErrors.course = 'Pilih mata kuliah projek.';
-  if (!formData.category) nextErrors.category = 'Pilih kategori projek.';
-  if (!isValidYouTubeUrl(formData.videoUrl)) nextErrors.videoUrl = 'Masukkan URL YouTube yang valid.';
   return nextErrors;
 }
 
@@ -60,21 +48,6 @@ function formatIndonesianDate(dateValue) {
   return `${Number.parseInt(day, 10)} ${monthName} ${year}`;
 }
 
-function normalizeYouTubeUrl(videoUrl) {
-  const trimmedUrl = videoUrl.trim();
-  if (!trimmedUrl) return 'https://www.youtube.com/embed/9KxU30uM3qM';
-
-  if (trimmedUrl.includes('watch?v=')) {
-    return trimmedUrl.replace('watch?v=', 'embed/');
-  }
-
-  if (trimmedUrl.includes('youtu.be/')) {
-    return trimmedUrl.replace('youtu.be/', 'www.youtube.com/embed/');
-  }
-
-  return trimmedUrl;
-}
-
 export default function ProjectForm({
   onCancel,
   onSuccess,
@@ -82,8 +55,10 @@ export default function ProjectForm({
   lockIdentity = false,
   submitLabel = 'Unggah Sekarang'
 }) {
-  const { addProject, currentUser, courses, categories } = useApp();
-  const today = new Date().toISOString().split('T')[0];
+  const { addProject, currentUser, courses, adminSettings } = useApp();
+  const now = new Date();
+  const today = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+  const yearEditedRef = useRef(false);
   const [submitted, setSubmitted] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -94,13 +69,11 @@ export default function ProjectForm({
     nim: currentUser?.role === 'student' ? currentUser.nim : '',
     semester: currentUser?.semester || 3,
     course: courses[0] || '',
-    category: categories[0] || '',
     date: today,
-    year: '2025/2026',
+    year: configuredAcademicYear(adminSettings?.academicYear),
     supervisor: '',
     videoUrl: '',
-    thumbnail: '',
-    techStackStr: 'ESP32, C++, MQTT, Node.js',
+    techStackStr: '',
     description: ''
   });
 
@@ -108,8 +81,13 @@ export default function ProjectForm({
     if (successTimerRef.current) window.clearTimeout(successTimerRef.current);
   }, []);
 
+  useEffect(() => {
+    if (!yearEditedRef.current) setFormData(previous => ({ ...previous, year: configuredAcademicYear(adminSettings?.academicYear) }));
+  }, [adminSettings?.academicYear]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
+    if (name === 'year') yearEditedRef.current = true;
     setFormData((previous) => ({ ...previous, [name]: value }));
     if (errors[name] || errors.form) {
       setErrors((previous) => ({ ...previous, [name]: undefined, form: undefined }));
@@ -123,14 +101,14 @@ export default function ProjectForm({
     const nextErrors = validateProject(formData);
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
-      const firstInvalidField = Object.keys(nextErrors)[0];
+      const firstInvalidField = Object.keys(FIELD_IDS).find(name => nextErrors[name]);
       window.requestAnimationFrame(() => document.getElementById(FIELD_IDS[firstInvalidField])?.focus());
       return;
     }
 
     setIsSubmitting(true);
 
-    const finalVideoUrl = normalizeYouTubeUrl(formData.videoUrl);
+    const finalVideoUrl = normalizeProjectVideo(formData.videoUrl);
     const techStack = formData.techStackStr
       .split(',')
       .map((item) => item.trim())
@@ -141,20 +119,14 @@ export default function ProjectForm({
       student: formData.student.trim(),
       nim: formData.nim.trim(),
       course: formData.course,
-      category: formData.category,
       semester: Number.parseInt(formData.semester, 10),
-      techStack: techStack.length > 0 ? techStack : ['TRK', 'Embedded System'],
-      thumbnail:
-        formData.thumbnail ||
-        getYouTubeThumbnail(finalVideoUrl) ||
-        'https://img.youtube.com/vi/9KxU30uM3qM/hqdefault.jpg',
+      techStack,
+      thumbnail: getYouTubeThumbnail(finalVideoUrl),
       videoUrl: finalVideoUrl,
-      supervisor: formData.supervisor.trim() || 'Dosen Pembimbing TRK SV IPB',
-      year: formData.year.trim() || '2025/2026',
+      supervisor: formData.supervisor.trim(),
+      year: formData.year.trim(),
       date: formatIndonesianDate(formData.date),
-      description:
-        formData.description.trim() ||
-        'Projek alat/sistem hasil praktikum mahasiswa Teknik Komputer (TRK) Sekolah Vokasi IPB.'
+      description: formData.description.trim()
     };
 
     try {
@@ -308,7 +280,7 @@ export default function ProjectForm({
             type="text"
             name="year"
             className={fieldClass('year')}
-            placeholder="Contoh: 2025/2026"
+            placeholder="YYYY/YYYY"
             value={formData.year}
             onChange={handleChange}
             maxLength={9}
@@ -328,7 +300,7 @@ export default function ProjectForm({
           </select>
         </div>
         <div>
-          <label htmlFor="project-supervisor" className="mb-1.5 block text-xs font-bold text-slate-700">Dosen Pembimbing</label>
+          <label htmlFor="project-supervisor" className="mb-1.5 block text-xs font-bold text-slate-700">Dosen Pembimbing (opsional)</label>
           <input
             id="project-supervisor"
             type="text"
@@ -354,18 +326,7 @@ export default function ProjectForm({
       </div>
 
       <div>
-        <label htmlFor="project-category" className="mb-1.5 block text-xs font-bold text-slate-700">Kategori Projek *</label>
-        <select id="project-category" name="category" className={fieldClass('category')} value={formData.category} onChange={handleChange} {...fieldProps('category')}>
-          {categories.length === 0 && <option value="">Belum ada kategori tersedia</option>}
-          {categories.map((category) => (
-            <option key={category} value={category}>{category}</option>
-          ))}
-        </select>
-        <FieldError id="project-category-error" message={errors.category} />
-      </div>
-
-      <div>
-        <label htmlFor="project-video-url" className="mb-1.5 block text-xs font-bold text-slate-700">URL Video YouTube</label>
+        <label htmlFor="project-video-url" className="mb-1.5 block text-xs font-bold text-slate-700">URL Video YouTube *</label>
         <input
           id="project-video-url"
           type="url"
@@ -374,13 +335,14 @@ export default function ProjectForm({
           placeholder="https://www.youtube.com/watch?v=..."
           value={formData.videoUrl}
           onChange={handleChange}
+          required
           {...fieldProps('videoUrl')}
         />
         <FieldError id="project-video-url-error" message={errors.videoUrl} />
       </div>
 
       <div>
-        <label htmlFor="project-tech-stack" className="mb-1.5 block text-xs font-bold text-slate-700">Teknologi / Stack</label>
+        <label htmlFor="project-tech-stack" className="mb-1.5 block text-xs font-bold text-slate-700">Teknologi / Stack (opsional)</label>
         <input
           id="project-tech-stack"
           type="text"
@@ -394,22 +356,25 @@ export default function ProjectForm({
       </div>
 
       <div>
-        <label htmlFor="project-description" className="mb-1.5 block text-xs font-bold text-slate-700">Deskripsi Singkat</label>
+        <label htmlFor="project-description" className="mb-1.5 block text-xs font-bold text-slate-700">Deskripsi Singkat *</label>
         <textarea
           id="project-description"
           name="description"
           rows="4"
-          className={`${inputClass} resize-none`}
+          className={`${fieldClass('description')} resize-y`}
           placeholder="Jelaskan ringkasan tujuan, cara kerja, dan keunggulan projek..."
           value={formData.description}
           onChange={handleChange}
           maxLength={1200}
+          required
+          {...fieldProps('description')}
         />
+        <FieldError id="project-description-error" message={errors.description} />
       </div>
 
-      {(courses.length === 0 || categories.length === 0) && (
+      {(courses.length === 0) && (
         <p role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm font-semibold text-amber-900">
-          Form belum dapat dikirim karena mata kuliah atau kategori belum tersedia. Hubungi admin untuk melengkapinya.
+          Form belum dapat dikirim karena mata kuliah belum tersedia. Hubungi admin untuk melengkapinya.
         </p>
       )}
 
@@ -425,7 +390,7 @@ export default function ProjectForm({
         )}
         <button
           type="submit"
-          disabled={isSubmitting || courses.length === 0 || categories.length === 0}
+          disabled={isSubmitting || courses.length === 0}
           className="flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 py-2.5 text-sm font-bold text-white shadow-md transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:bg-slate-400 disabled:shadow-none"
         >
           <Upload size={16} aria-hidden="true" />

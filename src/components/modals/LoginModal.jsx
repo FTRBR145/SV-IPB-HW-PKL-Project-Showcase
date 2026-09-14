@@ -3,6 +3,7 @@ import { X, Lock, User, GraduationCap, ShieldCheck } from 'lucide-react';
 import { demoCredentials } from '../../services/apiClient';
 import useApp from '../../hooks/useApp';
 import ModalShell from '../common/ModalShell';
+import { DialogClose } from '../ui/dialog';
 
 export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
   const { loginAsStudent, loginAsAdmin } = useApp();
@@ -44,14 +45,13 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
       ariaLabel="Masuk ke akun Showcase TRK"
       panelClassName="max-w-md max-h-[90vh] flex flex-col overflow-hidden rounded-3xl"
     >
-        <button
+        <DialogClose
           type="button"
           className="absolute right-3 top-3 z-10 flex h-11 w-11 items-center justify-center rounded-xl text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
-          onClick={onClose}
           aria-label="Tutup"
         >
           <X size={16} />
-        </button>
+        </DialogClose>
 
         <div className="p-6 sm:p-8 overflow-y-auto flex-1">
           {isSubmitting ? (

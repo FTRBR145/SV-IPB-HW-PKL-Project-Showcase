@@ -14,6 +14,7 @@ import {
   X
 } from 'lucide-react';
 import ModalShell from '../common/ModalShell';
+import { DialogClose } from '../ui/dialog';
 
 const coursePresentation = {
   'SISTEM TERTANAM (EMBEDDED SYSTEM)': { label: 'Sistem Tertanam', icon: Cpu },
@@ -66,7 +67,7 @@ export default function StudentSidebar({
         <nav className="w-full space-y-1 border-b border-slate-100 pb-4" aria-label="Navigasi mahasiswa">
           <button
             type="button"
-            onClick={onSelectHome}
+            onClick={onSelectHome} aria-current={activeItem === 'home' ? 'page' : undefined}
             className={`${mainItemClass} ${
               activeItem === 'home'
                 ? 'bg-slate-900 text-white'
@@ -74,14 +75,14 @@ export default function StudentSidebar({
             }`}
           >
             <Home size={17} className={activeItem === 'home' ? 'text-sky-400' : ''} />
-            <span>Beranda</span>
+            <span>Jelajah Karya</span>
           </button>
 
           {showStudentActions && (
             <>
               <button
                 type="button"
-                onClick={onNavigateUpload}
+                onClick={onNavigateUpload} aria-current={activeItem === 'upload' ? 'page' : undefined}
                 className={`${mainItemClass} ${
                   activeItem === 'upload'
                     ? 'bg-sky-600 text-white'
@@ -89,12 +90,12 @@ export default function StudentSidebar({
                 }`}
               >
                 <Upload size={17} />
-                <span>Upload Projek</span>
+                <span>Unggah Projek</span>
               </button>
 
               <button
                 type="button"
-                onClick={onSelectMyProjects}
+                onClick={onSelectMyProjects} aria-current={activeItem === 'my-projects' ? 'page' : undefined}
                 className={`${mainItemClass} ${
                   activeItem === 'my-projects'
                     ? 'bg-slate-900 text-white'
@@ -121,7 +122,7 @@ export default function StudentSidebar({
             <button
               key={value}
               type="button"
-              onClick={() => onSelectCourse?.(value)}
+              onClick={() => onSelectCourse?.(value)} aria-pressed={selectedCategory === value}
               className={`flex min-h-11 w-full items-center gap-2.5 rounded-xl px-3 text-left text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 ${
                 selectedCategory === value
                   ? `${activeClass} font-bold`
@@ -129,7 +130,7 @@ export default function StudentSidebar({
               }`}
             >
               <Icon size={15} className={`${iconClass} shrink-0`} />
-              <span className="truncate">{label}</span>
+              <span className="text-left leading-relaxed">{label}</span>
             </button>
           ))}
         </div>
@@ -162,7 +163,8 @@ export default function StudentSidebar({
         onClose={() => setIsCourseMenuOpen(false)}
         ariaLabel="Pilih mata kuliah"
         panelId="student-course-menu"
-        overlayClassName="items-end bg-slate-950/45 p-3 pb-[calc(5rem+env(safe-area-inset-bottom))] md:hidden"
+        backdropClassName="bg-slate-950/45 md:hidden"
+        overlayClassName="items-end p-3 pb-[calc(5rem+env(safe-area-inset-bottom))] md:hidden"
         panelClassName="max-h-[70vh] overflow-y-auto rounded-2xl p-4"
       >
             <div className="mb-3 flex items-center justify-between">
@@ -170,21 +172,20 @@ export default function StudentSidebar({
                 <h2 className="font-heading text-base font-bold text-slate-900">Mata Kuliah TRK</h2>
                 <p className="mt-0.5 text-xs text-slate-600">Pilih kategori projek yang ingin ditampilkan.</p>
               </div>
-              <button
+              <DialogClose
                 type="button"
-                onClick={() => setIsCourseMenuOpen(false)}
                 className="flex h-11 w-11 items-center justify-center rounded-xl bg-slate-100 text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
                 aria-label="Tutup pilihan mata kuliah"
               >
                 <X size={18} />
-              </button>
+              </DialogClose>
             </div>
             <div className="space-y-2">
               {courseItems.map(({ value, label, icon: Icon, activeClass, iconClass }) => (
                 <button
                   key={value}
                   type="button"
-                  onClick={() => selectCourse(value)}
+                  onClick={() => selectCourse(value)} aria-pressed={selectedCategory === value}
                   className={`flex min-h-12 w-full items-center gap-3 rounded-xl px-3 text-left text-xs font-bold ${
                     selectedCategory === value ? activeClass : 'bg-slate-50 text-slate-700'
                   }`}
@@ -207,17 +208,17 @@ export default function StudentSidebar({
 
       <nav className="workspace-toolbar fixed inset-x-0 bottom-0 z-50 border-t px-2 pb-[env(safe-area-inset-bottom)] shadow-[0_-8px_24px_rgba(15,23,42,0.10)] backdrop-blur md:hidden" aria-label="Navigasi mahasiswa mobile">
         <div className={`mx-auto grid min-h-16 max-w-lg items-stretch py-1.5 ${showStudentActions ? 'grid-cols-4' : 'grid-cols-3'}`}>
-          <button type="button" onClick={onSelectHome} aria-label="Beranda mahasiswa" className={`flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${activeItem === 'home' ? 'text-sky-700' : 'text-slate-600'}`}>
+          <button type="button" onClick={onSelectHome} aria-current={activeItem === 'home' ? 'page' : undefined} aria-label="Beranda mahasiswa" className={`flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${activeItem === 'home' ? 'text-sky-700' : 'text-slate-600'}`}>
             <span className={`rounded-xl p-1.5 ${activeItem === 'home' ? 'mobile-nav-active bg-sky-100' : ''}`}><Home size={19} /></span>
-            <span className="max-w-full">Awal</span>
+            <span className="max-w-full">Jelajah</span>
           </button>
           {showStudentActions && (
             <>
-              <button type="button" onClick={onNavigateUpload} aria-label="Upload projek" className={`flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${activeItem === 'upload' ? 'text-sky-700' : 'text-slate-600'}`}>
+              <button type="button" onClick={onNavigateUpload} aria-current={activeItem === 'upload' ? 'page' : undefined} aria-label="Unggah projek" className={`flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${activeItem === 'upload' ? 'text-sky-700' : 'text-slate-600'}`}>
                 <span className={`rounded-xl p-1.5 ${activeItem === 'upload' ? 'mobile-nav-active bg-sky-100' : ''}`}><Upload size={19} /></span>
                 <span className="max-w-full">Unggah</span>
               </button>
-              <button type="button" onClick={onSelectMyProjects} aria-label="Projek saya" className={`relative flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${activeItem === 'my-projects' ? 'text-sky-700' : 'text-slate-600'}`}>
+              <button type="button" onClick={onSelectMyProjects} aria-current={activeItem === 'my-projects' ? 'page' : undefined} aria-label="Projek saya" className={`relative flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${activeItem === 'my-projects' ? 'text-sky-700' : 'text-slate-600'}`}>
                 <span className={`relative rounded-xl p-1.5 ${activeItem === 'my-projects' ? 'mobile-nav-active bg-sky-100' : ''}`}>
                   <FolderGit2 size={19} />
                   {projectCount > 0 && <span className="absolute -right-2 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-slate-900 px-1 text-xs text-white">{projectCount}</span>}
@@ -228,7 +229,7 @@ export default function StudentSidebar({
           )}
           <button type="button" onClick={() => setIsCourseMenuOpen((open) => !open)} aria-label="Pilih mata kuliah" aria-expanded={isCourseMenuOpen} aria-controls="student-course-menu" className={`flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight ${isCourseMenuOpen || courseIsActive ? 'text-sky-700' : 'text-slate-600'}`}>
             <span className={`rounded-xl p-1.5 ${isCourseMenuOpen || courseIsActive ? 'mobile-nav-active bg-sky-100' : ''}`}><BookOpen size={19} /></span>
-            <span className="max-w-full">Kuliah</span>
+            <span className="max-w-full">Mata kuliah</span>
           </button>
           {showAdmin && !showStudentActions && (
             <button type="button" onClick={onNavigateAdmin} aria-label="Kembali ke panel admin" className="flex min-h-11 min-w-0 flex-col items-center justify-center gap-1 overflow-hidden px-1 text-center text-xs font-bold leading-tight text-slate-600">

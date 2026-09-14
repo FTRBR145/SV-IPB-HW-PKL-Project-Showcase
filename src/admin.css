@@ -1,0 +1,23 @@
+.admin-page {
+  font-family: 'Geist Variable', sans-serif;
+}
+.admin-page h1, .admin-page h2, .admin-page h3, .admin-page h4 {
+  font-family: inherit;
+}
+.admin-page h2 { letter-spacing: -0.01em; }
+.admin-page-heading { padding-bottom: 0.25rem; }
+.admin-page main section { min-width: 0; }
+.admin-page main button, .admin-page main select { cursor: pointer; }
+.admin-page main button:disabled { cursor: not-allowed; opacity: 0.5; }
+.admin-page :focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 3px; }
+.admin-page .admin-insights { gap: 1.25rem; }
+.admin-page .workspace-sidebar { background: var(--ui-surface); }
+.admin-page .admin-metric { min-width: 0; }
+.admin-page .admin-metric strong { display: block; }
+.admin-page .admin-insights .motion-chart-bar { animation: none; }
+@media (max-width: 640px) {
+  .admin-page .admin-metric { padding: 1rem; }
+  .admin-page .admin-metric > div:last-child { display: none; }
+  .admin-page .admin-metric strong { font-size: 1.75rem; }
+  .admin-page main section { padding: 1rem; }
+}

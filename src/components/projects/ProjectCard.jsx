@@ -1,13 +1,14 @@
 import React from 'react';
 import { Play } from 'lucide-react';
 import { getYouTubeThumbnail } from '../../data/projectsData';
+import { courseLabel } from '../../utils/courseLabel';
 
 export default function ProjectCard({ project, onClickDetail, motionIndex = 0 }) {
   const displayThumbnail = getYouTubeThumbnail(project.videoUrl) || project.thumbnail;
 
   return (
     <article
-      className="motion-list-item card-tilt shimmer-hover card-shimmer-border group flex flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm"
+      className="project-card group flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white"
       style={{ '--motion-index': motionIndex }}
     >
       {/* Thumbnail Wrapper */}
@@ -17,20 +18,20 @@ export default function ProjectCard({ project, onClickDetail, motionIndex = 0 })
         onClick={() => onClickDetail(project)}
         aria-label={`Lihat detail ${project.title}`}
       >
-        <img 
-          src={displayThumbnail} 
+        <img
+          src={displayThumbnail}
           alt={`Thumbnail projek ${project.title}`}
           width="480"
           height="270"
           loading="lazy"
           decoding="async"
-          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 opacity-90 group-hover:opacity-100" 
+          className="w-full h-full object-cover"
         />
-        <span className="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-slate-200 text-xs font-semibold px-2.5 py-1 rounded-full border border-slate-700">
+        <span className="absolute top-3 left-3 bg-slate-900 text-slate-200 text-xs font-semibold px-2.5 py-1 rounded-full border border-slate-700">
           Semester {project.semester}
         </span>
-        <div className="absolute inset-0 bg-slate-950/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-          <div className="w-12 h-12 rounded-full bg-white text-slate-900 flex items-center justify-center shadow-lg transform scale-90 group-hover:scale-100 transition-transform">
+        <div className="absolute bottom-3 right-3">
+          <div className="w-11 h-11 rounded-full bg-white text-slate-900 flex items-center justify-center">
             <Play size={22} fill="currentColor" className="ml-1" />
           </div>
         </div>
@@ -44,22 +45,23 @@ export default function ProjectCard({ project, onClickDetail, motionIndex = 0 })
           </h3>
           <p className="mb-3 text-xs font-medium text-slate-600">Oleh {project.student}</p>
 
-          <span className="inline-block bg-slate-100 text-slate-700 text-xs font-semibold px-2.5 py-1 rounded-md border border-slate-200 mb-3">
-            {project.course}
+          <span className="block text-slate-600 text-xs leading-relaxed mb-3">
+            {courseLabel(project.course)}
           </span>
 
           <div className="flex flex-wrap gap-1.5 mb-4">
             {(project.techStack || []).map((tech, idx) => (
-              <span key={idx} className="rounded border border-slate-200 bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-700">
+              <span key={idx} className="text-xs text-slate-600">
                 {tech}
+                {idx < project.techStack.length - 1 && <span className="ml-1.5" aria-hidden="true">/</span>}
               </span>
             ))}
           </div>
         </div>
 
-        <button 
+        <button
           type="button"
-          className="min-h-11 w-full rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2"
+          className="min-h-11 w-full rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-semibold text-slate-900 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2"
           onClick={() => onClickDetail(project)}
           aria-label={`Lihat detail projek ${project.title}`}
         >

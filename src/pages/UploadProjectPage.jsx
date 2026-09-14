@@ -1,7 +1,8 @@
 import React from 'react';
-import { ArrowLeft, FileVideo2, Info, Upload } from 'lucide-react';
+import { ArrowLeft, FileVideo2, Upload } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../components/common/Navbar';
+import Footer from '../components/common/Footer';
 import ProjectForm from '../components/projects/ProjectForm';
 import StudentSidebar from '../components/student/StudentSidebar';
 import useApp from '../hooks/useApp';
@@ -92,17 +93,12 @@ export default function UploadProjectPage() {
                   </ul>
                 </div>
 
-                <div className="bg-sky-50 border border-sky-100 rounded-2xl p-4 flex gap-3">
-                  <Info size={18} className="text-sky-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-sky-800 leading-relaxed">
-                    Nama dan NIM diambil otomatis dari akun mahasiswa yang sedang masuk.
-                  </p>
-                </div>
               </aside>
             </div>
           </div>
           </main>
         </div>
+        <Footer />
       </div>
 
     </div>
