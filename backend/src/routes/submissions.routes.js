@@ -6,12 +6,12 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get('/mine', authorize('student'), (request, response) => {
-  sendData(response, request.app.locals.repository.listSubmissions({ nim: request.user.nim }));
+router.get('/mine', authorize('student'), async (request, response) => {
+  sendData(response, await request.app.locals.repository.listSubmissions({ nim: request.user.nim }));
 });
 
-router.get('/', authorize('admin'), (request, response) => {
-  sendData(response, request.app.locals.repository.listSubmissions({ status: request.query.status }));
+router.get('/', authorize('admin'), async (request, response) => {
+  sendData(response, await request.app.locals.repository.listSubmissions({ status: request.query.status }));
 });
 
 function resolveModerationResult(result, response, status = 200) {
@@ -22,23 +22,23 @@ function resolveModerationResult(result, response, status = 200) {
   return sendData(response, result, status);
 }
 
-router.post('/:id/approve', authorize('admin'), (request, response) => {
+router.post('/:id/approve', authorize('admin'), async (request, response) => {
   resolveModerationResult(
-    request.app.locals.repository.approveSubmission(request.params.id, request.user.name),
+    await request.app.locals.repository.approveSubmission(request.params.id, request.user.name),
     response
   );
 });
 
-router.post('/:id/reject', authorize('admin'), (request, response) => {
+router.post('/:id/reject', authorize('admin'), async (request, response) => {
   resolveModerationResult(
-    request.app.locals.repository.rejectSubmission(request.params.id, request.user.name),
+    await request.app.locals.repository.rejectSubmission(request.params.id, request.user.name),
     response
   );
 });
 
-router.post('/:id/restore', authorize('admin'), (request, response) => {
+router.post('/:id/restore', authorize('admin'), async (request, response) => {
   resolveModerationResult(
-    request.app.locals.repository.restoreSubmission(request.params.id, request.user.name),
+    await request.app.locals.repository.restoreSubmission(request.params.id, request.user.name),
     response
   );
 });

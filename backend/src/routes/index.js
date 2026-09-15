@@ -2,12 +2,14 @@ import { Router } from 'express';
 import authRoutes from './auth.routes.js';
 import projectsRoutes from './projects.routes.js';
 import submissionsRoutes from './submissions.routes.js';
+import studentsRoutes from './students.routes.js';
 import adminRoutes from './admin.routes.js';
 import { sendData } from '../utils/http.js';
 
 const router = Router();
 
-router.get('/health', (_request, response) => {
+router.get('/health', async (request, response) => {
+  await request.app.locals.repository.health?.();
   sendData(response, {
     service: 'trk-showcase-backend',
     status: 'ok',
@@ -18,6 +20,7 @@ router.get('/health', (_request, response) => {
 router.use('/auth', authRoutes);
 router.use('/projects', projectsRoutes);
 router.use('/submissions', submissionsRoutes);
+router.use('/students', studentsRoutes);
 router.use('/', adminRoutes);
 
 export default router;

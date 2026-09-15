@@ -39,7 +39,7 @@ test('tabel admin menyesuaikan panel dan menyediakan pengurutan mobile', async (
   assert.match(source, /Urutkan data/);
   assert.match(source, /currentColumn\.searchValue\(row\)/);
   assert.match(css, /table-layout:\s*fixed/);
-  assert.match(css, /@container admin-table \(max-width: 760px\)/);
+  assert.match(css, /@container admin-table \(max-width: 640px\)/);
   assert.match(css, /white-space:\s*normal/);
   assert.doesNotMatch(css, /min-width:\s*720px|overflow-x:\s*auto/);
   assert.match(css, /\.table-cell-value > div\.justify-center/);

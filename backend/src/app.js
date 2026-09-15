@@ -4,10 +4,10 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import { env } from './config/env.js';
 import { errorHandler, notFound } from './middleware/errors.js';
-import { memoryRepository } from './repositories/memoryRepository.js';
 import apiRoutes from './routes/index.js';
 
-export function createApp({ repository = memoryRepository } = {}) {
+export function createApp({ repository } = {}) {
+  if (!repository) throw new Error('Repository wajib diberikan saat membuat API.');
   const app = express();
   app.disable('x-powered-by');
   app.locals.repository = repository;

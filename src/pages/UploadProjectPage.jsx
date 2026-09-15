@@ -24,6 +24,7 @@ export default function UploadProjectPage() {
         currentUser={currentUser}
         isLoggedIn={isLoggedIn}
         onLogout={logout}
+        onNavigateToStudent={() => navigate('/student')}
         onNavigateToAdmin={currentUser.role === 'admin' ? () => navigate('/admin') : undefined}
         onBackToLanding={() => navigate('/')}
       />

@@ -20,8 +20,10 @@
     "cn": "^0.2.6",
     "datatables.net-dt": "^3.0.2",
     "datatables.net-react": "^1.0.2",
+    "exceljs": "4.4.0",
     "lucide-react": "^1.28.0",
     "motion": "^13.2.0",
+    "papaparse": "5.5.3",
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
     "react-router-dom": "^7.18.2",
@@ -44,5 +46,10 @@
     "tailwindcss": "^4.3.3",
     "tsx": "^4.23.13",
     "vite": "^8.2.0"
+  },
+  "overrides": {
+    "exceljs": {
+      "uuid": "11.1.1"
+    }
   }
 }

@@ -1,10 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   DEFAULT_ADMIN_SETTINGS,
-  DEFAULT_CATEGORIES,
-  DEFAULT_MODERATORS
+  DEFAULT_CATEGORIES
 } from '../data/adminData';
-import { initialProjects, SV_COURSES } from '../data/projectsData';
+import { SV_COURSES } from '../data/projectsData';
 import {
   ApiClientError,
   apiRequest,
@@ -12,6 +11,7 @@ import {
   setAccessToken
 } from '../services/apiClient';
 import AppContext from './AppContextStore';
+import { loadProjectCatalog } from '../services/projectApi';
 
 const DEFAULT_COURSES = SV_COURSES.filter((course) => course !== 'Semua Mata Kuliah');
 
@@ -33,12 +33,13 @@ function normalizeActivityLogs(logs) {
 }
 
 export function AppProvider({ children }) {
+  const [studentAccounts, setStudentAccounts] = useState([]);
   const [projects, setProjects] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [submissions, setSubmissions] = useState([]);
   const [courses, setCourses] = useState(DEFAULT_COURSES);
   const [categories, setCategories] = useState(DEFAULT_CATEGORIES);
-  const [moderators, setModerators] = useState(DEFAULT_MODERATORS);
+  const [moderators, setModerators] = useState([]);
   const [adminSettings, setAdminSettings] = useState(DEFAULT_ADMIN_SETTINGS);
   const [activityLogs, setActivityLogs] = useState([]);
   const [toast, setToast] = useState({ show: false, message: '', type: 'info' });
@@ -65,11 +66,12 @@ export function AppProvider({ children }) {
 
   const loadPublicData = useCallback(async (signal) => {
     const [projectResponse, courseResponse, categoryResponse, settingResponse] = await Promise.all([
-      apiRequest('/projects?limit=100', { signal }),
+      loadProjectCatalog({ signal }),
       apiRequest('/courses', { signal }),
       apiRequest('/categories', { signal }),
       apiRequest('/settings/public', { signal })
     ]);
+    if (signal?.aborted) return;
     setProjects(projectResponse);
     setCourses(courseResponse);
     setCategories(categoryResponse);
@@ -78,11 +80,13 @@ export function AppProvider({ children }) {
 
   const loadPrivateData = useCallback(async (role, signal) => {
     if (role === 'admin') {
-      const [submissionResponse, moderatorResponse, logResponse] = await Promise.all([
+      const [submissionResponse, moderatorResponse, logResponse, studentResponse] = await Promise.all([
         apiRequest('/submissions', { signal }),
         apiRequest('/moderators', { signal }),
-        apiRequest('/activity-logs', { signal })
+        apiRequest('/activity-logs', { signal }),
+        apiRequest('/students', { signal })
       ]);
+      setStudentAccounts(studentResponse);
       setSubmissions(submissionResponse);
       setModerators(moderatorResponse);
       setActivityLogs(normalizeActivityLogs(logResponse));
@@ -93,6 +97,7 @@ export function AppProvider({ children }) {
       const ownSubmissions = await apiRequest('/submissions/mine', { signal });
       setSubmissions(ownSubmissions);
     }
+    setStudentAccounts([]);
     setModerators([]);
     setActivityLogs([]);
   }, []);
@@ -110,6 +115,7 @@ export function AppProvider({ children }) {
     setAccessToken(null);
     setCurrentUser(null);
     setSubmissions([]);
+    setStudentAccounts([]);
     setModerators([]);
     setActivityLogs([]);
   }, []);
@@ -130,8 +136,7 @@ export function AppProvider({ children }) {
         await loadPublicData(controller.signal);
       } catch (error) {
         if (active) {
-          setProjects(initialProjects);
-          showToast(`${error.message} Data demo lokal ditampilkan sementara.`, 'error');
+          showToast(error.message, 'error');
         }
       }
 
@@ -380,20 +385,11 @@ export function AppProvider({ children }) {
     }
   };
 
-  const resetToDefaultData = async () => {
-    try {
-      await apiRequest('/system/reset', { method: 'POST' });
-      await Promise.all([loadPublicData(), loadPrivateData(currentUser?.role)]);
-      showToast('Seluruh data demo backend berhasil direset.', 'info');
-      return true;
-    } catch (error) {
-      return reportApiError(error, 'Data demo gagal direset.');
-    }
-  };
-
   return (
     <AppContext.Provider value={{
       projects,
+      studentAccounts,
+      refreshStudents: async () => setStudentAccounts(await apiRequest('/students')),
       currentUser,
       isLoggedIn: Boolean(currentUser),
       isAuthReady,
@@ -421,8 +417,7 @@ export function AppProvider({ children }) {
       addCourse,
       deleteCourse,
       updateAdminSettings,
-      clearActivityLogs,
-      resetToDefaultData
+      clearActivityLogs
     }}>
       {children}
     </AppContext.Provider>

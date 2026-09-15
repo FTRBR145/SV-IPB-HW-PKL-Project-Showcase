@@ -28,7 +28,7 @@ const menuDescriptions = {
   dashboard: ['Dashboard Admin', 'Pantau kondisi showcase dan proses moderasi secara real-time.'],
   projects: ['Manajemen Projek', 'Kelola seluruh projek mahasiswa yang tampil di showcase.'],
   moderators: ['Manajemen Moderator', 'Atur dosen dan admin yang memiliki akses moderasi.'],
-  students: ['Data Mahasiswa', 'Lihat mahasiswa berdasarkan projek dan pengajuan yang tersimpan.'],
+  students: ['Data Mahasiswa', 'Kelola akun mahasiswa, tambah satu per satu, atau impor dari Excel dan CSV.'],
   courses: ['Manajemen Mata Kuliah', 'Tambah dan kelola daftar mata kuliah TRK.'],
   reports: ['Laporan', 'Unduh data atau cetak ringkasan operasional showcase.'],
   settings: ['Pengaturan Sistem', 'Atur kebijakan upload, moderasi, dan informasi platform.'],
@@ -61,6 +61,7 @@ export default function AdminDashboard() {
   const [searchParams, setSearchParams] = useSearchParams();
   const {
     projects,
+    studentAccounts,
     currentUser,
     isLoggedIn,
     logout,
@@ -80,7 +81,6 @@ export default function AdminDashboard() {
     deleteCourse,
     updateAdminSettings,
     clearActivityLogs,
-    resetToDefaultData
   } = useApp();
 
   const requestedSection = searchParams.get('section');
@@ -92,8 +92,9 @@ export default function AdminDashboard() {
   const [editingProject, setEditingProject] = useState(null);
 
   const students = useMemo(() => {
-    return buildStudentSummaries(projects, submissions);
-  }, [projects, submissions]);
+    const summaries = new Map(buildStudentSummaries(projects, submissions).map(student => [student.nim, student]));
+    return studentAccounts.map(account => ({ ...summaries.get(account.nim), ...account, projectCount: summaries.get(account.nim)?.projectCount || 0 }));
+  }, [projects, submissions, studentAccounts]);
 
   useEffect(() => {
     if (requestedSection && !ADMIN_MENU.some((item) => item.id === requestedSection)) {
@@ -158,7 +159,6 @@ export default function AdminDashboard() {
           <SettingsPanel
             settings={adminSettings}
             onSave={updateAdminSettings}
-            onReset={() => window.confirm('Reset seluruh data demo backend? Tindakan ini mengganti data sistem saat ini.') && resetToDefaultData()}
           />
         );
       case 'logs':

@@ -11,8 +11,7 @@ import {
   LogOut,
   User,
   PlaySquare,
-  Home,
-  LayoutDashboard
+  Home
 } from 'lucide-react';
 
 const EMPTY_COURSES = [];
@@ -32,6 +31,17 @@ export default function Navbar({
   onSelectCourse,
   courses = EMPTY_COURSES
 }) {
+  const isAdmin = isLoggedIn && currentUser?.role === 'admin';
+  const isStudent = isLoggedIn && currentUser?.role === 'student';
+  const isLanding = currentPage === 'landing';
+  const isStudentPage = currentPage === 'student' || currentPage === 'student-upload';
+  const accountLinks = [
+    ...(!isLanding && onBackToLanding ? [{ label: 'Beranda Publik', icon: Home, action: onBackToLanding }] : []),
+    ...(isAdmin && currentPage !== 'admin' && onNavigateToAdmin ? [{ label: 'Dashboard Admin', icon: Shield, action: onNavigateToAdmin }] : []),
+    ...(isStudent && currentPage !== 'student' && onNavigateToStudent ? [{ label: 'Portal Mahasiswa', icon: PlaySquare, action: onNavigateToStudent }] : []),
+    ...(isAdmin && !isStudentPage && onNavigateToStudent ? [{ label: 'Pratinjau Portal Mahasiswa', icon: PlaySquare, action: onNavigateToStudent }] : []),
+    ...(isStudent && onOpenUpload ? [{ label: 'Unggah Projek', icon: Upload, action: onOpenUpload }] : [])
+  ];
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [courseDropdownOpen, setCourseDropdownOpen] = useState(false);
@@ -50,6 +60,9 @@ export default function Navbar({
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'Escape') {
+        if (userDropdownOpen) userDropdownRef.current?.querySelector('button')?.focus();
+        else if (courseDropdownOpen) courseDropdownRef.current?.querySelector('button')?.focus();
+        setMobileMenuOpen(false);
         setCourseDropdownOpen(false);
         setUserDropdownOpen(false);
       }
@@ -68,7 +81,7 @@ export default function Navbar({
       document.removeEventListener('keydown', handleKeyDown);
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, []);
+  }, [userDropdownOpen, courseDropdownOpen]);
 
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
   const closeMobileMenu = () => {
@@ -94,16 +107,7 @@ export default function Navbar({
             alt="IPB University Sekolah Vokasi Logo"
             className="h-9 max-w-[145px] object-contain sm:h-14 sm:max-w-[270px]"
           />
-          {(currentPage === 'student' || currentPage === 'student-upload') && (
-            <span className="hidden items-center gap-1 rounded-lg bg-sky-100 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-sky-700 sm:inline-flex">
-              Portal Mahasiswa
-            </span>
-          )}
-          {currentPage === 'admin' && (
-            <span className="hidden items-center gap-1 rounded-lg bg-slate-900 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wider text-white shadow-xs sm:inline-flex">
-              Panel Admin
-            </span>
-          )}
+          {!isLanding && <span className="hidden border-l border-slate-200 pl-3 text-sm font-semibold text-slate-600 md:inline">{currentPage === 'admin' ? 'Admin' : 'Mahasiswa'}</span>}
         </button>
 
         {/* =================================================================== */}
@@ -137,29 +141,8 @@ export default function Navbar({
               )}
             </div>
           </div>
-        ) : currentPage === 'student' || currentPage === 'student-upload' ? (
+        ) : !isLanding ? (
           <div className="hidden md:block flex-1" />
-        ) : currentPage === 'admin' ? (
-          <nav className="hidden items-center gap-2 text-xs font-medium text-slate-700 xl:flex">
-            <button
-              onClick={onBackToLanding}
-              className="flex min-h-11 items-center gap-1.5 rounded-xl px-3.5 py-2 font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
-            >
-              <Home size={14} />
-              <span>Landing Publik</span>
-            </button>
-            <button
-              onClick={onNavigateToStudent}
-              className="flex min-h-11 items-center gap-1.5 rounded-xl px-3.5 py-2 font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
-            >
-              <PlaySquare size={14} className="text-sky-600" />
-              <span>Beranda Mahasiswa</span>
-            </button>
-            <span className="flex min-h-11 items-center gap-1.5 rounded-xl border border-slate-200 bg-slate-100 px-3.5 py-2 font-bold text-slate-900">
-              <LayoutDashboard size={14} className="text-slate-800" />
-              <span>Dashboard Admin</span>
-            </span>
-          </nav>
         ) : (
           <nav className="hidden items-center gap-6 text-sm font-medium text-slate-700 xl:flex">
             <a
@@ -220,54 +203,6 @@ export default function Navbar({
         {/* RIGHT ACTION BUTTONS & USER PROFILE */}
         {/* =================================================================== */}
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-          {/* Upload Button */}
-          {onOpenUpload && (
-            <button
-              className="action-strong hidden min-h-11 items-center gap-1.5 rounded-xl px-4 py-2 text-xs font-bold shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 focus-visible:ring-offset-2 sm:flex"
-              onClick={onOpenUpload}
-            >
-              <Upload size={14} className="text-sky-400" />
-              <span className="hidden sm:inline">Upload Projek</span>
-              <span className="sm:hidden">Upload</span>
-            </button>
-          )}
-
-          {/* Student Portal Shortcut (When on Landing or Admin) */}
-          {currentPage === 'landing' && onNavigateToStudent && (
-            <button
-              className="hidden min-h-11 items-center gap-1.5 rounded-xl border border-sky-200/70 bg-sky-50 px-3.5 py-2 text-xs font-bold text-sky-700 shadow-sm transition-all hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 md:flex"
-              onClick={onNavigateToStudent}
-              title="Buka Beranda Mahasiswa TRK"
-            >
-              <PlaySquare size={14} />
-              <span>Beranda Mahasiswa</span>
-            </button>
-          )}
-
-          {/* Landing Page Shortcut (When on Student Home or Admin) */}
-          {(currentPage === 'student' || currentPage === 'student-upload') && onBackToLanding && (
-            <button
-              className="hidden min-h-11 items-center gap-1.5 rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 lg:flex"
-              onClick={onBackToLanding}
-            >
-              <span>Landing Publik</span>
-            </button>
-          )}
-
-          {/* Admin Dashboard Shortcut (When on Landing or Student) */}
-          {currentPage !== 'admin' &&
-            onNavigateToAdmin &&
-            (!isLoggedIn || currentUser?.role === 'admin') && (
-            <button
-              className="hidden min-h-11 items-center gap-1.5 rounded-xl border border-slate-200 px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 md:flex"
-              onClick={onNavigateToAdmin}
-              title="Masuk Ke Dashboard Admin"
-            >
-              <Shield size={14} />
-              <span>Admin</span>
-            </button>
-          )}
-
           {/* User Profile / Login */}
           {isLoggedIn && currentUser ? (
             <div ref={userDropdownRef} className="relative">
@@ -297,32 +232,11 @@ export default function Navbar({
                       {currentUser.nim || currentUser.email}
                     </p>
                   </div>
-                  <button
-                    type="button"
-                    role="menuitem"
-                    onClick={() => {
-                      onNavigateToStudent?.();
-                      closeMobileMenu();
-                    }}
-                    className="flex min-h-11 w-full items-center gap-2 px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-slate-50"
-                  >
-                    <PlaySquare size={14} className="text-sky-600" />
-                    <span>Beranda Mahasiswa</span>
-                  </button>
-                  {currentUser.role === 'admin' && (
-                    <button
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        onNavigateToAdmin?.();
-                        closeMobileMenu();
-                      }}
-                      className="flex min-h-11 w-full items-center gap-2 px-4 py-2 text-left text-xs text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-slate-50"
-                    >
-                      <Shield size={14} className="text-slate-700" />
-                      <span>Panel Admin Dosen</span>
-                    </button>
-                  )}
+                  {accountLinks.map(({ label, icon: Icon, action }) => <button
+                    key={label} type="button" role="menuitem"
+                    onClick={() => { action(); closeMobileMenu(); }}
+                    className="flex min-h-11 w-full items-center gap-2 px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:bg-slate-50"
+                  ><Icon size={16} /><span>{label}</span></button>)}
                   <div className="border-t border-slate-100 my-1"></div>
                   <button
                     type="button"
@@ -341,7 +255,7 @@ export default function Navbar({
             </div>
           ) : (
             <button
-              className="hidden min-h-11 items-center gap-1.5 rounded-xl border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-700 shadow-sm transition-all hover:bg-slate-100 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 md:flex"
+              className="flex min-h-11 items-center gap-1.5 rounded-xl bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
               onClick={onOpenLogin}
             >
               <LogIn size={14} />
@@ -349,42 +263,23 @@ export default function Navbar({
             </button>
           )}
 
-          {/* Mobile Menu Hamburger */}
-          <button
+          {/* Public navigation on smaller screens */}
+          {isLanding && <button
             className="flex h-11 w-11 items-center justify-center rounded-xl text-slate-700 transition-colors hover:bg-slate-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600 xl:hidden"
             onClick={toggleMobileMenu}
             aria-label={mobileMenuOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'}
             aria-expanded={mobileMenuOpen}
           >
             {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
+          </button>}
         </div>
       </div>
 
       {/* =================================================================== */}
       {/* MOBILE EXPANDED MENU */}
       {/* =================================================================== */}
-      {mobileMenuOpen && (
+      {isLanding && mobileMenuOpen && (
         <div className="space-y-3 border-t border-slate-200 bg-white px-4 py-4 shadow-xl animate-in slide-in-from-top-2 duration-200 xl:hidden">
-          {/* Mobile Search (Student View) */}
-          {currentPage === 'student' && (
-            <div className="relative w-full">
-              <label htmlFor="student-project-search-mobile" className="sr-only">Telusuri projek mahasiswa</label>
-              <input
-                id="student-project-search-mobile"
-                type="text"
-                placeholder="Telusuri projek TRK..."
-                value={searchQuery}
-                onChange={(e) => onSearchChange && onSearchChange(e.target.value)}
-                className="min-h-11 w-full rounded-xl border border-slate-300 bg-slate-50 py-2 pl-9 pr-3 text-base text-slate-800 placeholder-slate-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-600 sm:text-sm"
-              />
-              <Search
-                size={14}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-              />
-            </div>
-          )}
-
           {/* Links */}
           <div className="space-y-1 pt-1">
             {currentPage === 'landing' && (
@@ -404,62 +299,9 @@ export default function Navbar({
               <Home size={15} />
               <span>Home</span>
             </button>
-            <button
-              onClick={() => {
-                onNavigateToStudent?.();
-                closeMobileMenu();
-              }}
-              className="flex min-h-11 w-full items-center gap-2 rounded-xl bg-sky-50 px-3 py-2 text-left text-xs font-bold text-sky-700"
-            >
-              <PlaySquare size={15} />
-              <span>Portal Beranda Mahasiswa</span>
-            </button>
-            {(!isLoggedIn || currentUser?.role === 'admin') && (
-              <button
-                onClick={() => {
-                  onNavigateToAdmin?.();
-                  closeMobileMenu();
-                }}
-                className="flex min-h-11 w-full items-center gap-2 rounded-xl px-3 py-2 text-left text-xs font-bold text-slate-800 hover:bg-slate-100"
-              >
-                <Shield size={15} />
-                <span>Panel Admin / Dosen</span>
-              </button>
-            )}
           </div>
 
-          {/* Mobile User / Auth */}
-          <div className="pt-2 border-t border-slate-100">
-            {isLoggedIn && currentUser ? (
-              <div className="space-y-2">
-                <div className="px-3 py-1">
-                  <p className="text-xs font-bold text-slate-900">{currentUser.name}</p>
-                  <p className="text-xs text-slate-600">{currentUser.nim || currentUser.email}</p>
-                </div>
-                <button
-                  onClick={() => {
-                    onLogout?.();
-                    closeMobileMenu();
-                  }}
-                  className="flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl bg-rose-50 px-3 py-2 text-center text-xs font-bold text-rose-600"
-                >
-                  <LogOut size={14} />
-                  <span>Keluar Akun</span>
-                </button>
-              </div>
-            ) : (
-              <button
-                onClick={() => {
-                  onOpenLogin?.();
-                  closeMobileMenu();
-                }}
-                className="action-strong flex min-h-11 w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-center text-xs font-bold"
-              >
-                <LogIn size={14} />
-                <span>Masuk / Login Akun</span>
-              </button>
-            )}
-          </div>
+
         </div>
       )}
     </header>

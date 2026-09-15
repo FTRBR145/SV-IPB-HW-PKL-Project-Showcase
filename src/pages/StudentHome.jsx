@@ -11,6 +11,7 @@ import '../student.css';
 import ProjectDetailModal from '../components/modals/ProjectDetailModal';
 import StudentSidebar from '../components/student/StudentSidebar';
 import useApp from '../hooks/useApp';
+import useProjectDetail from '../hooks/useProjectDetail';
 
 
 const SEMESTER_OPTIONS = [1, 2, 3, 4, 5, 6];
@@ -33,13 +34,13 @@ function belongsToStudent(project, student) {
 export default function StudentHome() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const { projects, submissions, currentUser, isLoggedIn, logout, courses } = useApp();
+  const { projects, submissions, currentUser, isLoggedIn, logout, courses, showToast } = useApp();
   const isAdminPreview = isAdminAccount(currentUser);
   const studentUser = isStudentAccount(currentUser) ? currentUser : null;
 
   const selectedSemester = searchParams.get('semester') || 'ALL';
   const searchQuery = searchParams.get('search') || '';
-  const [activeDetailProject, setActiveDetailProject] = useState(null);
+  const publishedDetail = useProjectDetail(searchParams.get('project'), showToast);
   const [visibleProjectCount, setVisibleProjectCount] = useState(PAGE_SIZE);
 
   // URL jadi sumber kebenaran tab & kategori, bukan state lokal.
@@ -78,16 +79,10 @@ export default function StudentHome() {
     [myPendingSubmissions, myPublishedProjects]
   );
 
-  useEffect(() => {
-    const targetId = searchParams.get('project');
-    if (!targetId) {
-      setActiveDetailProject(null);
-      return;
-    }
-    const pool = [...projects, ...myPendingSubmissions];
-    const found = pool.find((project) => String(project.id) === String(targetId));
-    setActiveDetailProject(found ?? null);
-  }, [searchParams, projects, myPendingSubmissions]);
+  const pendingId = searchParams.get('submission');
+  const activeDetailProject = pendingId
+    ? myPendingSubmissions.find(item => String(item.id) === pendingId) ?? null
+    : publishedDetail;
 
   const filteredProjects = useMemo(() => {
     const baseProjects = activeTab === 'my-projects' ? myProjects : projects;
@@ -111,13 +106,15 @@ export default function StudentHome() {
   };
 
   const handleOpenDetail = (project) => {
-    setActiveDetailProject(project);
-    updateParams((params) => params.set('project', project.id));
+    updateParams(params => {
+      params.delete('project');
+      params.delete('submission');
+      params.set(project.isPending ? 'submission' : 'project', project.id);
+    });
   };
 
   const handleCloseDetail = () => {
-    setActiveDetailProject(null);
-    updateParams((params) => params.delete('project'));
+    updateParams(params => { params.delete('project'); params.delete('submission'); });
   };
 
   const showAllProjects = () => {

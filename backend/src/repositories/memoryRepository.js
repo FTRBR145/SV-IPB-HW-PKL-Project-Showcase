@@ -1,3 +1,4 @@
+import { ApiError } from '../utils/http.js';
 import { createSeedData } from '../data/seed.js';
 
 function clone(value) {
@@ -29,6 +30,20 @@ export function createMemoryRepository(initialData = createSeedData()) {
   };
 
   return {
+    listStudents() { return clone(state.users.filter(user => user.role === 'student').map(({passwordHash: _hash, ...user}) => user)); },
+    getUserIdentifiers() { return state.users.map(({email,nim}) => ({email,nim})); },
+    createStudents(students, actor) {
+      const emails = new Set(state.users.map(user => user.email?.toLowerCase()));
+      const nims = new Set(state.users.map(user => user.nim?.toUpperCase()));
+      for (const student of students) {
+        if (emails.has(student.email) || nims.has(student.nim)) throw new ApiError(409, 'STUDENT_EXISTS', 'NIM atau email sudah terdaftar.');
+        emails.add(student.email); nims.add(student.nim);
+      }
+      const created = students.map((student,index) => ({...student,id:nextId(state.users)+index}));
+      state.users.push(...created);
+      recordActivity(`${created.length} akun mahasiswa ditambahkan.`, 'user', actor);
+      return clone(created.map(({passwordHash: _hash,...user}) => user));
+    },
     reset() {
       state = clone(initialData);
     },
@@ -183,6 +198,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
     restoreSubmission(id, actor) {
       const index = state.submissions.findIndex((item) => item.id === Number(id));
       if (index < 0) return { error: 'not_found' };
+      if (state.submissions[index].status !== 'rejected') return { error: 'invalid_status' };
       state.submissions[index] = {
         ...state.submissions[index],
         status: 'pending',

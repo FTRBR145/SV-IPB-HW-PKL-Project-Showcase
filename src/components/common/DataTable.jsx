@@ -30,6 +30,8 @@ export default function DataTable({
 }) {
   const tableRef = useRef(null);
   const sortId = useId();
+  const [query, setQuery] = useState(searchTerm);
+  const [pageSize, setPageSize] = useState(defaultPageSize);
   const [sortSelection, setSortSelection] = useState(defaultSortKey ? `${defaultSortKey}:${defaultSortDirection}` : '');
   const columnsRef = useRef(columns);
   columnsRef.current = columns;
@@ -77,6 +79,7 @@ export default function DataTable({
   const order = defaultSortIndex >= 0 ? [[defaultSortIndex, defaultSortDirection]] : [];
 
   useEffect(() => {
+    setQuery(searchTerm);
     const table = tableRef.current?.dt();
     if (table && table.search() !== searchTerm) table.search(searchTerm).draw();
   }, [searchTerm]);
@@ -119,22 +122,28 @@ export default function DataTable({
 
   return (
     <div className="data-table-shell min-w-0 w-full space-y-3">
-      {(extraHeaderActions || showExportCsv) && (
-        <div className="flex flex-wrap items-center justify-between gap-2">
-          <div className="min-w-0 max-w-full">{extraHeaderActions}</div>
-          {showExportCsv && (
-            <button
-              type="button"
-              onClick={handleExportCsv}
-              className="inline-flex min-h-11 items-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 shadow-2xs transition-colors hover:bg-slate-50"
-              title="Unduh hasil tabel dalam format CSV"
-            >
-              <Download size={14} className="text-sky-600" />
-              Unduh CSV
-            </button>
-          )}
-        </div>
-      )}
+      {extraHeaderActions && <div className="min-w-0 max-w-full">{extraHeaderActions}</div>}
+      <div className="table-toolbar">
+        <label className="table-length-control">
+          Tampilkan
+          <select aria-label="Jumlah baris per halaman" value={pageSize} onChange={event => {
+            const size = Number(event.target.value);
+            setPageSize(size);
+            tableRef.current?.dt()?.page.len(size).draw();
+          }}>
+            {pageSizeOptions.map(size => <option key={size} value={size}>{size}</option>)}
+          </select>
+          data
+        </label>
+        <label className="table-search-control">
+          Cari:
+          <input type="search" value={query} placeholder={searchPlaceholder} onChange={event => {
+            setQuery(event.target.value);
+            tableRef.current?.dt()?.search(event.target.value).draw();
+          }} />
+        </label>
+        {showExportCsv && <button type="button" onClick={handleExportCsv} className="table-export-control inline-flex min-h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600" title="Unduh hasil tabel dalam format CSV"><Download size={14} className="text-sky-600" /> Unduh CSV</button>}
+      </div>
 
       <div className="admin-datatable">
         <div className="table-mobile-sort">
@@ -171,8 +180,8 @@ export default function DataTable({
             order,
             pagingType: 'simple_numbers',
             layout: {
-              topStart: 'pageLength',
-              topEnd: 'search',
+              topStart: null,
+              topEnd: null,
               bottomStart: 'info',
               bottomEnd: 'paging'
             },

@@ -111,7 +111,7 @@
 .admin-datatable .dt-paging .dt-paging-button.disabled { opacity: 0.5; cursor: default; }
 .table-mobile-sort { display: none; }
 /* Reflow depends on the actual panel width, including the sidebar and browser zoom. */
-@container admin-table (max-width: 760px) {
+@container admin-table (max-width: 640px) {
   .table-mobile-sort {
     display: flex;
     flex-wrap: wrap;
@@ -157,4 +157,19 @@
 @container admin-table (max-width: 380px) {
   .table-cell { grid-template-columns: minmax(0, 1fr); gap: 0.25rem; }
   .admin-datatable .dt-input, .table-mobile-sort select { font-size: 1rem; }
+}
+
+.table-toolbar { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; color: var(--ui-muted); font-size: 0.8125rem; }
+.table-length-control, .table-search-control { display: flex; align-items: center; gap: 0.5rem; min-width: 0; }
+.table-length-control { flex-shrink: 0; }
+.table-search-control { margin-left: auto; flex: 1; justify-content: flex-end; }
+.table-toolbar select, .table-toolbar input { min-height: 2.75rem; min-width: 0; padding: 0.5rem 0.75rem; border: 1px solid var(--ui-border); border-radius: 0.5rem; background: var(--ui-surface); color: var(--ui-ink); font: inherit; }
+.table-toolbar input { width: min(100%, 20rem); }
+.table-toolbar :is(select, input):focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
+.table-export-control { flex-shrink: 0; }
+@container admin-table (max-width: 640px) {
+  .table-search-control { order: 3; flex-basis: 100%; }
+  .table-search-control input { flex: 1; width: 100%; }
+  .table-export-control { margin-left: auto; }
+  .table-toolbar :is(input, select) { font-size: 1rem; }
 }

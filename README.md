@@ -58,7 +58,7 @@ Platform web **Showcase Video Projek Praktikum dan Tugas Akhir Mahasiswa Program
 - **Runtime**: Node.js 20+
 - **Server Framework**: Express.js
 - **Autentikasi**: JSON Web Token (JWT) & bcrypt hashing
-- **Arsitektur Data**: Repository pattern terstruktur (in-memory / pluggable database)
+- **Arsitektur Data**: Supabase/PostgreSQL melalui repository async, transaksi moderasi, dan skema privat dengan RLS
 
 ---
 
@@ -134,6 +134,8 @@ copy .env.example .env
 # Backend
 copy backend\.env.example backend\.env
 ```
+
+Konfigurasikan `DATABASE_URL` dan `DATABASE_CA_FILE`, terapkan migrasi Supabase, lalu jalankan `npm --prefix backend run db:seed`. Lihat [panduan database backend](backend/README.md). Seed tidak menimpa database yang sudah berisi data.
 
 ### 5. Menjalankan Fullstack (Frontend + Backend)
 Jalankan kedua service secara bersamaan menggunakan script:

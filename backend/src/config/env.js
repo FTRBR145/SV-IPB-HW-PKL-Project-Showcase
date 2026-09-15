@@ -1,4 +1,7 @@
-import 'dotenv/config';
+import dotenv from 'dotenv';
+import { fileURLToPath } from 'node:url';
+
+dotenv.config({ path: fileURLToPath(new URL('../../.env', import.meta.url)), quiet: true });
 
 const parsedPort = Number.parseInt(process.env.PORT || '3000', 10);
 
@@ -14,6 +17,9 @@ if (process.env.NODE_ENV === 'production' && jwtSecret.length < 32) {
 
 export const env = Object.freeze({
   nodeEnv: process.env.NODE_ENV || 'development',
+  databaseUrl: process.env.DATABASE_URL || '',
+  databaseCaFile: process.env.DATABASE_CA_FILE || '',
+  repository: process.env.REPOSITORY || 'postgres',
   port: parsedPort,
   apiPrefix: process.env.API_PREFIX || '/api',
   frontendOrigins: (process.env.FRONTEND_ORIGIN || 'http://localhost:5173,http://127.0.0.1:5173,http://localhost:5174,http://127.0.0.1:5174,http://localhost:5175,http://127.0.0.1:5175')

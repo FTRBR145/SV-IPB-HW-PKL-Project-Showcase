@@ -16,7 +16,7 @@ function publicUser(user) {
 
 router.post('/login', validate(loginSchema), asyncHandler(async (request, response) => {
   const identifier = request.body.identifier || request.body.email;
-  const user = request.app.locals.repository.findUserByIdentifier(identifier);
+  const user = await request.app.locals.repository.findUserByIdentifier(identifier);
   const validPassword = user ? await bcrypt.compare(request.body.password, user.passwordHash) : false;
   if (!user || !validPassword) {
     throw new ApiError(401, 'INVALID_CREDENTIALS', 'Email atau password salah.');
@@ -31,8 +31,8 @@ router.post('/login', validate(loginSchema), asyncHandler(async (request, respon
   sendData(response, { accessToken, tokenType: 'Bearer', user: publicUser(user) });
 }));
 
-router.get('/me', authenticate, (request, response) => {
-  const user = request.app.locals.repository.findUserById(request.user.id);
+router.get('/me', authenticate, async (request, response) => {
+  const user = await request.app.locals.repository.findUserById(request.user.id);
   sendData(response, publicUser(user));
 });
 

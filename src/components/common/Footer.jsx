@@ -1,8 +1,10 @@
 import React from 'react';
+import useApp from '../../hooks/useApp';
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Cpu, Smartphone, Wifi, Wrench, Binary } from 'lucide-react';
 
 export default function Footer() {
+  const { isLoggedIn, currentUser } = useApp();
 
   return (
     <footer className="site-footer border-t border-slate-900 bg-slate-950 py-8 text-xs text-slate-300">
@@ -32,8 +34,8 @@ export default function Footer() {
             <h4 className="font-heading text-sm font-bold text-white mb-2">Navigasi</h4>
             <ul>
               <li><Link to="/" className="hover:text-white transition-colors">Home Landing</Link></li>
-              <li><Link to="/student" className="hover:text-white transition-colors">Beranda Mahasiswa</Link></li>
-              <li><Link to="/admin" className="hover:text-white transition-colors">Panel Admin / Dosen</Link></li>
+              {isLoggedIn && currentUser?.role === 'student' && <li><Link to="/student" className="hover:text-white transition-colors">Beranda Mahasiswa</Link></li>}
+              {isLoggedIn && currentUser?.role === 'admin' && <li><Link to="/admin" className="hover:text-white transition-colors">Dashboard Admin</Link></li>}
               <li><a href="/#about" className="hover:text-white transition-colors">Tentang Showcase</a></li>
               <li><a href="/#matakuliah" className="hover:text-white transition-colors">Katalog Mata Kuliah</a></li>
             </ul>

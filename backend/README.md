@@ -1,6 +1,6 @@
 # Backend Showcase Projek TRK
 
-REST API mandiri untuk landing showcase, portal mahasiswa, dan dashboard admin. Versi awal memakai repository **in-memory**, sehingga data akan kembali ke seed ketika server dimulai ulang. Struktur repository sengaja dipisahkan agar nanti dapat diganti dengan PostgreSQL atau MySQL tanpa mengubah kontrak route.
+REST API untuk landing showcase, portal mahasiswa, dan dashboard admin. Penyimpanan default memakai **Supabase/PostgreSQL** melalui pool koneksi `pg`. Data, pengajuan, pengaturan, moderator, dan log aktivitas bertahan setelah restart. Login JWT yang sudah ada tetap ditangani Express; migrasi ini tidak mengganti login dengan Supabase Auth.
 
 ## Menjalankan backend
 
@@ -8,8 +8,27 @@ REST API mandiri untuk landing showcase, portal mahasiswa, dan dashboard admin. 
 cd backend
 npm install
 copy .env.example .env
+npm run db:seed
 npm run dev
 ```
+
+Sebelum menjalankan `db:seed`, terapkan migrasi `supabase/migrations/20260915025603_showcase_persistence.sql` melalui Supabase SQL Editor / migration tooling ke database kosong, lalu atur password acak yang kuat untuk role `showcase_backend`. Migrasi membuat delapan tabel dalam skema privat `showcase`, mengaktifkan RLS, dan hanya memberi akses ke role backend.
+
+Isi `backend/.env` (file ini diabaikan Git):
+
+```dotenv
+REPOSITORY=postgres
+DATABASE_URL=postgresql://showcase_backend:PASSWORD@HOST:5432/postgres
+DATABASE_CA_FILE=certs/supabase-ca.crt
+```
+
+Gunakan hostname dari Supabase **Connect**. Koneksi langsung membutuhkan IPv6; pada jaringan IPv4 gunakan Session pooler dan format user `showcase_backend.PROJECT_REF` dari pengaturan koneksi. Jangan menebak hostname pooler. Sertifikat publik `certs/supabase-ca.crt` berasal dari `https://supabase-downloads.s3-ap-southeast-1.amazonaws.com/prod/ssl/prod-ca-2021.crt`; verifikasi TLS tetap aktif. Path CA relatif terhadap folder `backend`. Kredensial database hanya digunakan server, tidak pernah menjadi variabel `VITE_*`.
+
+`db:seed` hanya berjalan pada database yang belum diinisialisasi. Menjalankannya lagi tidak menimpa data. Ubah kredensial akun awal sebelum seed jika digunakan di luar demo. Server tidak melakukan seed/reset otomatis dan berhenti dengan error jika koneksi atau skema belum siap. Endpoint reset demo ditolak pada repository Postgres.
+
+Untuk deployment beberapa instance, tiap proses menggunakan pool maksimal 5 koneksi. Persetujuan mengunci baris pengajuan dan mengubah projek, status, serta log dalam satu transaksi. ID memakai identity sequence, sehingga tidak dipakai ulang setelah penghapusan. Skema menyimpan atribut konten sebagai JSONB per entitas, dengan primary key, indeks identitas/filter, dan foreign key publikasi.
+
+Mode lama tersedia hanya dengan `REPOSITORY=memory` untuk demo lokal; dilarang saat `NODE_ENV=production`. Mode ini tidak menyimpan data permanen.
 
 API tersedia di `http://localhost:3000/api` dan health check di `GET /api/health`.
 
@@ -43,7 +62,7 @@ Ubah semua kredensial dan `JWT_SECRET` melalui `.env` sebelum deployment.
 | `GET/POST/PATCH/DELETE` | `/api/moderators` | Admin | Kelola moderator |
 | `GET/PATCH` | `/api/settings` | Admin | Pengaturan sistem |
 | `GET/DELETE` | `/api/activity-logs` | Admin | Log aktivitas |
-| `POST` | `/api/system/reset` | Admin | Kembalikan repository ke data seed |
+| `POST` | `/api/system/reset` | Admin | Reset seed pada mode memory saja; Postgres menolak |
 
 Kirim JWT melalui header:
 
@@ -80,3 +99,17 @@ Gagal:
 ```bash
 npm test
 ```
+
+Tes backend menjalankan migrasi yang sama pada mesin PostgreSQL PGlite dengan database sementara, bukan database Supabase Anda. Cakupannya: login, 401/403, validasi, unggah, privasi pengajuan, persetujuan ganda, reject/restore, edit/hapus, pagination >100, rollback, RLS, dan buka ulang database. Untuk multi-instance, uji tambahan pada Supabase menguji dua koneksi terpisah sebelum deployment.
+
+Frontend mengambil setiap halaman `/projects?page=N&limit=100` menggunakan metadata pagination untuk menjaga filter dan statistik lokal tetap lengkap. Detail publik diambil dari `/projects/:id`, sedangkan pratinjau pengajuan sendiri memakai parameter URL `submission` agar ID-nya tidak bentrok dengan ID projek publik.
+
+## Manajemen akun mahasiswa
+
+Menu Mahasiswa membaca akun berperan student dari `showcase.users`, termasuk akun yang belum memiliki projek. Admin dapat menambahkan satu akun atau mengimpor Excel/CSV melalui frontend. Format dokumen: `nama,nim,email,semester,angkatan`; kolom NIM harus berupa teks. Batas 500 mahasiswa dan 5 MB per dokumen; Excel menggunakan lembar pertama dan tidak menerima rumus.
+
+- `GET /api/students`: direktori mahasiswa (admin saja, tanpa hash/password).
+- `POST /api/students/preview`: validasi `{ students: [...] }` tanpa menyimpan.
+- `POST /api/students`: validasi ulang dan pembuatan akun dalam satu transaksi.
+
+NIM/email duplikat (termasuk akun admin) ditolak tanpa menimpa akun lama. Preview bukan reservasi: repository memeriksa kembali identitas di dalam transaksi untuk menangani impor bersamaan. Setiap akun mendapat password acak, disimpan sebagai hash bcrypt; respons pembuatan berisi kredensial satu kali dan memakai Cache-Control no-store. Admin dapat mengunduh kredensial CSV pada layar hasil dan membagikannya sendiri. Aplikasi tidak mengirim email otomatis. File sumber diproses di browser, lalu hanya kolom mahasiswa yang dikirim ke backend.

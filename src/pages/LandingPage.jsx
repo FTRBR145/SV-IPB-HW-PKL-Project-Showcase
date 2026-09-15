@@ -20,6 +20,7 @@ import LoginModal from '../components/modals/LoginModal';
 
 // App Context
 import useApp from '../hooks/useApp';
+import useProjectDetail from '../hooks/useProjectDetail';
 
 export default function LandingPage() {
   const navigate = useNavigate();
@@ -33,7 +34,7 @@ export default function LandingPage() {
   const [searchQuery, setSearchQuery] = useState('');
 
   // Modal States
-  const [activeProjectDetail, setActiveProjectDetail] = useState(null);
+  const activeProjectDetail = useProjectDetail(projectId || searchParams.get('project'), showToast);
   const [isUploadOpen, setIsUploadOpen] = useState(false);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
 
@@ -43,28 +44,17 @@ export default function LandingPage() {
     }
   }, [searchParams]);
 
-  // Deep-link direct project modal opening via /project/:id or ?project=:id
-  useEffect(() => {
-    const targetId = projectId || searchParams.get('project');
-    if (targetId) {
-      const found = projects.find((p) => String(p.id) === String(targetId));
-      if (found) {
-        setActiveProjectDetail(found);
-      }
-    }
-  }, [projectId, searchParams, projects]);
-
   const handleCloseDetail = () => {
-    setActiveProjectDetail(null);
-    if (searchParams.get('project')) {
-      searchParams.delete('project');
-      setSearchParams(searchParams, { replace: true });
-    }
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.delete('project');
+    if (projectId) navigate({ pathname: '/', search: nextParams.toString() }, { replace: true });
+    else setSearchParams(nextParams, { replace: true });
   };
 
   const handleOpenDetail = (proj) => {
-    setActiveProjectDetail(proj);
-    setSearchParams({ project: proj.id });
+    const nextParams = new URLSearchParams(searchParams);
+    nextParams.set('project', proj.id);
+    setSearchParams(nextParams);
   };
 
   // Filter Projects Logic

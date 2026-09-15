@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { X, Lock, User, GraduationCap, ShieldCheck } from 'lucide-react';
-import { demoCredentials } from '../../services/apiClient';
 import useApp from '../../hooks/useApp';
 import ModalShell from '../common/ModalShell';
 import { DialogClose } from '../ui/dialog';
@@ -29,13 +28,6 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const handleFillDemoCredentials = () => {
-    const credential = demoCredentials[role];
-    setUsername(credential.identifier);
-    setPassword(credential.password);
-    setLoginError('');
   };
 
   return (
@@ -84,7 +76,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
               </div>
 
               {/* Dual Role Selector Tabs */}
-              <div className="mb-5 grid grid-cols-2 gap-1.5 rounded-2xl bg-slate-100 p-1.5" role="group" aria-label="Pilih jenis akun demo">
+              <div className="mb-5 grid grid-cols-2 gap-1.5 rounded-2xl bg-slate-100 p-1.5" role="group" aria-label="Pilih jenis akun">
                 <button
                   type="button"
                   onClick={() => {
@@ -131,20 +123,13 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
                     <label htmlFor="login-username" className="block text-xs font-bold text-slate-700">
                       {role === 'student' ? 'NIM / Email Mahasiswa IPB' : 'NIP / Email Dosen / Admin TRK'}
                     </label>
-                    <button
-                      type="button"
-                      onClick={handleFillDemoCredentials}
-                      className="min-h-11 text-xs font-semibold text-sky-700 underline underline-offset-2 hover:text-sky-900"
-                    >
-                      Isi Demo Otomatis
-                    </button>
                   </div>
                   <input
                     id="login-username"
                     type="text"
                     autoComplete="username"
                     className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-3 text-base text-slate-800 placeholder-slate-500 transition-colors focus:border-sky-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:text-sm"
-                    placeholder={role === 'student' ? 'J0304211015 / mhs@apps.ipb.ac.id' : 'admin.trk@apps.ipb.ac.id'}
+                    placeholder={role === 'student' ? 'Masukkan NIM atau email' : 'Masukkan NIP atau email'}
                     value={username}
                     onChange={(e) => {
                       setUsername(e.target.value);

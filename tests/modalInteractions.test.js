@@ -1,4 +1,4 @@
-import test, { afterEach } from 'node:test';
+import test, { afterEach, mock } from 'node:test';
 import assert from 'node:assert/strict';
 import { JSDOM } from 'jsdom';
 import { register } from 'tsx/esm/api';
@@ -28,7 +28,7 @@ dom.window.HTMLElement.prototype.getClientRects = function () {
 };
 
 const { default: React, useState } = await import('react');
-const { render, screen, within, waitFor, cleanup, act } = await import('@testing-library/react');
+const { render, renderHook, screen, within, waitFor, cleanup, act } = await import('@testing-library/react');
 const { default: userEvent } = await import('@testing-library/user-event');
 const { default: ModalShell } = await import('../src/components/common/ModalShell.jsx');
 const { DialogClose } = await import('../src/components/ui/dialog.jsx');
@@ -38,10 +38,12 @@ const { default: ProjectDetailModal } = await import('../src/components/modals/P
 const { default: UploadModal } = await import('../src/components/modals/UploadModal.jsx');
 const { default: EditProjectModal } = await import('../src/components/admin/EditProjectModal.jsx');
 const { default: AppContext } = await import('../src/context/AppContextStore.js');
+const { default: useProjectDetail } = await import('../src/hooks/useProjectDetail.js');
 const h = React.createElement;
 
 afterEach(async () => {
   cleanup();
+  mock.restoreAll();
   await act(async () => {});
   document.body.style.cssText = '';
   document.documentElement.style.cssText = '';
@@ -215,4 +217,77 @@ test('edit cancel stays disabled during save while Escape can still dismiss', as
   await user.keyboard('{Escape}');
   assert.equal(closes, 1);
   await act(async () => finishSave(false));
+});
+
+test('detail requests are independent of catalog and stale responses cannot reopen a closed modal', async () => {
+  const pending=[];
+  mock.method(globalThis,'fetch',(url,options)=>new Promise(resolve=>pending.push({url,options,resolve})));
+  const showToast=mock.fn();
+  const {result,rerender}=renderHook(({id})=>useProjectDetail(id,showToast),{initialProps:{id:'205'}});
+  assert.equal(pending[0].url,'/api/projects/205');
+  rerender({id:'206'});
+  assert.equal(pending[0].options.signal.aborted,true);
+  await act(async()=>pending[1].resolve(new Response(JSON.stringify({data:{id:206,title:'Terbaru'}}))));
+  assert.equal(result.current.id,206);
+  await act(async()=>pending[0].resolve(new Response(JSON.stringify({data:{id:205,title:'Lama'}}))));
+  assert.equal(result.current.id,206);
+  rerender({id:null});
+  assert.equal(result.current,null);
+  assert.equal(showToast.mock.callCount(),0);
+});
+
+test('missing project detail reports an Indonesian error without showing stale content', async () => {
+  mock.method(globalThis,'fetch',async()=>new Response(JSON.stringify({error:{message:'Not found'}}),{status:404}));
+  const showToast=mock.fn();
+  const {result}=renderHook(()=>useProjectDetail('9999',showToast));
+  await waitFor(()=>assert.equal(showToast.mock.callCount(),1));
+  assert.equal(result.current,null);
+  assert.equal(showToast.mock.calls[0].arguments[0],'Projek tidak ditemukan atau sudah dihapus.');
+});
+
+
+const { default: Navbar } = await import('../src/components/common/Navbar.jsx');
+const navCallbacks = { onOpenUpload:()=>{}, onOpenLogin:()=>{}, onLogout:()=>{}, onNavigateToAdmin:()=>{}, onNavigateToStudent:()=>{}, onBackToLanding:()=>{} };
+test('guest navigation has public links and login but no private shortcuts, including mobile', async () => {
+  const user=userEvent.setup();
+  render(h(Navbar,{...navCallbacks}));
+  assert.ok(screen.getByRole('button',{name:'Login'}));
+  assert.equal(screen.queryByRole('button',{name:/Upload|Unggah|Admin|Mahasiswa/}),null);
+  await user.click(screen.getByRole('button',{name:'Buka menu navigasi'}));
+  assert.equal(screen.queryByRole('button',{name:/Upload|Unggah|Admin|Mahasiswa/}),null);
+  assert.ok(screen.getByRole('button',{name:'Home'}));
+});
+for (const role of ['admin','student']) {
+  test(`navigation for ${role} consolidates role shortcuts in account menu`, async () => {
+    const user=userEvent.setup(); const navigate=mock.fn();
+    render(h(Navbar,{...navCallbacks,isLoggedIn:true,currentUser:{name:'Akun Uji',role},onNavigateToAdmin:navigate,onNavigateToStudent:navigate}));
+    assert.equal(screen.queryByRole('button',{name:/Dashboard Admin|Portal Mahasiswa|Unggah Projek/}),null);
+    const account=screen.getByRole('button',{name:'Menu akun Akun Uji'});
+    await user.click(account);
+    const menu=screen.getByRole('menu',{name:'Opsi Akun'});
+    if(role==='admin') {
+      assert.ok(within(menu).getByRole('menuitem',{name:'Dashboard Admin'}));
+      assert.ok(within(menu).getByRole('menuitem',{name:'Pratinjau Portal Mahasiswa'}));
+      assert.equal(within(menu).queryByRole('menuitem',{name:'Unggah Projek'}),null);
+    } else {
+      assert.ok(within(menu).getByRole('menuitem',{name:'Portal Mahasiswa'}));
+      assert.ok(within(menu).getByRole('menuitem',{name:'Unggah Projek'}));
+      assert.equal(within(menu).queryByRole('menuitem',{name:/Admin|Pratinjau/}),null);
+    }
+    await user.keyboard('{Escape}');
+    assert.equal(screen.queryByRole('menu',{name:'Opsi Akun'}),null);
+    assert.equal(document.activeElement,account);
+    await user.click(account);
+    await user.click(screen.getByRole('menuitem',{name:role==='admin'?'Dashboard Admin':'Portal Mahasiswa'}));
+    assert.equal(navigate.mock.callCount(),1);
+    assert.equal(screen.queryByRole('menu',{name:'Opsi Akun'}),null);
+  });
+}
+test('admin header avoids repeating active dashboard and exposes public return in account menu', async()=>{
+  const user=userEvent.setup();
+  render(h(Navbar,{...navCallbacks,currentPage:'admin',isLoggedIn:true,currentUser:{name:'Admin',role:'admin'}}));
+  assert.equal(screen.queryByRole('button',{name:'Buka menu navigasi'}),null);
+  assert.equal(screen.queryByText('Dashboard Admin'),null);
+  await user.click(screen.getByRole('button',{name:'Menu akun Admin'}));
+  assert.ok(screen.getByRole('menuitem',{name:'Beranda Publik'}));
 });

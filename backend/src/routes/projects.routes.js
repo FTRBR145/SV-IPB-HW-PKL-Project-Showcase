@@ -6,20 +6,20 @@ import { ApiError, sendData } from '../utils/http.js';
 
 const router = Router();
 
-router.get('/', (request, response) => {
-  const { items, ...meta } = request.app.locals.repository.listProjects(request.query);
+router.get('/', async (request, response) => {
+  const { items, ...meta } = await request.app.locals.repository.listProjects(request.query);
   sendData(response, items, 200, meta);
 });
 
-router.get('/:id', (request, response) => {
-  const project = request.app.locals.repository.findProjectById(request.params.id);
+router.get('/:id', async (request, response) => {
+  const project = await request.app.locals.repository.findProjectById(request.params.id);
   if (!project) throw new ApiError(404, 'PROJECT_NOT_FOUND', 'Projek tidak ditemukan.');
   sendData(response, project);
 });
 
-router.post('/', optionalAuthenticate, validate(projectSchema), (request, response) => {
+router.post('/', optionalAuthenticate, validate(projectSchema), async (request, response) => {
   const repository = request.app.locals.repository;
-  const settings = repository.getSettings();
+  const settings = await repository.getSettings();
   if (settings.maintenanceMode) {
     throw new ApiError(503, 'MAINTENANCE_MODE', 'Upload sedang dinonaktifkan selama pemeliharaan.');
   }
@@ -40,22 +40,22 @@ router.post('/', optionalAuthenticate, validate(projectSchema), (request, respon
   };
 
   if (!request.user || request.user.role === 'student' || settings.moderationRequired) {
-    const submission = repository.createSubmission(projectData, actorName);
+    const submission = await repository.createSubmission(projectData, actorName);
     return sendData(response, { type: 'submission', item: submission }, 202);
   }
 
-  const project = repository.createProject(projectData, actorName);
+  const project = await repository.createProject(projectData, actorName);
   return sendData(response, { type: 'project', item: project }, 201);
 });
 
-router.patch('/:id', authenticate, authorize('admin'), validate(projectUpdateSchema), (request, response) => {
-  const project = request.app.locals.repository.updateProject(request.params.id, request.body, request.user.name);
+router.patch('/:id', authenticate, authorize('admin'), validate(projectUpdateSchema), async (request, response) => {
+  const project = await request.app.locals.repository.updateProject(request.params.id, request.body, request.user.name);
   if (!project) throw new ApiError(404, 'PROJECT_NOT_FOUND', 'Projek tidak ditemukan.');
   sendData(response, project);
 });
 
-router.delete('/:id', authenticate, authorize('admin'), (request, response) => {
-  const project = request.app.locals.repository.deleteProject(request.params.id, request.user.name);
+router.delete('/:id', authenticate, authorize('admin'), async (request, response) => {
+  const project = await request.app.locals.repository.deleteProject(request.params.id, request.user.name);
   if (!project) throw new ApiError(404, 'PROJECT_NOT_FOUND', 'Projek tidak ditemukan.');
   sendData(response, project);
 });

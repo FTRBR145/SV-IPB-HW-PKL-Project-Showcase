@@ -1,3 +1,4 @@
+import StudentEnrollment from './StudentEnrollment';
 import React, { useState, useMemo } from 'react';
 import {
   Eye,
@@ -5,9 +6,12 @@ import {
   Plus,
   Power,
   Trash2,
-  UserCheck
+  UserCheck,
+  X
 } from 'lucide-react';
 import DataTable from '../common/DataTable';
+import ModalShell from '../common/ModalShell';
+import { DialogClose } from '../ui/dialog';
 import { courseLabel } from '../../utils/courseLabel';
 
 // ============================================================================
@@ -215,6 +219,8 @@ export function StudentsPanel({ students, onViewProjects }) {
         </div>
       )
     },
+    { key: 'email', label: 'Email', sortable: true },
+    { key: 'angkatan', label: 'Angkatan', sortable: true },
     {
       key: 'semester',
       label: 'Semester',
@@ -268,9 +274,10 @@ export function StudentsPanel({ students, onViewProjects }) {
             Direktori Mahasiswa TRK ({students.length})
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
-            Daftar mahasiswa terdaftar berdasarkan riwayat pengajuan dan karya projek.
+            Akun mahasiswa terdaftar, termasuk yang belum mengunggah projek.
           </p>
         </div>
+        <StudentEnrollment />
       </div>
 
       <DataTable
@@ -293,6 +300,7 @@ export function StudentsPanel({ students, onViewProjects }) {
 // 3. MODERATORS PANEL (WITH DATATABLE)
 // ============================================================================
 export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
+  const [isAddOpen, setIsAddOpen] = useState(false);
   const [formData, setFormData] = useState({ name: '', nip: '', email: '' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
@@ -315,15 +323,19 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
     }
     setIsSubmitting(true);
     setFormError('');
-    const added = await onAdd(normalized);
-    setIsSubmitting(false);
-    if (added) setFormData({ name: '', nip: '', email: '' });
+    try {
+      const added = await onAdd(normalized);
+      if (added) { setFormData({ name: '', nip: '', email: '' }); setIsAddOpen(false); }
+      else setFormError('Moderator belum ditambahkan. Periksa data atau coba kembali.');
+    } catch (error) {
+      setFormError(error.message || 'Moderator gagal ditambahkan. Silakan coba kembali.');
+    } finally { setIsSubmitting(false); }
   };
 
   const columns = [
     {
       key: 'name',
-      label: 'Nama Moderator / Dosen',
+      label: 'Nama',
       sortable: true,
       render: (row) => (
         <div className="flex items-center gap-2.5">
@@ -332,24 +344,22 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
           </div>
           <div>
             <strong className="text-slate-900 font-bold block">{row.name}</strong>
-            <span className="text-xs tabular-nums text-slate-600">
-              {row.nip ? `NIP. ${row.nip}` : 'Admin'}
-            </span>
           </div>
         </div>
       )
     },
     {
       key: 'email',
-      label: 'Email Akun',
+      label: 'Email',
       sortable: true,
       render: (row) => (
         <span className="tabular-nums text-xs text-slate-600">{row.email}</span>
       )
     },
+    { key: 'nip', label: 'NIP', sortable: true, render: row => row.nip || '—' },
     {
       key: 'status',
-      label: 'Status Akses',
+      label: 'Status',
       sortable: true,
       render: (row) => (
         <span
@@ -398,11 +408,12 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
   ];
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[340px_minmax(0,1fr)] gap-6 items-start">
-      {/* Form Tambah */}
+    <div className="min-w-0 space-y-4">
+      <ModalShell isOpen={isAddOpen} onClose={() => { if (!isSubmitting) setIsAddOpen(false); }} ariaLabel="Tambah moderator" panelClassName="max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl">
+      <DialogClose disabled={isSubmitting} aria-label="Tutup form moderator" className="absolute right-3 top-3 flex min-h-11 min-w-11 items-center justify-center rounded-xl hover:bg-slate-100"><X size={18} /></DialogClose>
       <form onSubmit={submit} className="space-y-4 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-2xs" noValidate>
         <div>
-          <h2 className="font-heading font-bold text-base text-slate-900">Tambah Moderator</h2>
+          <h2 className="font-heading font-bold text-base text-slate-900 pr-12">Tambah Moderator</h2>
           <p className="text-xs text-slate-500 mt-1">Daftarkan dosen pembimbing atau admin baru.</p>
         </div>
         {[
@@ -415,6 +426,8 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
             <input
               id={`moderator-${name}`}
               type={name === 'email' ? 'email' : 'text'}
+              disabled={isSubmitting}
+              maxLength={name === 'name' ? 120 : name === 'nip' ? 40 : 160}
               value={formData[name]}
               onChange={(event) => {
                 setFormData((previous) => ({ ...previous, [name]: event.target.value }));
@@ -433,16 +446,20 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
           <Plus size={15} /> {isSubmitting ? 'Menambahkan...' : 'Tambah Moderator'}
         </button>
       </form>
+      </ModalShell>
 
       {/* DataTable List */}
       <section className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-        <div>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
           <h2 className="font-heading font-bold text-base text-slate-900">
             Daftar Moderator ({moderators.length})
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
             Kelola hak akses moderasi dan manajemen sistem showcase.
           </p>
+          </div>
+          <button type="button" onClick={() => { setFormData({ name: '', nip: '', email: '' }); setFormError(''); setIsAddOpen(true); }} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"><Plus size={16} /> Tambah Moderator</button>
         </div>
 
         <DataTable
@@ -466,6 +483,8 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
 // 4. TAXONOMY PANEL (COURSES & CATEGORIES WITH DATATABLE)
 // ============================================================================
 export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDelete }) {
+  const [isAddOpen, setIsAddOpen] = useState(false);
+  const [formError, setFormError] = useState('');
   const [name, setName] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -473,9 +492,14 @@ export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDe
     event.preventDefault();
     if (isSubmitting) return;
     setIsSubmitting(true);
-    const added = await onAdd(name);
-    setIsSubmitting(false);
-    if (added) setName('');
+    setFormError('');
+    try {
+      const added = await onAdd(name.trim());
+      if (added) { setName(''); setIsAddOpen(false); }
+      else setFormError('Data belum ditambahkan. Periksa nama atau coba kembali.');
+    } catch (error) {
+      setFormError(error.message || 'Data gagal ditambahkan. Silakan coba kembali.');
+    } finally { setIsSubmitting(false); }
   };
 
   // Normalize items to objects if they are strings
@@ -551,37 +575,46 @@ export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDe
   ];
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[340px_minmax(0,1fr)] gap-6 items-start">
-      {/* Form Input */}
+    <div className="min-w-0 space-y-4">
+      <ModalShell isOpen={isAddOpen} onClose={() => { if (!isSubmitting) setIsAddOpen(false); }} ariaLabel={`Tambah ${title.toLowerCase()}`} panelClassName="max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl">
+      <DialogClose disabled={isSubmitting} aria-label={`Tutup form ${title.toLowerCase()}`} className="absolute right-3 top-3 flex min-h-11 min-w-11 items-center justify-center rounded-xl hover:bg-slate-100"><X size={18} /></DialogClose>
       <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-4">
         <div>
-          <h2 className="font-heading font-bold text-base text-slate-900">Tambah {title}</h2>
+          <h2 className="font-heading font-bold text-base text-slate-900 pr-12">Tambah {title}</h2>
           <p className="text-xs text-slate-500 mt-1">{description}</p>
         </div>
         <label className="block text-xs font-bold text-slate-700">
           Nama {title} *
           <input
+            disabled={isSubmitting}
+            minLength={3}
+            maxLength={160}
             value={name}
-            onChange={(event) => setName(event.target.value)}
+            onChange={(event) => { setName(event.target.value); setFormError(''); }}
             placeholder={`Masukkan nama ${title.toLowerCase()}...`}
             required
-            className="mt-1.5 w-full px-3.5 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:ring-2 focus:ring-sky-500/20"
+            className="mt-1.5 min-h-11 w-full px-3.5 py-2 rounded-xl border border-slate-200 text-base focus:outline-none focus:ring-2 focus:ring-sky-500/20"
           />
         </label>
+        {formError && <p role="alert" className="text-sm text-rose-700">{formError}</p>}
         <button disabled={isSubmitting} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all disabled:cursor-wait disabled:opacity-60">
           <Plus size={15} /> {isSubmitting ? 'Menambahkan...' : `Tambah ${title}`}
         </button>
       </form>
+      </ModalShell>
 
       {/* DataTable List */}
       <section className="bg-white rounded-xl border border-slate-200 p-5 space-y-4">
-        <div>
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
           <h2 className="font-heading font-bold text-base text-slate-900">
             Daftar {title} ({normalizedData.length})
           </h2>
           <p className="text-xs text-slate-500 mt-0.5">
             Item yang sedang terikat dengan projek tidak dapat dihapus demi integritas data.
           </p>
+          </div>
+          <button type="button" onClick={() => { setName(''); setFormError(''); setIsAddOpen(true); }} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"><Plus size={16} /> Tambah {title}</button>
         </div>
 
         <DataTable

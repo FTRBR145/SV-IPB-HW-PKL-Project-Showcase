@@ -1,4 +1,4 @@
-const API_BASE_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/$/, '');
+const API_BASE_URL = (import.meta.env?.VITE_API_URL || '/api').replace(/\/$/, '');
 const ACCESS_TOKEN_KEY = 'trk_showcase_access_token';
 const REQUEST_TIMEOUT_MS = 15000;
 
@@ -30,11 +30,12 @@ export function setAccessToken(token) {
 }
 
 export async function apiRequest(path, options = {}) {
-  const { method = 'GET', body, token = getAccessToken(), signal, timeout = REQUEST_TIMEOUT_MS } = options;
+  const { method = 'GET', body, token = getAccessToken(), signal, timeout = REQUEST_TIMEOUT_MS, includeMeta = false } = options;
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), timeout);
   const abortFromCaller = () => controller.abort();
   signal?.addEventListener('abort', abortFromCaller, { once: true });
+  if (signal?.aborted) controller.abort();
 
   try {
     const response = await fetch(`${API_BASE_URL}${path}`, {
@@ -60,10 +61,11 @@ export async function apiRequest(path, options = {}) {
       );
     }
 
-    return payload?.data;
+    return includeMeta ? { data: payload?.data, meta: payload?.meta } : payload?.data;
   } catch (error) {
     if (error instanceof ApiClientError) throw error;
     if (error.name === 'AbortError') {
+      if (signal?.aborted) throw error;
       throw new ApiClientError('Koneksi ke server terlalu lama. Silakan coba kembali.', {
         code: 'REQUEST_TIMEOUT'
       });
@@ -74,14 +76,3 @@ export async function apiRequest(path, options = {}) {
     signal?.removeEventListener('abort', abortFromCaller);
   }
 }
-
-export const demoCredentials = Object.freeze({
-  student: {
-    identifier: 'J0304211015',
-    password: import.meta.env.VITE_DEMO_STUDENT_PASSWORD || 'MahasiswaTRK123!'
-  },
-  admin: {
-    identifier: 'admin.trk@apps.ipb.ac.id',
-    password: import.meta.env.VITE_DEMO_ADMIN_PASSWORD || 'AdminTRK123!'
-  }
-});

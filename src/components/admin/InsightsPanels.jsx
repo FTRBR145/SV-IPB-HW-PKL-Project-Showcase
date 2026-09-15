@@ -60,7 +60,7 @@ export function ReportsPanel({ projects, submissions, students, logs, onExportPr
   );
 }
 
-export function SettingsPanel({ settings, onSave, onReset }) {
+export function SettingsPanel({ settings, onSave }) {
   const [formData, setFormData] = useState(settings);
   const [isSaving, setIsSaving] = useState(false);
   useEffect(() => setFormData(settings), [settings]);
@@ -74,7 +74,7 @@ export function SettingsPanel({ settings, onSave, onReset }) {
   };
 
   return (
-    <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_300px] gap-6 items-start">
+    <div className="max-w-3xl">
       <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
         <div>
           <h2 className="font-heading font-bold text-base text-slate-900">Pengaturan Sistem</h2>
@@ -123,18 +123,6 @@ export function SettingsPanel({ settings, onSave, onReset }) {
         </button>
       </form>
 
-      <aside className="bg-rose-50 border border-rose-100 rounded-2xl p-5 shadow-2xs">
-        <h2 className="font-heading font-bold text-sm text-rose-900">Zona Reset</h2>
-        <p className="text-xs text-rose-700 mt-1 mb-4">
-          Mengembalikan seluruh data projek, moderasi, moderator, mata kuliah, dan pengaturan backend ke data demo awal.
-        </p>
-        <button
-          onClick={onReset}
-          className="w-full px-4 py-2.5 rounded-xl bg-rose-600 text-white text-xs font-bold hover:bg-rose-700 shadow-2xs transition-all"
-        >
-          Reset Seluruh Data Demo
-        </button>
-      </aside>
     </div>
   );
 }
