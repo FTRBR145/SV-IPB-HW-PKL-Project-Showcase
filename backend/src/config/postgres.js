@@ -11,9 +11,12 @@ export function createPostgresPool() {
     // pg lets URL SSL parameters replace the explicit ssl object (including CA).
     for (const key of ['sslmode', 'sslrootcert', 'sslcert', 'sslkey']) url.searchParams.delete(key);
   }
-  return new pg.Pool({
+  const pool = new pg.Pool({
     connectionString: url.toString(),
     max: 5,
+    min: 1,
+    keepAlive: true,
+    keepAliveInitialDelayMillis: 10000,
     connectionTimeoutMillis: 10000,
     idleTimeoutMillis: 30000,
     statement_timeout: 15000,
@@ -23,4 +26,8 @@ export function createPostgresPool() {
       rejectUnauthorized: true
     } } : {})
   });
+  // pg removes disconnected idle clients itself; handle the event so a brief
+  // network interruption does not terminate the entire API process.
+  pool.on('error', () => console.warn('Koneksi database idle terputus; pool akan membuka koneksi pengganti saat diperlukan.'));
+  return pool;
 }

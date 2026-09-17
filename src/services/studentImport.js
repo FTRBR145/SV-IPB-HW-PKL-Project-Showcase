@@ -1,4 +1,5 @@
 import Papa from 'papaparse';
+export { downloadCsv } from './exportFiles.js';
 
 export const studentHeaders = ['nama', 'nim', 'email', 'semester', 'angkatan'];
 
@@ -20,7 +21,9 @@ export function rowsToStudents(rows) {
 export async function parseStudentFile(file) {
   if (file.size > 5 * 1024 * 1024) throw new Error('Ukuran dokumen maksimal 5 MB.');
   if (/\.csv$/i.test(file.name)) {
-    const result = Papa.parse(await file.text(), { skipEmptyLines: 'greedy' });
+    const text = (await file.text()).replace(/^\uFEFF/, '');
+    const separator = /^sep=([;,])\r?\n/i.exec(text);
+    const result = Papa.parse(separator ? text.slice(separator[0].length) : text, { skipEmptyLines: 'greedy', ...(separator ? { delimiter: separator[1] } : {}) });
     if (result.errors.length) throw new Error('CSV tidak valid. Periksa tanda kutip dan pemisah kolom.');
     return rowsToStudents(result.data);
   }
@@ -42,14 +45,6 @@ export async function parseStudentFile(file) {
     rows.push(values);
   });
   return rowsToStudents(rows);
-}
-
-export function downloadCsv(filename, rows) {
-  const csv = Papa.unparse(rows, { escapeFormulae: true });
-  const url = URL.createObjectURL(new Blob(['\uFEFF', csv], { type: 'text/csv;charset=utf-8' }));
-  const link = document.createElement('a');
-  link.href = url; link.download = filename; link.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 export async function downloadStudentTemplate() {

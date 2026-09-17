@@ -1,3 +1,4 @@
+import { activityActor, studentActivity, settingsActivity } from '../utils/activity.js';
 import { ApiError } from '../utils/http.js';
 import { createSeedData } from '../data/seed.js';
 
@@ -21,7 +22,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
       id: nextId(state.activityLogs),
       type,
       message,
-      actor,
+      ...activityActor(actor),
       timestamp: new Date().toISOString()
     };
     state.activityLogs.unshift(entry);
@@ -30,6 +31,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
   };
 
   return {
+    recordActivity,
     listStudents() { return clone(state.users.filter(user => user.role === 'student').map(({passwordHash: _hash, ...user}) => user)); },
     getUserIdentifiers() { return state.users.map(({email,nim}) => ({email,nim})); },
     createStudents(students, actor) {
@@ -41,7 +43,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
       }
       const created = students.map((student,index) => ({...student,id:nextId(state.users)+index}));
       state.users.push(...created);
-      recordActivity(`${created.length} akun mahasiswa ditambahkan.`, 'user', actor);
+      recordActivity(studentActivity(created), 'user', actor);
       return clone(created.map(({passwordHash: _hash,...user}) => user));
     },
     reset() {
@@ -134,7 +136,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
         moderatedAt: null
       };
       state.submissions.unshift(submission);
-      recordActivity(`Pengajuan baru diterima dari ${submission.student}.`, 'submission', actor);
+      recordActivity(`Pengajuan “${submission.title}” dari ${submission.student} diterima.`, 'submission', actor);
       return clone(submission);
     },
 
@@ -178,7 +180,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
         status: 'approved',
         moderatedAt: new Date().toISOString()
       };
-      recordActivity(`Pengajuan ${submission.student} disetujui.`, 'success', actor);
+      recordActivity(`Pengajuan “${submission.title}” dari ${submission.student} disetujui.`, 'success', actor);
       return { submission: clone(state.submissions[index]), project };
     },
 
@@ -191,7 +193,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
         status: 'rejected',
         moderatedAt: new Date().toISOString()
       };
-      recordActivity(`Pengajuan ${state.submissions[index].student} ditolak.`, 'danger', actor);
+      recordActivity(`Pengajuan “${state.submissions[index].title}” dari ${state.submissions[index].student} ditolak.`, 'danger', actor);
       return { submission: clone(state.submissions[index]) };
     },
 
@@ -204,7 +206,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
         status: 'pending',
         moderatedAt: null
       };
-      recordActivity(`Pengajuan ${state.submissions[index].student} dikembalikan ke antrean.`, 'submission', actor);
+      recordActivity(`Pengajuan “${state.submissions[index].title}” dari ${state.submissions[index].student} dikembalikan ke antrean.`, 'submission', actor);
       return { submission: clone(state.submissions[index]) };
     },
 
@@ -247,7 +249,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
         status: 'active'
       };
       state.moderators.push(moderator);
-      recordActivity(`Moderator ${moderator.name} ditambahkan.`, 'user', actor);
+      recordActivity(`Moderator ${moderator.name} (${moderator.email}) ditambahkan.`, 'user', actor);
       return clone(moderator);
     },
 
@@ -257,7 +259,7 @@ export function createMemoryRepository(initialData = createSeedData()) {
       const activeCount = state.moderators.filter((item) => item.status === 'active').length;
       if (state.moderators[index].status === 'active' && activeCount <= 1) return { error: 'last_active' };
       state.moderators[index].status = state.moderators[index].status === 'active' ? 'inactive' : 'active';
-      recordActivity('Status moderator diperbarui.', 'user', actor);
+      recordActivity(`Moderator ${state.moderators[index].name} (${state.moderators[index].email}) ${state.moderators[index].status === 'active' ? 'diaktifkan' : 'dinonaktifkan'}.`, 'user', actor);
       return { moderator: clone(state.moderators[index]) };
     },
 
@@ -275,8 +277,9 @@ export function createMemoryRepository(initialData = createSeedData()) {
     },
 
     updateSettings(updates, actor) {
+      const message = settingsActivity(state.settings, { ...state.settings, ...updates });
       state.settings = { ...state.settings, ...clone(updates) };
-      recordActivity('Pengaturan sistem diperbarui.', 'settings', actor);
+      if (message) recordActivity(message, 'settings', actor);
       return clone(state.settings);
     },
 

@@ -24,21 +24,21 @@ function resolveModerationResult(result, response, status = 200) {
 
 router.post('/:id/approve', authorize('admin'), async (request, response) => {
   resolveModerationResult(
-    await request.app.locals.repository.approveSubmission(request.params.id, request.user.name),
+    await request.app.locals.repository.approveSubmission(request.params.id, request.user),
     response
   );
 });
 
 router.post('/:id/reject', authorize('admin'), async (request, response) => {
   resolveModerationResult(
-    await request.app.locals.repository.rejectSubmission(request.params.id, request.user.name),
+    await request.app.locals.repository.rejectSubmission(request.params.id, request.user),
     response
   );
 });
 
 router.post('/:id/restore', authorize('admin'), async (request, response) => {
   resolveModerationResult(
-    await request.app.locals.repository.restoreSubmission(request.params.id, request.user.name),
+    await request.app.locals.repository.restoreSubmission(request.params.id, request.user),
     response
   );
 });

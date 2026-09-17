@@ -167,6 +167,19 @@
 .table-toolbar input { width: min(100%, 20rem); }
 .table-toolbar :is(select, input):focus-visible { outline: 2px solid var(--ui-focus); outline-offset: 2px; }
 .table-export-control { flex-shrink: 0; }
+.admin-datatable table.dataTable > tbody > tr.table-row-invalid,
+.admin-datatable table.dataTable > tbody > tr.table-row-invalid > td {
+  background-color: #fff1f2;
+}
+.import-field-invalid {
+  display: block;
+  padding: 0.5rem;
+  border: 1px solid #be123c;
+  border-radius: 0.375rem;
+  background: #fff;
+  color: #9f1239;
+  overflow-wrap: anywhere;
+}
 @container admin-table (max-width: 640px) {
   .table-search-control { order: 3; flex-basis: 100%; }
   .table-search-control input { flex: 1; width: 100%; }

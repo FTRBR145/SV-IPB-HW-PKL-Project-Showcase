@@ -40,22 +40,22 @@ router.post('/', optionalAuthenticate, validate(projectSchema), async (request, 
   };
 
   if (!request.user || request.user.role === 'student' || settings.moderationRequired) {
-    const submission = await repository.createSubmission(projectData, actorName);
+    const submission = await repository.createSubmission(projectData, request.user || 'Tamu');
     return sendData(response, { type: 'submission', item: submission }, 202);
   }
 
-  const project = await repository.createProject(projectData, actorName);
+  const project = await repository.createProject(projectData, request.user || 'Tamu');
   return sendData(response, { type: 'project', item: project }, 201);
 });
 
 router.patch('/:id', authenticate, authorize('admin'), validate(projectUpdateSchema), async (request, response) => {
-  const project = await request.app.locals.repository.updateProject(request.params.id, request.body, request.user.name);
+  const project = await request.app.locals.repository.updateProject(request.params.id, request.body, request.user);
   if (!project) throw new ApiError(404, 'PROJECT_NOT_FOUND', 'Projek tidak ditemukan.');
   sendData(response, project);
 });
 
 router.delete('/:id', authenticate, authorize('admin'), async (request, response) => {
-  const project = await request.app.locals.repository.deleteProject(request.params.id, request.user.name);
+  const project = await request.app.locals.repository.deleteProject(request.params.id, request.user);
   if (!project) throw new ApiError(404, 'PROJECT_NOT_FOUND', 'Projek tidak ditemukan.');
   sendData(response, project);
 });

@@ -21,13 +21,13 @@ router.get('/settings/public', async (request, response) => {
 router.use(authenticate, authorize('admin'));
 
 router.post('/courses', validate(courseSchema), async (request, response) => {
-  const course = await request.app.locals.repository.addCourse(request.body.name, request.user.name);
+  const course = await request.app.locals.repository.addCourse(request.body.name, request.user);
   if (!course) throw new ApiError(409, 'COURSE_EXISTS', 'Mata kuliah sudah tersedia.');
   sendData(response, { name: course }, 201);
 });
 
 router.delete('/courses/:name', async (request, response) => {
-  const result = await request.app.locals.repository.deleteCourse(request.params.name, request.user.name);
+  const result = await request.app.locals.repository.deleteCourse(request.params.name, request.user);
   if (result.error === 'not_found') throw new ApiError(404, 'COURSE_NOT_FOUND', 'Mata kuliah tidak ditemukan.');
   if (result.error === 'in_use') throw new ApiError(409, 'COURSE_IN_USE', 'Mata kuliah masih digunakan oleh projek atau pengajuan.');
   sendData(response, result);
@@ -38,20 +38,20 @@ router.get('/moderators', async (request, response) => {
 });
 
 router.post('/moderators', validate(moderatorSchema), async (request, response) => {
-  const moderator = await request.app.locals.repository.addModerator(request.body, request.user.name);
+  const moderator = await request.app.locals.repository.addModerator(request.body, request.user);
   if (!moderator) throw new ApiError(409, 'MODERATOR_EXISTS', 'Email moderator sudah terdaftar.');
   sendData(response, moderator, 201);
 });
 
 router.patch('/moderators/:id/status', async (request, response) => {
-  const result = await request.app.locals.repository.toggleModerator(request.params.id, request.user.name);
+  const result = await request.app.locals.repository.toggleModerator(request.params.id, request.user);
   if (result.error === 'not_found') throw new ApiError(404, 'MODERATOR_NOT_FOUND', 'Moderator tidak ditemukan.');
   if (result.error === 'last_active') throw new ApiError(409, 'LAST_ACTIVE_MODERATOR', 'Minimal satu moderator harus tetap aktif.');
   sendData(response, result.moderator);
 });
 
 router.delete('/moderators/:id', async (request, response) => {
-  const result = await request.app.locals.repository.deleteModerator(request.params.id, request.user.name);
+  const result = await request.app.locals.repository.deleteModerator(request.params.id, request.user);
   if (result.error === 'not_found') throw new ApiError(404, 'MODERATOR_NOT_FOUND', 'Moderator tidak ditemukan.');
   if (result.error === 'last_moderator') throw new ApiError(409, 'LAST_MODERATOR', 'Minimal satu moderator harus tersedia.');
   sendData(response, result.moderator);
@@ -62,7 +62,7 @@ router.get('/settings', async (request, response) => {
 });
 
 router.patch('/settings', validate(settingsSchema), async (request, response) => {
-  sendData(response, await request.app.locals.repository.updateSettings(request.body, request.user.name));
+  sendData(response, await request.app.locals.repository.updateSettings(request.body, request.user));
 });
 
 router.get('/activity-logs', async (request, response) => {
@@ -70,7 +70,7 @@ router.get('/activity-logs', async (request, response) => {
 });
 
 router.delete('/activity-logs', async (request, response) => {
-  await request.app.locals.repository.clearActivityLogs(request.user.name);
+  await request.app.locals.repository.clearActivityLogs(request.user);
   sendData(response, []);
 });
 

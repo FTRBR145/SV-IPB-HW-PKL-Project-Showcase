@@ -127,28 +127,38 @@ export function SettingsPanel({ settings, onSave }) {
   );
 }
 
-export function ActivityLogsPanel({ logs, onClear }) {
+const activityTypes = { login: 'Login admin', logout: 'Logout admin', project: 'Projek', submission: 'Pengajuan', success: 'Persetujuan', danger: 'Penghapusan / penolakan', taxonomy: 'Mata kuliah', user: 'Akun pengguna', settings: 'Pengaturan', system: 'Sistem', info: 'Informasi' };
+const activityTime = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'medium', timeZone: 'Asia/Jakarta' });
+
+export function ActivityLogsPanel({ logs, onClear, onRefresh }) {
   const [typeFilter, setTypeFilter] = useState('all');
-  const types = ['all', ...new Set(logs.map((log) => log.type))];
+  const [dateFilter, setDateFilter] = useState('');
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshMessage, setRefreshMessage] = useState('');
+  const types = ['all', ...new Set([...Object.keys(activityTypes), ...logs.map((log) => log.type)])];
 
   const filteredLogs = useMemo(() => {
-    if (typeFilter === 'all') return logs;
-    return logs.filter((log) => log.type === typeFilter);
-  }, [logs, typeFilter]);
+    return logs.filter((log) => (typeFilter === 'all' || log.type === typeFilter) &&
+      (!dateFilter || new Date(log.timestamp).toLocaleDateString('sv-SE', { timeZone: 'Asia/Jakarta' }) === dateFilter));
+  }, [logs, typeFilter, dateFilter]);
 
   const columns = [
     {
       key: 'message',
       label: 'Aktivitas / Perubahan',
       sortable: true,
+      weight: 3,
       render: (row) => (
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center flex-shrink-0">
             <Activity size={15} />
           </div>
-          <strong className="text-xs text-slate-800 font-semibold leading-snug">
-            {row.message}
-          </strong>
+          <div className="text-xs text-slate-800 font-semibold leading-snug break-words min-w-0">
+            {row.message.length > 250 ? <details>
+              <summary className="cursor-pointer">{row.message.split('. ')[0]}. Lihat rincian</summary>
+              <p className="mt-2 font-normal">{row.message}</p>
+            </details> : row.message}
+          </div>
         </div>
       )
     },
@@ -156,19 +166,21 @@ export function ActivityLogsPanel({ logs, onClear }) {
       key: 'actor',
       label: 'Pelaku',
       sortable: true,
+      searchValue: row => `${row.actor || 'Sistem'} ${row.actorEmail || ''}`,
       render: (row) => (
         <span className="text-xs text-slate-700 font-medium">
           {row.actor || 'Sistem'}
+          {row.actorEmail && <span className="block text-slate-500 break-all">{row.actorEmail}</span>}
         </span>
       )
     },
     {
       key: 'timestamp',
-      label: 'Waktu',
+      label: 'Waktu (WIB)',
       sortable: true,
       render: (row) => (
         <span className="text-xs font-mono text-slate-600">
-          {row.timestamp}
+          {Number.isNaN(Date.parse(row.timestamp)) ? row.timestamp : activityTime.format(new Date(row.timestamp))}
         </span>
       )
     },
@@ -180,29 +192,43 @@ export function ActivityLogsPanel({ logs, onClear }) {
       className: 'text-center',
       render: (row) => (
         <span className="inline-flex items-center rounded-full bg-slate-100 px-2 py-0.5 font-mono text-xs font-bold text-slate-600">
-          {row.type}
+          {activityTypes[row.type] || row.type}
         </span>
       )
     }
   ];
 
   const filterActions = (
-    <div className="flex items-center gap-2">
+    <div className="flex flex-wrap items-center gap-3">
+      <label className="text-xs font-medium text-slate-700">Jenis aktivitas
       <select
+        aria-label="Jenis aktivitas"
         value={typeFilter}
         onChange={(e) => setTypeFilter(e.target.value)}
         className="px-2.5 py-1.5 rounded-xl border border-slate-200 text-xs bg-white font-medium text-slate-700 focus:outline-none"
       >
         {types.map((type) => (
           <option key={type} value={type}>
-            {type === 'all' ? 'Semua Tipe' : type}
+            {type === 'all' ? 'Semua aktivitas' : activityTypes[type] || type}
           </option>
         ))}
       </select>
+      </label>
+      <label className="text-xs font-medium text-slate-700">Tanggal (WIB)
+        <input type="date" value={dateFilter} onChange={event => setDateFilter(event.target.value)} className="ml-2 min-h-11 rounded-xl border border-slate-200 px-3 bg-white" />
+      </label>
+      {(typeFilter !== 'all' || dateFilter) && <button className="text-xs text-sky-700 underline min-h-11" onClick={() => { setTypeFilter('all'); setDateFilter(''); }}>Reset filter</button>}
+      {onRefresh && <button disabled={refreshing} className="min-h-11 px-3 rounded-xl border border-slate-200 text-xs font-bold disabled:opacity-60" onClick={async () => {
+        setRefreshing(true); setRefreshMessage('');
+        try { setRefreshMessage(await onRefresh() === false ? 'Log belum dapat diperbarui. Coba lagi.' : 'Log berhasil diperbarui.'); }
+        catch { setRefreshMessage('Log belum dapat diperbarui. Coba lagi.'); }
+        finally { setRefreshing(false); }
+      }}>{refreshing ? 'Memuat...' : 'Segarkan log'}</button>}
       <button
         onClick={() => window.confirm('Bersihkan seluruh log aktivitas?') && onClear()}
         className="p-1.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 transition-colors shadow-2xs"
         title="Bersihkan seluruh log aktivitas"
+        aria-label="Bersihkan seluruh log aktivitas"
       >
         <Trash2 size={15} />
       </button>
@@ -216,9 +242,10 @@ export function ActivityLogsPanel({ logs, onClear }) {
           Log Aktivitas Sistem ({logs.length})
         </h2>
         <p className="text-xs text-slate-500 mt-0.5">
-          Rekaman jejak audit perubahan, persetujuan moderasi, dan aksi administratif.
+          Maksimal 200 aktivitas terbaru: login/logout admin, penambahan data, moderasi, dan perubahan pengaturan. Waktu ditampilkan dalam WIB.
         </p>
       </div>
+      <p role="status" className="text-xs text-slate-600">{refreshMessage}</p>
 
       <DataTable
         data={filteredLogs}
@@ -231,7 +258,7 @@ export function ActivityLogsPanel({ logs, onClear }) {
         extraHeaderActions={filterActions}
         showExportCsv={true}
         exportFileName="log-aktivitas-showcase.csv"
-        emptyMessage="Belum ada aktivitas yang tercatat."
+        emptyMessage={logs.length ? 'Tidak ada aktivitas yang cocok dengan filter.' : 'Belum ada aktivitas yang tercatat.'}
       />
     </section>
   );

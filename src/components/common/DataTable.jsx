@@ -1,3 +1,4 @@
+import { downloadCsv } from '../../services/exportFiles';
 import React, { useEffect, useId, useMemo, useRef, useState } from 'react';
 import DataTablesReact from 'datatables.net-react';
 import DataTablesCore from 'datatables.net-dt';
@@ -26,7 +27,8 @@ export default function DataTable({
   showExportCsv = false,
   exportFileName = 'data-export.csv',
   emptyMessage = 'Tidak ada data yang ditemukan.',
-  searchTerm = ''
+  searchTerm = '',
+  isRowInvalid
 }) {
   const tableRef = useRef(null);
   const sortId = useId();
@@ -101,23 +103,10 @@ export default function DataTable({
     if (exportData.length === 0) return;
 
     const exportColumns = columns.filter((column) => column.key && column.exportable !== false);
-    const headers = exportColumns
-      .map((column) => `"${String(column.label || column.key).replaceAll('"', '""')}"`)
-      .join(',');
-    const rows = exportData.map((item) => exportColumns
-      .map((column) => {
-        const value = normalizeCellValue(item[column.key]);
-        return `"${String(value).replaceAll('"', '""')}"`;
-      })
-      .join(','));
-
-    const blob = new Blob([`\uFEFF${[headers, ...rows].join('\n')}`], { type: 'text/csv;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = exportFileName;
-    link.click();
-    URL.revokeObjectURL(url);
+    downloadCsv(exportFileName, [
+      exportColumns.map(column => column.label || column.key),
+      ...exportData.map(item => exportColumns.map(column => normalizeCellValue(item[column.key])))
+    ]);
   };
 
   return (
@@ -170,6 +159,7 @@ export default function DataTable({
             setSortSelection(key ? `${key}:${direction}` : '');
           }}
           options={{
+            rowCallback: (row, data) => row.classList.toggle('table-row-invalid', Boolean(isRowInvalid?.(data))),
             autoWidth: false,
             scrollX: false,
             search: { search: searchTerm },

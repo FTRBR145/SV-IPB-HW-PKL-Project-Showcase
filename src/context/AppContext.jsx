@@ -15,23 +15,6 @@ import { loadProjectCatalog } from '../services/projectApi';
 
 const DEFAULT_COURSES = SV_COURSES.filter((course) => course !== 'Semua Mata Kuliah');
 
-function formatApiTimestamp(value) {
-  if (!value) return '';
-  const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return value;
-  return new Intl.DateTimeFormat('id-ID', {
-    dateStyle: 'medium',
-    timeStyle: 'short'
-  }).format(date);
-}
-
-function normalizeActivityLogs(logs) {
-  return logs.map((log) => ({
-    ...log,
-    timestamp: formatApiTimestamp(log.timestamp)
-  }));
-}
-
 export function AppProvider({ children }) {
   const [studentAccounts, setStudentAccounts] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -89,7 +72,7 @@ export function AppProvider({ children }) {
       setStudentAccounts(studentResponse);
       setSubmissions(submissionResponse);
       setModerators(moderatorResponse);
-      setActivityLogs(normalizeActivityLogs(logResponse));
+      setActivityLogs(logResponse);
       return;
     }
 
@@ -105,9 +88,11 @@ export function AppProvider({ children }) {
   const refreshActivityLogs = useCallback(async () => {
     try {
       const logs = await apiRequest('/activity-logs');
-      setActivityLogs(normalizeActivityLogs(logs));
+      setActivityLogs(logs);
+      return true;
     } catch (error) {
       console.warn('Log aktivitas belum dapat disegarkan:', error);
+      return false;
     }
   }, []);
 
@@ -210,9 +195,19 @@ export function AppProvider({ children }) {
   const loginAsStudent = (credentials) => loginForRole('student', credentials);
   const loginAsAdmin = (credentials) => loginForRole('admin', credentials);
 
-  const logout = () => {
-    endSession();
-    window.location.replace('/');
+  const logoutInProgress = useRef(false);
+  const logout = async () => {
+    if (logoutInProgress.current) return;
+    logoutInProgress.current = true;
+    try {
+      await apiRequest('/auth/logout', { method: 'POST', timeout: 5000 });
+    } catch {
+      // Still clear local credentials when the backend is unreachable.
+    } finally {
+      endSession();
+      window.location.replace('/');
+      logoutInProgress.current = false;
+    }
   };
 
   const addProject = async (projectData) => {
@@ -225,6 +220,7 @@ export function AppProvider({ children }) {
         setProjects((previous) => [result.item, ...previous]);
         showToast('Video projek berhasil disimpan dan dipublikasikan!');
       }
+      if (currentUser?.role === 'admin') await refreshActivityLogs();
       return result.item;
     } catch (error) {
       reportApiError(error, 'Projek belum dapat disimpan.');
@@ -389,7 +385,10 @@ export function AppProvider({ children }) {
     <AppContext.Provider value={{
       projects,
       studentAccounts,
-      refreshStudents: async () => setStudentAccounts(await apiRequest('/students')),
+      refreshStudents: async () => {
+        setStudentAccounts(await apiRequest('/students'));
+        await refreshActivityLogs();
+      },
       currentUser,
       isLoggedIn: Boolean(currentUser),
       isAuthReady,
@@ -399,6 +398,7 @@ export function AppProvider({ children }) {
       moderators,
       adminSettings,
       activityLogs,
+      refreshActivityLogs,
       toast,
       isLoading,
       showToast,

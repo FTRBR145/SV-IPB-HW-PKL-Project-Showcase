@@ -28,7 +28,18 @@ router.post('/login', validate(loginSchema), asyncHandler(async (request, respon
     { subject: String(user.id), expiresIn: env.jwtExpiresIn }
   );
 
+  if (user.role === 'admin') {
+    await request.app.locals.repository.recordActivity('Admin berhasil login.', 'login', user);
+  }
+  response.set('Cache-Control', 'no-store');
   sendData(response, { accessToken, tokenType: 'Bearer', user: publicUser(user) });
+}));
+
+router.post('/logout', authenticate, asyncHandler(async (request, response) => {
+  if (request.user.role === 'admin') {
+    await request.app.locals.repository.recordActivity('Admin logout.', 'logout', request.user);
+  }
+  sendData(response, { loggedOut: true });
 }));
 
 router.get('/me', authenticate, async (request, response) => {

@@ -1,3 +1,4 @@
+import { activityActor, studentActivity, settingsActivity } from '../utils/activity.js';
 import { ApiError } from '../utils/http.js';
 
 const entityTables = ['users', 'projects', 'submissions', 'moderators', 'activity_logs'];
@@ -26,7 +27,7 @@ export function createPostgresRepository(pool) {
     return unpack((await client.query(`insert into showcase.${table}(data) values ($1) returning *`, [document])).rows[0]);
   };
   const log = async (client, message, type = 'info', actor = 'Sistem') => {
-    const entry = await insert(client, 'activity_logs', { message, type, actor, timestamp: now() });
+    const entry = await insert(client, 'activity_logs', { message, type, ...activityActor(actor), timestamp: now() });
     await client.query('delete from showcase.activity_logs where id in (select id from showcase.activity_logs order by id desc offset 200)');
     return entry;
   };
@@ -38,6 +39,7 @@ export function createPostgresRepository(pool) {
   };
 
   return {
+    recordActivity: (message, type, actor) => transaction(client => log(client, message, type, actor)),
     async listStudents() {
       return (await rows("select id, data - 'passwordHash' as data from showcase.users where data->>'role'='student' order by lower(data->>'name'),id")).map(unpack);
     },
@@ -60,7 +62,7 @@ export function createPostgresRepository(pool) {
           [JSON.stringify(students)]
         );
         const created = result.rows.map(unpack);
-        await log(client, `${created.length} akun mahasiswa ditambahkan.`, 'user', actor);
+        await log(client, studentActivity(created), 'user', actor);
         return created;
       });
     },
@@ -137,7 +139,7 @@ export function createPostgresRepository(pool) {
     createSubmission(data, actor) {
       return transaction(async client => {
         const submission = await insert(client, 'submissions', { ...data, status: 'pending', createdAt: now(), moderatedAt: null });
-        await log(client, `Pengajuan baru diterima dari ${submission.student}.`, 'submission', actor);
+        await log(client, `Pengajuan “${submission.title}” dari ${submission.student} diterima.`, 'submission', actor);
         return submission;
       });
     },
@@ -156,7 +158,7 @@ export function createPostgresRepository(pool) {
         const { status: _status, moderatedAt: _moderatedAt, createdAt: _createdAt, ...data } = row.data;
         const project = await createProject(client, data, actor);
         const submission = unpack((await client.query('update showcase.submissions set data=data || $2::jsonb, project_id=$3 where id=$1 returning *', [row.id, {status:'approved',moderatedAt:now()}, project.id])).rows[0]);
-        await log(client, `Pengajuan ${submission.student} disetujui.`, 'success', actor);
+        await log(client, `Pengajuan “${submission.title}” dari ${submission.student} disetujui.`, 'success', actor);
         return { submission, project };
       });
     },
@@ -168,7 +170,7 @@ export function createPostgresRepository(pool) {
         if (!row) return {error:'not_found'};
         if (row.data.status !== expected) return {error:'invalid_status'};
         const submission = unpack((await client.query('update showcase.submissions set data=data || $2::jsonb where id=$1 returning *',[row.id,{status,moderatedAt:status==='pending'?null:now()}])).rows[0]);
-        await log(client, status==='pending' ? `Pengajuan ${submission.student} dikembalikan ke antrean.` : `Pengajuan ${submission.student} ditolak.`, 'submission', actor);
+        await log(client, status==='pending' ? `Pengajuan “${submission.title}” dari ${submission.student} dikembalikan ke antrean.` : `Pengajuan “${submission.title}” dari ${submission.student} ditolak.`, 'submission', actor);
         return {submission};
       });
     },
@@ -199,7 +201,7 @@ export function createPostgresRepository(pool) {
       return transaction(async client => {
         const result=await client.query('insert into showcase.moderators(data) values($1) on conflict do nothing returning *',[{...data,email:data.email.toLowerCase(),status:'active'}]);
         const moderator=unpack(result.rows[0]);
-        if(moderator) await log(client,`Moderator ${moderator.name} ditambahkan.`,'user',actor);
+        if(moderator) await log(client,`Moderator ${moderator.name} (${moderator.email}) ditambahkan.`,'user',actor);
         return moderator;
       });
     },
@@ -216,7 +218,7 @@ export function createPostgresRepository(pool) {
         const result=remove
           ? await client.query('delete from showcase.moderators where id=$1 returning *',[row.id])
           : await client.query('update showcase.moderators set data=data || $2::jsonb where id=$1 returning *',[row.id,{status:row.data.status==='active'?'inactive':'active'}]);
-        await log(client,remove?`Moderator ${row.data.name} dihapus.`:'Status moderator diperbarui.','user',actor);
+        await log(client,remove?`Moderator ${row.data.name} dihapus.`:`Moderator ${row.data.name} (${row.data.email}) ${row.data.status === 'active' ? 'dinonaktifkan' : 'diaktifkan'}.`,'user',actor);
         return {moderator:unpack(result.rows[0])};
       });
     },
@@ -227,8 +229,10 @@ export function createPostgresRepository(pool) {
     },
     updateSettings(updates,actor) {
       return transaction(async client => {
+        const before = (await client.query('select data from showcase.settings where id=1 for update')).rows[0].data;
         const result=await client.query('update showcase.settings set data=data || $1::jsonb where id=1 returning data',[updates]);
-        await log(client,'Pengaturan sistem diperbarui.','settings',actor);
+        const message = settingsActivity(before, result.rows[0].data);
+        if (message) await log(client,message,'settings',actor);
         return result.rows[0].data;
       });
     },

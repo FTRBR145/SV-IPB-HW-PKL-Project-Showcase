@@ -1,3 +1,4 @@
+import { downloadCsv } from '../services/exportFiles';
 import React, { useEffect, useMemo, useState } from 'react';
 import '../admin.css';
 import { Plus } from 'lucide-react';
@@ -35,27 +36,6 @@ const menuDescriptions = {
   logs: ['Log Aktivitas', 'Tinjau jejak perubahan yang dilakukan pada dashboard.']
 };
 
-function escapeCsv(value) {
-  const stringValue = value == null ? '' : Array.isArray(value) ? value.join(', ') : String(value);
-  return `"${stringValue.replaceAll('"', '""')}"`;
-}
-
-function downloadCsv(filename, rows) {
-  if (rows.length === 0) return;
-  const headers = Object.keys(rows[0]);
-  const content = [
-    headers.map(escapeCsv).join(','),
-    ...rows.map((row) => headers.map((header) => escapeCsv(row[header])).join(','))
-  ].join('\n');
-  const blob = new Blob([`\uFEFF${content}`], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = filename;
-  link.click();
-  URL.revokeObjectURL(url);
-}
-
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -70,6 +50,7 @@ export default function AdminDashboard() {
     moderators,
     adminSettings,
     activityLogs,
+    refreshActivityLogs,
     approveSubmission,
     rejectSubmission,
     restoreSubmission,
@@ -162,7 +143,7 @@ export default function AdminDashboard() {
           />
         );
       case 'logs':
-        return <ActivityLogsPanel logs={activityLogs} onClear={clearActivityLogs} />;
+        return <ActivityLogsPanel logs={activityLogs} onClear={clearActivityLogs} onRefresh={refreshActivityLogs} />;
       default:
         return (
           <DashboardOverview
