@@ -12,6 +12,13 @@ dist
 dist-ssr
 *.local
 
+# Local integration-test databases
+/.test-data/
+
+# Keep test suites local; do not publish them to GitHub
+/tests/
+/backend/tests/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
