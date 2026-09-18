@@ -15,6 +15,7 @@ export async function authenticate(request, _response, next) {
     const payload = jwt.verify(token, env.jwtSecret);
     const user = await request.app.locals.repository.findUserById(payload.sub);
     if (!user) return next(new ApiError(401, 'INVALID_TOKEN', 'Pengguna pada token tidak ditemukan.'));
+    if ((payload.authVersion || 0) !== (user.authVersion || 0)) return next(new ApiError(401, 'INVALID_TOKEN', 'Password telah berubah. Silakan masuk kembali.'));
     request.user = {
       id: user.id,
       name: user.name,
@@ -37,6 +38,7 @@ export async function optionalAuthenticate(request, _response, next) {
     const payload = jwt.verify(token, env.jwtSecret);
     const user = await request.app.locals.repository.findUserById(payload.sub);
     if (!user) return next(new ApiError(401, 'INVALID_TOKEN', 'Pengguna pada token tidak ditemukan.'));
+    if ((payload.authVersion || 0) !== (user.authVersion || 0)) return next(new ApiError(401, 'INVALID_TOKEN', 'Password telah berubah. Silakan masuk kembali.'));
     request.user = {
       id: user.id,
       name: user.name,

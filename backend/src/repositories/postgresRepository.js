@@ -39,6 +39,30 @@ export function createPostgresRepository(pool) {
   };
 
   return {
+    updateOwnProfile(id, name, actor) {
+      return transaction(async client => {
+        const user = unpack((await client.query("update showcase.users set data=data || $2::jsonb where id=$1 returning *", [asId(id), JSON.stringify({name})])).rows[0]);
+        if (!user) throw new ApiError(404, 'USER_NOT_FOUND', 'Akun tidak ditemukan.');
+        await log(client, 'Memperbarui nama profil.', 'user', actor);
+        return user;
+      });
+    },
+    changeOwnPassword(id, previousHash, passwordHash, actor) {
+      return transaction(async client => {
+        const result = await client.query("update showcase.users set data=data || jsonb_build_object('passwordHash', $3::text, 'authVersion', coalesce((data->>'authVersion')::integer,0)+1) where id=$1 and data->>'passwordHash'=$2 returning id", [asId(id), previousHash, passwordHash]);
+        if (!result.rows.length) return false;
+        await log(client, 'Mengubah password akun.', 'user', actor);
+        return true;
+      });
+    },
+    async getPublicStatistics() {
+      const [statistics] = await rows(`select
+        (select count(*)::integer from showcase.projects) as projects,
+        (select count(*)::integer from showcase.users where data->>'role'='student') as students,
+        (select count(*)::integer from showcase.courses) as courses,
+        (select count(*)::integer from showcase.moderators where data->>'role'='lecturer') as lecturers`);
+      return statistics;
+    },
     recordActivity: (message, type, actor) => transaction(client => log(client, message, type, actor)),
     async listStudents() {
       return (await rows("select id, data - 'passwordHash' as data from showcase.users where data->>'role'='student' order by lower(data->>'name'),id")).map(unpack);

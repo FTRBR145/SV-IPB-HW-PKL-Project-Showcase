@@ -1,3 +1,4 @@
+import ValidatedForm from '../common/ValidatedForm';
 import React, { useState } from 'react';
 import { Plus, Upload, X, Download, Copy, Check } from 'lucide-react';
 import ModalShell from '../common/ModalShell';
@@ -122,11 +123,11 @@ export default function StudentEnrollment() {
         </div>
         <p className="text-sm text-slate-600">Pilih Excel agar kolom tertata dan NIM tetap utuh, termasuk angka nol di depan.</p>
       </div> : <>
-        {!preview && mode === 'single' && <form onSubmit={event => { event.preventDefault(); save(); }} className="space-y-4">
+        {!preview && mode === 'single' && <ValidatedForm onSubmit={event => { event.preventDefault(); save(); }} className="space-y-4">
           {[['name','Nama lengkap','text',120],['nim','NIM','text',30],['email','Email','email',160],['angkatan','Angkatan','text',40]].map(([key,label,type,maxLength]) => <label key={key} className="block text-sm font-semibold text-slate-700">{label} *<input className={input} type={type} maxLength={maxLength} required disabled={busy} value={form[key]} onChange={event => setForm(previous => ({...previous,[key]:event.target.value}))} /></label>)}
           <label className="block text-sm font-semibold text-slate-700">Semester *<input className={input} type="number" min="1" max="14" required disabled={busy} value={form.semester} onChange={event => setForm(previous => ({...previous,semester:event.target.value}))} /></label>
           <button disabled={busy} className={`${button} bg-slate-900 text-white`}>{busy ? 'Menyimpan…' : 'Tambah Mahasiswa'}</button>
-        </form>}
+        </ValidatedForm>}
         {!preview && mode === 'import' && <div className="space-y-5">
           <p className="text-sm text-slate-700">Gunakan lembar pertama dengan kolom <strong>nama, nim, email, semester, angkatan</strong>. Format NIM sebagai teks. Maksimal 500 mahasiswa dan 5 MB per dokumen.</p>
           <div className="flex flex-wrap gap-2"><button disabled={busy} className={button} onClick={template}>Template Excel</button><button disabled={busy} className={button} onClick={() => downloadCsv('template-mahasiswa.csv', [studentHeaders])}>Template CSV</button></div>

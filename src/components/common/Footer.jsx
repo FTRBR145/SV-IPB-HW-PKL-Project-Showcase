@@ -1,10 +1,11 @@
 import React from 'react';
 import useApp from '../../hooks/useApp';
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, Mail, Cpu, Smartphone, Wifi, Wrench, Binary } from 'lucide-react';
+import { MapPin, Phone, Mail, BookOpen } from 'lucide-react';
+import { courseLabel } from '../../utils/courseLabel';
 
 export default function Footer() {
-  const { isLoggedIn, currentUser } = useApp();
+  const { isLoggedIn, currentUser, courses = [] } = useApp();
 
   return (
     <footer className="site-footer border-t border-slate-900 bg-slate-950 py-8 text-xs text-slate-300">
@@ -32,50 +33,29 @@ export default function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="font-heading text-sm font-bold text-white mb-2">Navigasi</h4>
-            <ul>
-              <li><Link to="/" className="hover:text-white transition-colors">Home Landing</Link></li>
-              {isLoggedIn && currentUser?.role === 'student' && <li><Link to="/student" className="hover:text-white transition-colors">Beranda Mahasiswa</Link></li>}
+            <ul className="space-y-2">
+              <li><Link to="/" className="hover:text-white transition-colors">Home</Link></li>
+              {isLoggedIn && currentUser?.role === 'student' && <li><Link to="/student" className="hover:text-white transition-colors">Portal Mahasiswa</Link></li>}
               {isLoggedIn && currentUser?.role === 'admin' && <li><Link to="/admin" className="hover:text-white transition-colors">Dashboard Admin</Link></li>}
-              <li><a href="/#about" className="hover:text-white transition-colors">Tentang Showcase</a></li>
-              <li><a href="/#matakuliah" className="hover:text-white transition-colors">Katalog Mata Kuliah</a></li>
+              {isLoggedIn && currentUser?.role === 'student' && <li><Link to="/student/upload" className="hover:text-white transition-colors">Unggah Projek</Link></li>}
+              {isLoggedIn && currentUser?.role === 'admin' && <li><Link to="/student" className="hover:text-white transition-colors">Pratinjau Portal Mahasiswa</Link></li>}
+              <li><a href="/#projects" className="hover:text-white transition-colors">Jelajahi Projek</a></li>
+              <li><a href="/#about" className="hover:text-white transition-colors">Tentang</a></li>
+              <li><a href="/#matakuliah" className="hover:text-white transition-colors">Mata Kuliah</a></li>
             </ul>
           </div>
 
-          {/* Fokus Keahlian TRK SV IPB (5 Mata Kuliah Utama) */}
           <div>
-            <h4 className="font-heading text-sm font-bold text-white mb-2">Fokus Keahlian TRK</h4>
-            <ul>
-              <li>
-                <a href="/#matakuliah" className="hover:text-sky-400 transition-colors flex items-center gap-2">
-                  <Cpu size={14} className="text-sky-400 flex-shrink-0" />
-                  <span>Sistem Tertanam (Embedded System)</span>
+            <h4 className="font-heading text-sm font-bold text-white mb-2">Mata Kuliah</h4>
+            <ul className="space-y-2">
+              {courses.map(course => <li key={course}>
+                <a href={`/?course=${encodeURIComponent(course)}#projects`} className="hover:text-white transition-colors flex items-start gap-2">
+                  <BookOpen size={14} aria-hidden="true" className="mt-0.5 text-sky-400 flex-shrink-0" />
+                  <span>{courseLabel(course)}</span>
                 </a>
-              </li>
-              <li>
-                <a href="/#matakuliah" className="hover:text-sky-400 transition-colors flex items-center gap-2">
-                  <Smartphone size={14} className="text-sky-400 flex-shrink-0" />
-                  <span>Aplikasi Mobile</span>
-                </a>
-              </li>
-              <li>
-                <a href="/#matakuliah" className="hover:text-sky-400 transition-colors flex items-center gap-2">
-                  <Wifi size={14} className="text-sky-400 flex-shrink-0" />
-                  <span>Proyek Sistem IoT (Internet of Things)</span>
-                </a>
-              </li>
-              <li>
-                <a href="/#matakuliah" className="hover:text-sky-400 transition-colors flex items-center gap-2">
-                  <Wrench size={14} className="text-sky-400 flex-shrink-0" />
-                  <span>Teknologi Bengkel Elektromekanik</span>
-                </a>
-              </li>
-              <li>
-                <a href="/#matakuliah" className="hover:text-sky-400 transition-colors flex items-center gap-2">
-                  <Binary size={14} className="text-sky-400 flex-shrink-0" />
-                  <span>Rangkaian Logika & Teknik Digital</span>
-                </a>
-              </li>
+              </li>)}
             </ul>
+            {!courses.length && <p className="text-slate-400">Belum ada mata kuliah.</p>}
           </div>
 
           {/* Contact */}
@@ -97,17 +77,17 @@ export default function Footer() {
                 </span>
               </li>
               <li className="flex gap-2.5 items-center pt-1">
-                <Phone size={15} className="text-slate-400 flex-shrink-0" /> <span>(0251) 8348007</span>
+                <Phone size={15} className="text-slate-400 flex-shrink-0" /> <a href="tel:+622518348007" className="hover:text-white">(0251) 8348007</a>
               </li>
               <li className="flex gap-2.5 items-center">
-                <Mail size={15} className="text-slate-400 flex-shrink-0" /> <span>sv@apps.ipb.ac.id</span>
+                <Mail size={15} className="text-slate-400 flex-shrink-0" /> <a href="mailto:sv@apps.ipb.ac.id" className="hover:text-white">sv@apps.ipb.ac.id</a>
               </li>
             </ul>
           </div>
         </div>
 
         <div className="border-t border-slate-800 pt-4 text-center text-xs text-slate-400">
-          <p>© 2026 Sekolah Vokasi IPB University. Teknologi Rekayasa Komputer (TRK) Project Showcase.</p>
+          <p>© {new Date().getFullYear()} Sekolah Vokasi IPB University. Teknologi Rekayasa Komputer (TRK) Project Showcase.</p>
         </div>
       </div>
     </footer>

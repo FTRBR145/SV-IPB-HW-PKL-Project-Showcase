@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import {
   CheckCircle,
+  Eye,
   FolderKanban,
   GraduationCap,
   RotateCcw,
@@ -66,12 +67,13 @@ export default function DashboardOverview({
   students,
   onApprove,
   onReject,
-  onRestore
+  onRestore,
+  onPreview
 }) {
   const [statusFilter, setStatusFilter] = useState('all');
   const [activeAction, setActiveAction] = useState('');
 
-  const runModerationAction = async (action, submissionId) => {
+  const runModerationAction = useCallback(async (action, submissionId) => {
     const actionKey = `${action}-${submissionId}`;
     if (activeAction) return;
     setActiveAction(actionKey);
@@ -82,7 +84,7 @@ export default function DashboardOverview({
     } finally {
       setActiveAction('');
     }
-  };
+  }, [activeAction, onApprove, onReject, onRestore]);
 
   const pendingCount = submissions.filter((item) => item.status === 'pending').length;
   const approvedCount = submissions.filter((item) => item.status === 'approved').length;
@@ -118,7 +120,7 @@ export default function DashboardOverview({
   };
 
   // DataTable Column Definitions for Submissions
-  const columns = [
+  const columns = useMemo(() => [
     {
       key: 'student',
       label: 'Mahasiswa',
@@ -158,7 +160,7 @@ export default function DashboardOverview({
       sortable: true,
       render: (row) => (
         <span className="text-xs tabular-nums text-slate-600">
-          {row.date || '2026'}
+          {row.date || '—'}
         </span>
       )
     },
@@ -185,7 +187,16 @@ export default function DashboardOverview({
       headerClassName: 'text-center',
       className: 'text-center',
       render: (row) => (
-        <div className="flex items-center justify-center gap-1.5">
+        <div className="flex flex-wrap items-center justify-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => onPreview(row)}
+            className="flex h-11 w-11 items-center justify-center rounded-lg bg-sky-50 text-sky-700 shadow-2xs transition-colors hover:bg-sky-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"
+            title="Pratinjau Projek"
+            aria-label={`Pratinjau projek ${row.title}`}
+          >
+            <Eye size={15} />
+          </button>
           {row.status === 'pending' ? (
             <>
               <button
@@ -221,7 +232,7 @@ export default function DashboardOverview({
         </div>
       )
     }
-  ];
+  ], [activeAction, runModerationAction, onPreview]);
 
   return (
     <div className="min-w-0 space-y-6">

@@ -1,3 +1,4 @@
+import ValidatedForm from '../common/ValidatedForm';
 import React, { useState } from 'react';
 import { Save, X } from 'lucide-react';
 import useApp from '../../hooks/useApp';
@@ -70,7 +71,7 @@ export default function EditProjectModal({ project, onClose }) {
           <p className="text-xs text-slate-500 mt-1">Perbarui informasi projek yang sudah dipublikasikan.</p>
         </div>
 
-        <form onSubmit={submit} className="space-y-4">
+        <ValidatedForm onSubmit={submit} className="space-y-4">
           <div>
             <label htmlFor="edit-title" className="block text-xs font-bold text-slate-700 mb-1.5">
               Judul projek *
@@ -207,7 +208,7 @@ export default function EditProjectModal({ project, onClose }) {
               <Save size={16} /> {isSubmitting ? 'Menyimpan...' : 'Simpan Perubahan'}
             </button>
           </div>
-        </form>
+        </ValidatedForm>
     </ModalShell>
   );
 }

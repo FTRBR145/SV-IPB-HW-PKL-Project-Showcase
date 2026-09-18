@@ -8,6 +8,10 @@ import { sendData } from '../utils/http.js';
 
 const router = Router();
 
+router.get('/statistics', async (request, response) => {
+  sendData(response, await request.app.locals.repository.getPublicStatistics());
+});
+
 router.get('/health', async (request, response) => {
   await request.app.locals.repository.health?.();
   sendData(response, {

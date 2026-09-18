@@ -2,6 +2,12 @@ import { z } from 'zod';
 
 const optionalText = (max) => z.string().trim().max(max).optional();
 
+export const profileSchema = z.object({ name: z.string().trim().min(2).max(120) }).strict();
+export const passwordSchema = z.object({
+  currentPassword: z.string().min(1).max(128),
+  newPassword: z.string().min(12).max(72).refine(value => Buffer.byteLength(value, 'utf8') <= 72, 'Password maksimal 72 byte.')
+}).strict();
+
 export const loginSchema = z.object({
   identifier: z.string().trim().min(3).max(160).optional(),
   email: z.email().transform((value) => value.toLowerCase()).optional(),
@@ -36,6 +42,7 @@ export const courseSchema = z.object({
 });
 
 export const moderatorSchema = z.object({
+  role: z.enum(['admin', 'lecturer']).default('admin'),
   name: z.string().trim().min(3).max(120),
   nip: z.string().trim().max(40).optional().default(''),
   email: z.email().transform((value) => value.toLowerCase())

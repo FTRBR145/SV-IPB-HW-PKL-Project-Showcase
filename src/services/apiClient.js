@@ -30,6 +30,34 @@ export function setAccessToken(token) {
 }
 
 export async function apiRequest(path, options = {}) {
+  try {
+    return await requestOnce(path, options);
+  } catch (error) {
+    // Only replay reads: a failed write may already have committed on the server.
+    if ((options.method || 'GET').toUpperCase() !== 'GET' ||
+        error.status !== 503 || error.code !== 'DATABASE_UNAVAILABLE') throw error;
+    await waitForDatabase(options.signal);
+    return requestOnce(path, options);
+  }
+}
+
+function waitForDatabase(signal) {
+  return new Promise((resolve, reject) => {
+    const abort = () => {
+      window.clearTimeout(timer);
+      signal?.removeEventListener('abort', abort);
+      reject(new DOMException('Permintaan dibatalkan.', 'AbortError'));
+    };
+    const timer = window.setTimeout(() => {
+      signal?.removeEventListener('abort', abort);
+      resolve();
+    }, 5000);
+    signal?.addEventListener('abort', abort, { once: true });
+    if (signal?.aborted) abort();
+  });
+}
+
+async function requestOnce(path, options = {}) {
   const { method = 'GET', body, token = getAccessToken(), signal, timeout = REQUEST_TIMEOUT_MS, includeMeta = false } = options;
   const controller = new AbortController();
   const timeoutId = window.setTimeout(() => controller.abort(), timeout);

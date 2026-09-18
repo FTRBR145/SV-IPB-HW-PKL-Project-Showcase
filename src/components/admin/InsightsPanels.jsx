@@ -1,3 +1,4 @@
+import ValidatedForm from '../common/ValidatedForm';
 import React, { useEffect, useState, useMemo } from 'react';
 import {
   Activity,
@@ -75,7 +76,7 @@ export function SettingsPanel({ settings, onSave }) {
 
   return (
     <div className="max-w-3xl">
-      <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
+      <ValidatedForm onSubmit={submit} className="bg-white rounded-2xl border border-slate-200/80 p-6 shadow-2xs space-y-5">
         <div>
           <h2 className="font-heading font-bold text-base text-slate-900">Pengaturan Sistem</h2>
           <p className="text-xs text-slate-500 mt-1">Perubahan disimpan melalui backend dan berlaku untuk seluruh pengguna.</p>
@@ -121,7 +122,7 @@ export function SettingsPanel({ settings, onSave }) {
         <button disabled={isSaving} className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-bold hover:bg-slate-800 shadow-2xs transition-all disabled:cursor-wait disabled:opacity-60">
           <Save size={16} /> {isSaving ? 'Menyimpan...' : 'Simpan Pengaturan'}
         </button>
-      </form>
+      </ValidatedForm>
 
     </div>
   );

@@ -26,7 +26,7 @@ import useApp from '../hooks/useApp';
 import { buildStudentSummaries } from '../utils/dataIntegrity';
 
 const menuDescriptions = {
-  dashboard: ['Dashboard Admin', 'Pantau kondisi showcase dan proses moderasi secara real-time.'],
+  dashboard: ['Dashboard Admin', 'Pantau kondisi showcase dan kelola pengajuan projek.'],
   projects: ['Manajemen Projek', 'Kelola seluruh projek mahasiswa yang tampil di showcase.'],
   moderators: ['Manajemen Moderator', 'Atur dosen dan admin yang memiliki akses moderasi.'],
   students: ['Data Mahasiswa', 'Kelola akun mahasiswa, tambah satu per satu, atau impor dari Excel dan CSV.'],
@@ -153,6 +153,7 @@ export default function AdminDashboard() {
             onApprove={approveSubmission}
             onReject={rejectSubmission}
             onRestore={restoreSubmission}
+            onPreview={setPreviewProject}
           />
         );
     }
@@ -203,7 +204,7 @@ export default function AdminDashboard() {
         <Footer />
       </div>
 
-      <UploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} />
+      <UploadModal isOpen={isUploadOpen} onClose={() => setIsUploadOpen(false)} submitLabel="Simpan dan Publikasikan" />
       {previewProject && (
         <ProjectDetailModal
           project={previewProject}

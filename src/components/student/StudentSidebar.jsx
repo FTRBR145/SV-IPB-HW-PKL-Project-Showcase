@@ -143,13 +143,13 @@ export default function StudentSidebar({
               className="flex min-h-11 w-full items-center gap-2.5 rounded-xl bg-slate-100 px-3 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500"
             >
               <ShieldCheck size={16} />
-              <span>Panel Admin / Dosen</span>
+              <span>Dashboard Admin</span>
             </button>
           )}
           <div className="rounded-xl bg-sky-50 px-3 py-3 text-sky-900">
             <div className="mb-1 flex items-center gap-1.5 text-xs font-bold">
               <GraduationCap size={14} className="text-sky-600" />
-              <span>TRK SV IPB 2026</span>
+              <span>TRK SV IPB</span>
             </div>
             <p className="text-xs leading-4 text-sky-800">
               Showcase tugas akhir dan praktikum mahasiswa.

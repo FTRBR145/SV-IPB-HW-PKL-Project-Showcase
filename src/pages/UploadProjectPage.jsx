@@ -76,7 +76,7 @@ export default function UploadProjectPage() {
                 ) : (
                   <ProjectForm
                     lockIdentity
-                    submitLabel={adminSettings.moderationRequired ? 'Kirim untuk Ditinjau' : 'Simpan dan Publikasikan'}
+                    submitLabel={currentUser.role === 'admin' ? 'Simpan dan Publikasikan' : 'Kirim untuk Ditinjau'}
                     onCancel={() => navigate('/student')}
                     onSuccess={() => navigate('/student?tab=my-projects', { replace: true })}
                   />

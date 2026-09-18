@@ -822,3 +822,9 @@ h1, h2, h3, h4, h5, h6 {
     @apply font-sans;
   }
 }
+
+/* Validation feedback shared by forms that replace browser error bubbles. */
+form[data-custom-validation] :is(input, select, textarea)[aria-invalid="true"] {
+  border-color: #be123c;
+  background-color: #fff1f2;
+}

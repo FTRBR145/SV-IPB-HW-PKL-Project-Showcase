@@ -1,3 +1,4 @@
+import ValidatedForm from '../common/ValidatedForm';
 import React, { useState } from 'react';
 import { X, Lock, User, GraduationCap, ShieldCheck } from 'lucide-react';
 import useApp from '../../hooks/useApp';
@@ -117,11 +118,11 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
               </div>
 
               {/* Login Form */}
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <ValidatedForm onSubmit={handleSubmit} className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-1.5">
                     <label htmlFor="login-username" className="block text-xs font-bold text-slate-700">
-                      {role === 'student' ? 'NIM / Email Mahasiswa IPB' : 'NIP / Email Dosen / Admin TRK'}
+                      {role === 'student' ? 'NIM / Email Mahasiswa' : 'Email Dosen / Admin'}
                     </label>
                   </div>
                   <input
@@ -129,7 +130,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
                     type="text"
                     autoComplete="username"
                     className="w-full rounded-xl border border-slate-300 bg-slate-50 px-3.5 py-3 text-base text-slate-800 placeholder-slate-500 transition-colors focus:border-sky-600 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20 sm:text-sm"
-                    placeholder={role === 'student' ? 'Masukkan NIM atau email' : 'Masukkan NIP atau email'}
+                    placeholder={role === 'student' ? 'Masukkan NIM atau email' : 'Masukkan email akun'}
                     value={username}
                     onChange={(e) => {
                       setUsername(e.target.value);
@@ -141,7 +142,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
 
                 <div>
                   <label htmlFor="login-password" className="mb-1.5 block text-xs font-bold text-slate-700">
-                    Password Akun IPB
+                    Password Akun Showcase
                   </label>
                   <input
                     id="login-password"
@@ -171,7 +172,7 @@ export default function LoginModal({ isOpen, onClose, onLoginSuccess }) {
                 >
                   {role === 'admin' ? 'Masuk ke Dashboard Admin' : 'Masuk Portal Mahasiswa'}
                 </button>
-              </form>
+              </ValidatedForm>
             </>
           )}
         </div>

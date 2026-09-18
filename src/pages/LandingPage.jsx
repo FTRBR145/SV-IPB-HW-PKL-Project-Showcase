@@ -32,6 +32,19 @@ export default function LandingPage() {
   const [selectedSemester, setSelectedSemester] = useState('ALL');
   const [selectedCourse, setSelectedCourse] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const courseFromUrl = searchParams.get('course') || '';
+
+  useEffect(() => {
+    setSelectedCourse(courseFromUrl);
+    setSelectedSemester('ALL');
+  }, [courseFromUrl]);
+
+  useEffect(() => {
+    const target = ['#home', '#about', '#matakuliah', '#projects'].includes(location.hash) ? location.hash.slice(1) : null;
+    if (!target) return;
+    const frame = requestAnimationFrame(() => document.getElementById(target)?.scrollIntoView());
+    return () => cancelAnimationFrame(frame);
+  }, [location.hash, courseFromUrl]);
 
   // Modal States
   const activeProjectDetail = useProjectDetail(projectId || searchParams.get('project'), showToast);

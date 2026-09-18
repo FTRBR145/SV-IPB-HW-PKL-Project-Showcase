@@ -31,6 +31,29 @@ export function createMemoryRepository(initialData = createSeedData()) {
   };
 
   return {
+    updateOwnProfile(id, name, actor) {
+      const user = state.users.find(user => user.id === Number(id));
+      if (!user) throw new ApiError(404, 'USER_NOT_FOUND', 'Akun tidak ditemukan.');
+      user.name = name;
+      recordActivity('Memperbarui nama profil.', 'user', actor);
+      return clone(user);
+    },
+    changeOwnPassword(id, previousHash, passwordHash, actor) {
+      const user = state.users.find(user => user.id === Number(id));
+      if (!user || user.passwordHash !== previousHash) return false;
+      user.passwordHash = passwordHash;
+      user.authVersion = (user.authVersion || 0) + 1;
+      recordActivity('Mengubah password akun.', 'user', actor);
+      return true;
+    },
+    getPublicStatistics() {
+      return {
+        projects: state.projects.length,
+        students: state.users.filter(user => user.role === 'student').length,
+        courses: state.courses.length,
+        lecturers: state.moderators.filter(moderator => moderator.role === 'lecturer').length
+      };
+    },
     recordActivity,
     listStudents() { return clone(state.users.filter(user => user.role === 'student').map(({passwordHash: _hash, ...user}) => user)); },
     getUserIdentifiers() { return state.users.map(({email,nim}) => ({email,nim})); },

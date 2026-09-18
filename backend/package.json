@@ -6,7 +6,7 @@
   "type": "module",
   "main": "src/server.js",
   "scripts": {
-    "dev": "node --watch src/server.js",
+    "dev": "node --watch-path=src --watch-path=.env src/server.js",
     "start": "node src/server.js",
     "test": "node --test",
     "check": "node --check src/server.js",

@@ -1,37 +1,32 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useReducedMotion } from 'motion/react';
 import { NumberTicker } from '../ui/number-ticker';
 import useApp from '../../hooks/useApp';
 import { ArrowRight } from 'lucide-react';
+import { apiRequest } from '../../services/apiClient';
 
 export default function StatsBar() {
   const reducedMotion = useReducedMotion();
-  const { projects, moderators } = useApp();
-
-  const totalProjects = projects.length;
-  const totalStudents = new Set(projects.map((p) => p.student).filter(Boolean)).size;
-  const totalCourses = new Set(projects.map((p) => p.course).filter(Boolean)).size;
-
-  const uniqueLecturers = new Set();
-  projects.forEach((p) => {
-    const supervisor = p.supervisor?.trim();
-    if (supervisor) uniqueLecturers.add(supervisor);
-  });
-  if (Array.isArray(moderators)) {
-    moderators.forEach((m) => {
-      const name = m.name?.trim();
-      if (name && !name.toLowerCase().includes('administrator')) {
-        uniqueLecturers.add(name);
-      }
+  const { projects, courses, studentAccounts, moderators } = useApp();
+  const [statistics, setStatistics] = useState(null);
+  const [failed, setFailed] = useState(false);
+  const [retry, setRetry] = useState(0);
+  useEffect(() => {
+    const controller = new AbortController();
+    setFailed(false);
+    apiRequest('/statistics', { signal: controller.signal }).then(data => {
+      if (!controller.signal.aborted) setStatistics(data);
+    }).catch(() => {
+      if (!controller.signal.aborted) { setStatistics(null); setFailed(true); }
     });
-  }
-  const totalLecturers = uniqueLecturers.size;
+    return () => controller.abort();
+  }, [projects, courses, studentAccounts, moderators, retry]);
 
   const stats = [
-    { label: 'Total projek', value: totalProjects, suffix: '' },
-    { label: 'Mahasiswa', value: totalStudents, suffix: '' },
-    { label: 'Mata kuliah', value: totalCourses, suffix: '' },
-    { label: 'Dosen', value: totalLecturers, suffix: '' }
+    { label: 'Total projek', value: statistics?.projects },
+    { label: 'Mahasiswa terdaftar', value: statistics?.students },
+    { label: 'Mata kuliah', value: statistics?.courses },
+    { label: 'Dosen', value: statistics?.lecturers }
   ];
 
 
@@ -50,7 +45,7 @@ export default function StatsBar() {
             <div key={stat.label}>
               <dt>{stat.label}</dt>
               <dd>
-                {reducedMotion ? stat.value : <>
+                {stat.value == null ? '—' : reducedMotion ? stat.value : <>
                   <NumberTicker value={stat.value} aria-hidden="true" className="tracking-normal text-slate-900" />
                   <span className="sr-only">{stat.value}</span>
                 </>}
@@ -58,6 +53,7 @@ export default function StatsBar() {
             </div>
           ))}
         </dl>
+        {failed && <p role="status" className="mt-2 text-sm text-rose-700">Statistik belum dapat dimuat. <button className="underline" onClick={() => setRetry(value => value + 1)}>Coba lagi</button></p>}
       </div>
     </section>
   );

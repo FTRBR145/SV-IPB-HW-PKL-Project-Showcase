@@ -88,7 +88,7 @@ export default function ProjectDetailModal({ project, onClose }) {
                   <span className="mb-0.5 block text-xs font-bold uppercase tracking-wider text-slate-600">
                     DOSEN PEMBIMBING
                   </span>
-                  <p className="font-bold text-xs text-slate-800">{project.supervisor || 'Dosen Pembimbing TRK SV IPB'}</p>
+                  <p className="font-bold text-xs text-slate-800">{project.supervisor || 'Belum dicantumkan'}</p>
                 </div>
               </div>
 

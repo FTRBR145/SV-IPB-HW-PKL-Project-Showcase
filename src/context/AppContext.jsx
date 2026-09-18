@@ -390,6 +390,16 @@ export function AppProvider({ children }) {
         await refreshActivityLogs();
       },
       currentUser,
+      saveProfile: async (name) => {
+        const user = await apiRequest('/auth/me', { method: 'PATCH', body: { name } });
+        setCurrentUser(user);
+        return user;
+      },
+      changePassword: async (passwords) => {
+        await apiRequest('/auth/password', { method: 'POST', body: passwords });
+        endSession();
+        showToast('Password berhasil diubah. Silakan masuk dengan password baru.', 'success');
+      },
       isLoggedIn: Boolean(currentUser),
       isAuthReady,
       submissions,

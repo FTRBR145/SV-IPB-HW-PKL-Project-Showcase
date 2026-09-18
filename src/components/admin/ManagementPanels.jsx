@@ -1,3 +1,4 @@
+import ValidatedForm from '../common/ValidatedForm';
 import StudentEnrollment from './StudentEnrollment';
 import React, { useState, useMemo } from 'react';
 import {
@@ -87,7 +88,7 @@ export function ProjectsPanel({ projects, searchQuery = '', onEdit, onDelete, on
       sortable: true,
       render: (row) => (
         <span className="text-xs tabular-nums text-slate-600">
-          {row.year || '2026'}
+          {row.year || '—'}
         </span>
       )
     },
@@ -301,7 +302,7 @@ export function StudentsPanel({ students, onViewProjects }) {
 // ============================================================================
 export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
   const [isAddOpen, setIsAddOpen] = useState(false);
-  const [formData, setFormData] = useState({ name: '', nip: '', email: '' });
+  const [formData, setFormData] = useState({ name: '', nip: '', email: '', role: 'admin' });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
 
@@ -311,7 +312,8 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
     const normalized = {
       name: formData.name.trim(),
       nip: formData.nip.trim(),
-      email: formData.email.trim().toLocaleLowerCase('id-ID')
+      email: formData.email.trim().toLocaleLowerCase('id-ID'),
+      role: formData.role
     };
     if (normalized.name.length < 3) {
       setFormError('Nama moderator minimal 3 karakter.');
@@ -325,7 +327,7 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
     setFormError('');
     try {
       const added = await onAdd(normalized);
-      if (added) { setFormData({ name: '', nip: '', email: '' }); setIsAddOpen(false); }
+      if (added) { setFormData({ name: '', nip: '', email: '', role: 'admin' }); setIsAddOpen(false); }
       else setFormError('Moderator belum ditambahkan. Periksa data atau coba kembali.');
     } catch (error) {
       setFormError(error.message || 'Moderator gagal ditambahkan. Silakan coba kembali.');
@@ -356,6 +358,7 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
         <span className="tabular-nums text-xs text-slate-600">{row.email}</span>
       )
     },
+    { key: 'role', label: 'Role', sortable: true, render: row => row.role === 'lecturer' ? 'Dosen' : row.role === 'admin' ? 'Admin' : 'Belum ditentukan' },
     { key: 'nip', label: 'NIP', sortable: true, render: row => row.nip || '—' },
     {
       key: 'status',
@@ -441,6 +444,17 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
             />
           </label>
         ))}
+        <fieldset disabled={isSubmitting}>
+          <legend className="text-xs font-bold text-slate-700">Role *</legend>
+          <div className="mt-2 grid grid-cols-2 gap-2 rounded-xl bg-slate-100 p-1.5">
+            {[['admin', 'Admin'], ['lecturer', 'Dosen']].map(([value, label]) => (
+              <label key={value} className="min-w-0 cursor-pointer">
+                <input type="radio" name="moderator-role" value={value} checked={formData.role === value} onChange={() => setFormData(previous => ({ ...previous, role: value }))} className="peer sr-only" />
+                <span className="flex min-h-11 items-center justify-center rounded-lg border border-transparent px-3 py-2 text-sm font-semibold text-slate-600 transition-colors hover:bg-white/60 peer-checked:border-slate-200 peer-checked:bg-white peer-checked:text-slate-900 peer-checked:shadow-sm peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-sky-600 peer-disabled:cursor-wait peer-disabled:opacity-50">{label}</span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
         {formError && <p id="moderator-form-error" role="alert" className="text-xs font-semibold text-rose-700">{formError}</p>}
         <button disabled={isSubmitting} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-xs font-bold text-white shadow-2xs transition-all hover:bg-slate-800 disabled:cursor-wait disabled:opacity-60">
           <Plus size={15} /> {isSubmitting ? 'Menambahkan...' : 'Tambah Moderator'}
@@ -459,7 +473,7 @@ export function ModeratorsPanel({ moderators, onAdd, onToggle, onDelete }) {
             Kelola hak akses moderasi dan manajemen sistem showcase.
           </p>
           </div>
-          <button type="button" onClick={() => { setFormData({ name: '', nip: '', email: '' }); setFormError(''); setIsAddOpen(true); }} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"><Plus size={16} /> Tambah Moderator</button>
+          <button type="button" onClick={() => { setFormData({ name: '', nip: '', email: '', role: 'admin' }); setFormError(''); setIsAddOpen(true); }} className="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 py-2.5 text-sm font-bold text-white hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-600"><Plus size={16} /> Tambah Moderator</button>
         </div>
 
         <DataTable
@@ -553,7 +567,7 @@ export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDe
             type="button"
             onClick={() => {
               if (row.projectCount > 0) {
-                alert(`Tidak dapat menghapus “${row.name}” karena masih digunakan oleh ${row.projectCount} projek.`);
+                setFormError(`Tidak dapat menghapus “${row.name}” karena masih digunakan oleh ${row.projectCount} projek.`);
                 return;
               }
               if (window.confirm(`Hapus ${title.toLowerCase()} “${row.name}”?`)) onDelete(row.name);
@@ -578,7 +592,7 @@ export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDe
     <div className="min-w-0 space-y-4">
       <ModalShell isOpen={isAddOpen} onClose={() => { if (!isSubmitting) setIsAddOpen(false); }} ariaLabel={`Tambah ${title.toLowerCase()}`} panelClassName="max-w-lg max-h-[90dvh] overflow-y-auto rounded-2xl">
       <DialogClose disabled={isSubmitting} aria-label={`Tutup form ${title.toLowerCase()}`} className="absolute right-3 top-3 flex min-h-11 min-w-11 items-center justify-center rounded-xl hover:bg-slate-100"><X size={18} /></DialogClose>
-      <form onSubmit={submit} className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-4">
+      <ValidatedForm onSubmit={submit} className="bg-white rounded-2xl border border-slate-200/80 p-5 shadow-2xs space-y-4">
         <div>
           <h2 className="font-heading font-bold text-base text-slate-900 pr-12">Tambah {title}</h2>
           <p className="text-xs text-slate-500 mt-1">{description}</p>
@@ -600,7 +614,7 @@ export function TaxonomyPanel({ title, description, items, getCount, onAdd, onDe
         <button disabled={isSubmitting} className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-bold hover:bg-slate-800 shadow-2xs transition-all disabled:cursor-wait disabled:opacity-60">
           <Plus size={15} /> {isSubmitting ? 'Menambahkan...' : `Tambah ${title}`}
         </button>
-      </form>
+      </ValidatedForm>
       </ModalShell>
 
       {/* DataTable List */}

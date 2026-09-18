@@ -11,6 +11,7 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 const StudentHome = lazy(() => import('./pages/StudentHome'));
 const UploadProjectPage = lazy(() => import('./pages/UploadProjectPage'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 
 function RouteLoader() {
   return (
@@ -35,6 +36,7 @@ export default function App() {
             {/* Landing Public Page */}
             <Route path="/" element={<LandingPage />} />
             <Route path="/project/:projectId" element={<LandingPage />} />
+            <Route path="/account" element={<ProtectedRoute allowedRoles={['student', 'admin', 'lecturer']}><ProfilePage /></ProtectedRoute>} />
 
             {/* Authenticated Student Portal (TRKTube Beranda) */}
             <Route

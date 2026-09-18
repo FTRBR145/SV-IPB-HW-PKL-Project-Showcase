@@ -4,7 +4,7 @@ import ProjectForm from '../projects/ProjectForm';
 import ModalShell from '../common/ModalShell';
 import { DialogClose } from '../ui/dialog';
 
-export default function UploadModal({ isOpen, onClose, onAddProject }) {
+export default function UploadModal({ isOpen, onClose, onAddProject, submitLabel }) {
   return (
     <ModalShell
       isOpen={isOpen}
@@ -31,6 +31,7 @@ export default function UploadModal({ isOpen, onClose, onAddProject }) {
           </div>
 
           <ProjectForm
+            submitLabel={submitLabel}
             onAddProject={onAddProject}
             onCancel={onClose}
             onSuccess={onClose}

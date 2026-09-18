@@ -39,7 +39,7 @@ router.post('/', optionalAuthenticate, validate(projectSchema), async (request, 
     date: request.body.date || new Date().toISOString()
   };
 
-  if (!request.user || request.user.role === 'student' || settings.moderationRequired) {
+  if (request.user?.role !== 'admin') {
     const submission = await repository.createSubmission(projectData, request.user || 'Tamu');
     return sendData(response, { type: 'submission', item: submission }, 202);
   }

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { courseLabel } from '../../utils/courseLabel';
 import {
   ChevronDown,
@@ -31,11 +32,13 @@ export default function Navbar({
   onSelectCourse,
   courses = EMPTY_COURSES
 }) {
+  const navigate = useNavigate();
   const isAdmin = isLoggedIn && currentUser?.role === 'admin';
   const isStudent = isLoggedIn && currentUser?.role === 'student';
   const isLanding = currentPage === 'landing';
   const isStudentPage = currentPage === 'student' || currentPage === 'student-upload';
   const accountLinks = [
+    ...(isLoggedIn ? [{ label: 'Akun Saya', icon: User, action: () => navigate('/account') }] : []),
     ...(!isLanding && onBackToLanding ? [{ label: 'Beranda Publik', icon: Home, action: onBackToLanding }] : []),
     ...(isAdmin && currentPage !== 'admin' && onNavigateToAdmin ? [{ label: 'Dashboard Admin', icon: Shield, action: onNavigateToAdmin }] : []),
     ...(isStudent && currentPage !== 'student' && onNavigateToStudent ? [{ label: 'Portal Mahasiswa', icon: PlaySquare, action: onNavigateToStudent }] : []),
@@ -107,7 +110,7 @@ export default function Navbar({
             alt="IPB University Sekolah Vokasi Logo"
             className="h-9 max-w-[145px] object-contain sm:h-14 sm:max-w-[270px]"
           />
-          {!isLanding && <span className="hidden border-l border-slate-200 pl-3 text-sm font-semibold text-slate-600 md:inline">{currentPage === 'admin' ? 'Admin' : 'Mahasiswa'}</span>}
+          {!isLanding && <span className="hidden border-l border-slate-200 pl-3 text-sm font-semibold text-slate-600 md:inline">{currentPage === 'account' ? 'Akun Saya' : currentPage === 'admin' ? 'Admin' : 'Mahasiswa'}</span>}
         </button>
 
         {/* =================================================================== */}
